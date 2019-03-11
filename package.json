@@ -23,10 +23,18 @@
     "test:ci": "jest --ci --runInBand --reporters=default --reporters=jest-junit --coverage",
     "semantic-release": "cd dist && semantic-release"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ctrl/shared-torrent": "^1.1.2",
+    "got": "^9.6.0",
+    "tough-cookie": "^3.0.1",
+    "url-join": "^4.0.0"
+  },
   "devDependencies": {
+    "@types/got": "9.4.1",
     "@types/jest": "24.0.11",
     "@types/node": "11.11.0",
+    "@types/tough-cookie": "2.3.5",
+    "@types/url-join": "4.0.0",
     "@typescript-eslint/eslint-plugin": "1.4.2",
     "@typescript-eslint/parser": "1.4.2",
     "eslint": "5.15.1",

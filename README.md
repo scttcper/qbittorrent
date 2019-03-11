@@ -1,53 +1,33 @@
-# TypeScript Quickstart Library
+# qBittorrent [![npm](https://img.shields.io/npm/v/@ctrl/qbittorrent.svg?maxAge=3600)](https://www.npmjs.com/package/@ctrl/qbittorrent) [![CircleCI](https://circleci.com/gh/TypeCtrl/qbittorrent.svg?style=svg)](https://circleci.com/gh/TypeCtrl/qbittorrent) [![coverage status](https://codecov.io/gh/typectrl/qbittorrent/branch/master/graph/badge.svg)](https://codecov.io/gh/typectrl/qbittorrent)
 
-A fork of [typescript-library-starter](https://github.com/alexjoverm/typescript-library-starter) with up to date packages and a few subsitutions.
+> TypeScript api wrapper for [qBittorrent](https://www.qbittorrent.org/) using [got](https://github.com/sindresorhus/got)
 
-## Use
+### Install
 
-```sh
-git clone https://github.com/TypeCtrl/typescript-quickstart-lib.git --depth=1 YOURFOLDERNAME
-cd YOURFOLDERNAME
-
-# Run npm install and write your library name when asked. That's it!
-npm install
+```console
+npm install @ctrl/qbittorrent
 ```
 
-## Features
-
-- Zero Setup
-- Jest test running
-- publishes for every platform http://2ality.com/2017/04/setting-up-multi-platform-packages.html
-- typescript type publishing `d.ts`
-- **[Prettier](https://github.com/prettier/prettier)** and eslint for code formatting and consistency
-- **[circleCI](https://circleci.com)** integration and **[codecov](https://codecov.io)** coverage reporting
-- **Automatic releases and changelog**, using [Semantic release](https://github.com/semantic-release/semantic-release)
-
-## Additional Setup
-
-#### Travis
-
-Add travis Environment Variables
-
-- **NPM** add `NPM_TOKEN` for publishing (see more)[https://github.com/semantic-release/npm#environment-variables]
-- **docs** add `GH_TOKEN` to publish docs to github pages
-
-#### Codecov
-
-Add project to codecov https://codecov.io/gh
-
-### NPM scripts
-
-- `npm test`: Run test suite
-- `npm run test:watch`: Run test suite in [interactive watch mode](http://facebook.github.io/jest/docs/cli.html#watch)
-- `npm run test:prod`: Run test and generate coverage
-- `npm run build`: Generate bundles and typings
-- `npm run build:docs`: builds docs
-- `npm run lint`: Lints code
-
-### Importing library
-
-You can import the public_api using
+### Use
 
 ```ts
-import { something } from 'mylib';
+import { QBittorrent } from '@ctrl/qbittorrent';
+
+const qbittorrent = new QBittorrent({
+  baseUrl: 'http://localhost:8080/',
+  username: 'admin',
+  password: 'adminadmin',
+});
+
+async function main() {
+  const res = await qbittorrent.getAllData();
+  console.log(res.result);
+}
 ```
+
+### API
+
+Docs: https://typectrl.github.io/qbittorrent/classes/qbittorrent.html
+
+### See Also
+transmission - https://github.com/TypeCtrl/transmission
