@@ -1,0 +1,50 @@
+{
+  "name": "qbittorrent",
+  "version": "0.0.0-placeholder",
+  "description": "",
+  "author": "Scott Cooper <scttcper@gmail.com>",
+  "license": "MIT",
+  "repository": "",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
+  "module": "./module/index.js",
+  "sideEffects": false,
+  "keywords": [
+    "typescript"
+  ],
+  "scripts": {
+    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint:fix": "eslint --fix src/**/*.ts test/**/*.ts",
+    "prebuild": "rimraf dist",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.module.json",
+    "postbuild": "cp package.json dist && cp LICENSE dist && cp README.md dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --runInBand --reporters=default --reporters=jest-junit --coverage",
+    "semantic-release": "cd dist && semantic-release"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "24.0.11",
+    "@types/node": "11.11.0",
+    "@typescript-eslint/eslint-plugin": "1.4.2",
+    "@typescript-eslint/parser": "1.4.2",
+    "eslint": "5.15.1",
+    "eslint-config-prettier": "4.1.0",
+    "eslint-config-xo-space": "0.21.0",
+    "eslint-config-xo-typescript": "0.8.0",
+    "eslint-plugin-import": "2.16.0",
+    "jest": "24.3.1",
+    "jest-junit": "6.3.0",
+    "rimraf": "2.6.3",
+    "semantic-release": "15.13.3",
+    "ts-jest": "24.0.0",
+    "typescript": "3.3.3333"
+  },
+  "release": {
+    "branch": "master"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  }
+}
