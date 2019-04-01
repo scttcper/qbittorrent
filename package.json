@@ -39,7 +39,7 @@
     "@types/url-join": "4.0.0",
     "@typescript-eslint/eslint-plugin": "1.4.2",
     "@typescript-eslint/parser": "1.4.2",
-    "eslint": "5.15.2",
+    "eslint": "5.16.0",
     "eslint-config-prettier": "4.1.0",
     "eslint-config-xo-space": "0.21.0",
     "eslint-config-xo-typescript": "0.8.0",
