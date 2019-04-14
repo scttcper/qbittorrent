@@ -18,16 +18,12 @@ jobs:
       - run:
           name: test
           command: npm run test:ci
-          environment:
-            JEST_JUNIT_OUTPUT: jest/test-report.xml
       - run:
           name: lint
           command: npm run lint
       - run:
           name: codecov
           command: bash <(curl -s https://codecov.io/bash)
-      - store_test_results:
-          path: jest
   release:
     docker:
       - image: circleci/node:10
@@ -46,7 +42,7 @@ jobs:
             git config user.name "ci-build"
             ssh-add -D
       - run: npm run build:docs
-      - run: npx gh-pages -x -d docs -m "update docs [ci skip]" -r https://${GH_TOKEN}@github.com/typectrl/deluge.git
+      - run: npx gh-pages -x -d docs -m "update docs [ci skip]" -r https://${GH_TOKEN}@github.com/typectrl/qbittorrent.git
 
 workflows:
   version: 2
