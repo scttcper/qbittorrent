@@ -3,15 +3,15 @@ import fs from 'fs';
 import got, { GotBodyOptions, GotFormOptions, GotJSONOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
 import urljoin from 'url-join';
-import {
-  TorrentClient,
-  NormalizedTorrent,
-  AllClientData,
-  TorrentState,
-  Label,
-} from '@ctrl/shared-torrent';
 
-import { TorrentSettings } from '@ctrl/shared-torrent';
+import {
+  AllClientData,
+  Label,
+  NormalizedTorrent,
+  TorrentClient,
+  TorrentSettings,
+  TorrentState,
+} from '@ctrl/shared-torrent';
 
 import {
   AddTorrentOptions,
@@ -21,9 +21,9 @@ import {
   TorrentFilters,
   TorrentPieceState,
   TorrentProperties,
+  TorrentState as qbtState,
   TorrentTrackers,
   WebSeed,
-  TorrentState as qbtState,
 } from './types';
 
 const defaults: TorrentSettings = {
