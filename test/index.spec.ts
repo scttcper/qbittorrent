@@ -95,7 +95,7 @@ describe('QBittorrent', () => {
     expect(torrent.eta).toBe(8640000);
     expect(torrent.isCompleted).toBe(false);
     expect(torrent.label).toBe('');
-    expect(torrent.name).toBe('ubuntu-18.04.1-desktop-amd64.iso');
+    expect(torrent.name).toBe(torrentName);
     expect(torrent.progress).toBe(0);
     expect(torrent.queuePosition).toBe(1);
     expect(torrent.ratio).toBe(0);
