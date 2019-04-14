@@ -3,6 +3,13 @@ import fs from 'fs';
 import got, { GotBodyOptions, GotFormOptions, GotJSONOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
 import urljoin from 'url-join';
+import {
+  TorrentClient,
+  NormalizedTorrent,
+  AllClientData,
+  TorrentState,
+  Label,
+} from '@ctrl/shared-torrent';
 
 import { TorrentSettings } from '@ctrl/shared-torrent';
 
@@ -16,6 +23,7 @@ import {
   TorrentProperties,
   TorrentTrackers,
   WebSeed,
+  TorrentState as qbtState,
 } from './types';
 
 const defaults: TorrentSettings = {
@@ -26,7 +34,7 @@ const defaults: TorrentSettings = {
   timeout: 5000,
 };
 
-export class QBittorrent {
+export class QBittorrent implements TorrentClient {
   config: TorrentSettings;
 
   /**
@@ -37,8 +45,6 @@ export class QBittorrent {
   constructor(options: Partial<TorrentSettings> = {}) {
     this.config = { ...defaults, ...options };
   }
-
-  async listTorrents() {}
 
   /**
    * Get application version
@@ -55,6 +61,16 @@ export class QBittorrent {
     return res.body;
   }
 
+  async getTorrent(hash: string): Promise<NormalizedTorrent> {
+    const torrentsResponse = await this.listTorrents(hash);
+    const torrentData = torrentsResponse[0];
+    if (!torrentData) {
+      throw new Error('Torrent not found');
+    }
+
+    return this._normalizeTorrentData(torrentData);
+  }
+
   /**
    * Torrents list
    * @param hashes Filter by torrent hashes
@@ -62,7 +78,7 @@ export class QBittorrent {
    * @param category Get torrents with the given category (empty string means "without category"; no "category" parameter means "any category")
    * @returns list of torrents
    */
-  async torrentList(
+  async listTorrents(
     hashes?: string | string[],
     filter?: TorrentFilters,
     category?: string,
@@ -82,6 +98,34 @@ export class QBittorrent {
 
     const res = await this.request<Torrent[]>('/torrents/info', 'GET', params);
     return res.body;
+  }
+
+  async getAllData() {
+    const listTorrents = await this.listTorrents();
+    const results: AllClientData = {
+      torrents: [],
+      labels: [],
+    };
+    const labels: { [key: string]: Label } = {};
+    for (const torrent of listTorrents) {
+      const torrentData: NormalizedTorrent = this._normalizeTorrentData(torrent);
+      results.torrents.push(torrentData);
+
+      // setup label
+      if (torrentData.label) {
+        if (labels[torrentData.label]) {
+          labels[torrentData.label] = {
+            id: torrentData.label,
+            name: torrentData.label,
+            count: 1,
+          };
+        } else {
+          labels[torrentData.label].count += 1;
+        }
+      }
+    }
+
+    return results;
   }
 
   async torrentProperties(hash: string): Promise<TorrentProperties> {
@@ -190,7 +234,10 @@ export class QBittorrent {
     return true;
   }
 
-  async deleteTorrent(hashes: string | string[] | 'all', deleteFiles = true): Promise<boolean> {
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#delete-torrents
+   */
+  async removeTorrent(hashes: string | string[] | 'all', deleteFiles = true): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
       deleteFiles,
@@ -217,8 +264,8 @@ export class QBittorrent {
 
   async addTorrent(
     torrent: string | Buffer,
-    filename: string = 'torrent',
-    options: Partial<AddTorrentOptions>,
+    filename = 'torrent',
+    options?: Partial<AddTorrentOptions>,
   ): Promise<boolean> {
     const form = new FormData();
     const fileOptions: FormData.AppendOptions = {
@@ -228,16 +275,18 @@ export class QBittorrent {
 
     if (typeof torrent === 'string') {
       if (fs.existsSync(torrent)) {
-        form.append('file', Buffer.from(fs.readFileSync(torrent)));
+        form.append('file', Buffer.from(fs.readFileSync(torrent)), fileOptions);
       } else {
-        form.append('file', Buffer.from(torrent, 'base64'));
+        form.append('file', Buffer.from(torrent, 'base64'), fileOptions);
       }
     } else {
       form.append('file', torrent, fileOptions);
     }
 
-    for (const key of Object.keys(options)) {
-      form.append(key, options[key]);
+    if (options) {
+      for (const key of Object.keys(options)) {
+        form.append(key, options[key]);
+      }
     }
 
     const res = await this.request<string>(
@@ -274,7 +323,7 @@ export class QBittorrent {
     return true;
   }
 
-  async increasePriority(hashes: string | string[] | 'all'): Promise<boolean> {
+  async queueUp(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
@@ -282,7 +331,7 @@ export class QBittorrent {
     return true;
   }
 
-  async decreasePriority(hashes: string | string[] | 'all'): Promise<boolean> {
+  async queueDown(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
@@ -329,7 +378,7 @@ export class QBittorrent {
 
     const res = await got.post(url, options);
     if (!res.headers['set-cookie'] || !res.headers['set-cookie'].length) {
-      throw new Error('Cookie not found');
+      throw new Error('Cookie not found. Auth Failed.');
     }
 
     const cookie = Cookie.parse(res.headers['set-cookie'][0]);
@@ -338,6 +387,11 @@ export class QBittorrent {
     }
 
     this._sid = cookie.value;
+    return true;
+  }
+
+  logout() {
+    this._sid = undefined;
     return true;
   }
 
@@ -392,5 +446,51 @@ export class QBittorrent {
     }
 
     return hashes;
+  }
+
+  private _normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
+    let state = TorrentState.unknown;
+    if (torrent.state === qbtState.Uploading || qbtState.CheckingUP) {
+      state = TorrentState.seeding;
+    } else if (torrent.state === qbtState.Downloading) {
+      state = TorrentState.downloading;
+    } else if (torrent.state === qbtState.CheckingDL) {
+      state = TorrentState.checking;
+    } else if (torrent.state === qbtState.Error || torrent.state === qbtState.StalledDL) {
+      state = TorrentState.error;
+    } else if ([qbtState.QueuedDL, qbtState.QueuedUP].includes(torrent.state)) {
+      state = TorrentState.queued;
+    } else if (torrent.state === qbtState.PausedDL || torrent.state === qbtState.PausedUP) {
+      state = TorrentState.paused;
+    }
+
+    const isCompleted = torrent.progress >= 100;
+
+    const result: NormalizedTorrent = {
+      id: torrent.hash,
+      name: torrent.name,
+      stateMessage: '',
+      state,
+      dateAdded: new Date(torrent.added_on * 1000).toISOString(),
+      isCompleted,
+      progress: torrent.progress,
+      label: torrent.category,
+      dateCompleted: new Date(torrent.completion_on * 1000).toISOString(),
+      savePath: torrent.save_path,
+      uploadSpeed: torrent.upspeed,
+      downloadSpeed: torrent.dlspeed,
+      eta: torrent.eta,
+      queuePosition: torrent.priority,
+      connectedPeers: torrent.num_leechs,
+      connectedSeeds: torrent.num_seeds,
+      totalPeers: torrent.num_incomplete,
+      totalSeeds: torrent.num_complete,
+      totalSelected: torrent.size,
+      totalSize: torrent.total_size,
+      totalUploaded: torrent.uploaded,
+      totalDownloaded: torrent.downloaded,
+      ratio: torrent.ratio,
+    };
+    return result;
   }
 }

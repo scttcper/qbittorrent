@@ -32,5 +32,5 @@ Docs: https://typectrl.github.io/qbittorrent/classes/qbittorrent.html
 qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation
 
 ### See Also
-deluge - https://github.com/TypeCtrl/deluge
-transmission - https://github.com/TypeCtrl/transmission
+deluge - https://github.com/TypeCtrl/deluge  
+transmission - https://github.com/TypeCtrl/transmission  

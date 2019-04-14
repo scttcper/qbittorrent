@@ -39,6 +39,10 @@ export interface Torrent {
   hash: string;
   magnet_uri: string;
   /**
+   * datetime in seconds
+   */
+  added_on: number;
+  /**
    * Torrent size
    */
   size: number;
@@ -47,11 +51,11 @@ export interface Torrent {
    */
   progress: number;
   /**
-   * Torrent download speed
+   * Torrent download speed (bytes/s)
    */
   dlspeed: number;
   /**
-   * Torrent upload speed
+   * Torrent upload speed (bytes/s)
    */
   upspeed: number;
   /**
@@ -95,7 +99,7 @@ export interface Torrent {
    */
   f_l_piece_prio: boolean;
   /**
-   * Torrent copletion time
+   * Torrent copletion datetime in seconds
    */
   completion_on: number;
   /**
@@ -167,6 +171,10 @@ export interface Torrent {
    */
   total_size: number;
   time_active: number;
+  /**
+   * Category name
+   */
+  category: string;
 }
 
 export enum TorrentState {
