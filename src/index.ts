@@ -450,18 +450,43 @@ export class QBittorrent implements TorrentClient {
 
   private _normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     let state = TorrentState.unknown;
-    if (torrent.state === qbtState.Uploading || qbtState.CheckingUP) {
-      state = TorrentState.seeding;
-    } else if (torrent.state === qbtState.Downloading) {
-      state = TorrentState.downloading;
-    } else if (torrent.state === qbtState.CheckingDL) {
-      state = TorrentState.checking;
-    } else if (torrent.state === qbtState.Error || torrent.state === qbtState.StalledDL) {
-      state = TorrentState.error;
-    } else if ([qbtState.QueuedDL, qbtState.QueuedUP].includes(torrent.state)) {
-      state = TorrentState.queued;
-    } else if (torrent.state === qbtState.PausedDL || torrent.state === qbtState.PausedUP) {
-      state = TorrentState.paused;
+
+    switch (torrent.state) {
+      case qbtState.ForcedDL:
+      case qbtState.MetaDL:
+        state = TorrentState.downloading;
+        break;
+      case qbtState.Allocating:
+        // state = 'stalledDL';
+        state = TorrentState.queued;
+        break;
+      case qbtState.ForcedUP:
+        state = TorrentState.seeding;
+        break;
+      case qbtState.PausedDL:
+        state = TorrentState.paused;
+        break;
+      case qbtState.PausedUP:
+        // state = 'completed';
+        state = TorrentState.paused;
+        break;
+      case qbtState.QueuedDL:
+      case qbtState.QueuedUP:
+        state = TorrentState.queued;
+        break;
+      case qbtState.CheckingDL:
+      case qbtState.CheckingUP:
+      case qbtState.QueuedForChecking:
+      case qbtState.CheckingResumeData:
+      case qbtState.Moving:
+        state = TorrentState.checking;
+        break;
+      case qbtState.Unknown:
+      case qbtState.MissingFiles:
+        state = TorrentState.error;
+        break;
+      default:
+        break;
     }
 
     const isCompleted = torrent.progress >= 100;

@@ -222,10 +222,18 @@ export enum TorrentState {
    * Torrent is being downloaded, but no connection were made
    */
   StalledDL = 'stalledDL',
+  ForcedDL = 'forcedDL',
+  ForcedUP = 'forcedUP',
   /**
    * Torrent has just started downloading and is fetching metadata
    */
   MetaDL = 'metaDL',
+  Allocating = 'allocating',
+  QueuedForChecking = 'queuedForChecking',
+  CheckingResumeData = 'checkingResumeData',
+  Moving = 'moving',
+  Unknown = 'unknown',
+  MissingFiles = 'missingFiles',
 }
 
 export interface TorrentProperties {

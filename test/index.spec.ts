@@ -3,6 +3,7 @@ import pWaitFor from 'p-wait-for';
 import fs from 'fs';
 
 import { QBittorrent } from '../src/index';
+import { TorrentState } from '@ctrl/shared-torrent';
 
 const baseUrl = 'http://localhost:8080';
 const torrentName = 'ubuntu-18.04.1-desktop-amd64.iso';
@@ -100,7 +101,7 @@ describe('QBittorrent', () => {
     expect(torrent.queuePosition).toBe(1);
     expect(torrent.ratio).toBe(0);
     expect(torrent.savePath).toBe('/downloads/');
-    expect(torrent.state).toBe('seeding');
+    expect(torrent.state).toBe(TorrentState.checking);
     expect(torrent.stateMessage).toBe('');
     expect(torrent.totalDownloaded).toBe(0);
     expect(torrent.totalPeers).toBe(0);
