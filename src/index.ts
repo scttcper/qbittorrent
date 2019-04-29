@@ -113,7 +113,7 @@ export class QBittorrent implements TorrentClient {
 
       // setup label
       if (torrentData.label) {
-        if (labels[torrentData.label]) {
+        if (labels[torrentData.label] === undefined) {
           labels[torrentData.label] = {
             id: torrentData.label,
             name: torrentData.label,
