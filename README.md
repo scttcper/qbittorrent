@@ -13,7 +13,7 @@ npm install @ctrl/qbittorrent
 ```ts
 import { QBittorrent } from '@ctrl/qbittorrent';
 
-const qbittorrent = new QBittorrent({
+const client = new QBittorrent({
   baseUrl: 'http://localhost:8080/',
   username: 'admin',
   password: 'adminadmin',
@@ -21,16 +21,58 @@ const qbittorrent = new QBittorrent({
 
 async function main() {
   const res = await qbittorrent.getAllData();
-  console.log(res.result);
+  console.log(res);
 }
 ```
 
 ### API
 
-Docs: https://typectrl.github.io/qbittorrent/classes/qbittorrent.html
+Docs: https://typectrl.github.io/qbittorrent/classes/qbittorrent.html  
+qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation  
 
-qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation
+### Normalized API
+These functions have been normalized between torrent clients. Can easily support multiple torrent clients. See below for alternative supported torrent clients
+
+##### getAllData
+Returns all torrent data and an array of label objects. Data has been normalized and does not match the output of native `listTorrents()`.
+
+```ts
+const data = await client.getAllData();
+console.log(data.torrents);
+```
+
+##### getTorrent
+Returns one torrent data
+
+```ts
+const data = await client.getTorrent();
+console.log(data);
+```
+
+##### pauseTorrent and resumeTorrent
+Pause or resume a torrent
+
+```ts
+const paused = await client.pauseTorrent();
+console.log(paused);
+const resumed = await client.resumeTorrent();
+console.log(resumed);
+```
+
+##### removeTorrent
+Remove a torrent. Does not remove data on disk by default.
+
+```ts
+// does not remove data on disk
+const result = await client.removeTorrent('torrent_id', false);
+console.log(result);
+
+// remove data on disk
+const res = await client.removeTorrent('torrent_id', true);
+console.log(res);
+```
 
 ### See Also
+All torrent clients support the same normalized functions
 deluge - https://github.com/TypeCtrl/deluge  
 transmission - https://github.com/TypeCtrl/transmission  
