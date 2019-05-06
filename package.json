@@ -5,8 +5,11 @@
   "author": "Scott Cooper <scttcper@gmail.com>",
   "license": "MIT",
   "repository": "typectrl/qbittorrent",
-  "main": "./index.js",
-  "typings": "./index.d.ts",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -18,14 +21,13 @@
   "scripts": {
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts test/**/*.ts",
-    "prebuild": "rimraf dist",
-    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "build": "del dist && tsc",
     "build:docs": "typedoc --out docs --target es6 --theme minimal --mode file src && touch docs/.nojekyll",
-    "postbuild": "cp package.json dist && cp LICENSE dist && cp README.md dist",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
     "test:ci": "jest --ci --runInBand --coverage",
-    "semantic-release": "cd dist && semantic-release"
+    "semantic-release": "semantic-release"
   },
   "dependencies": {
     "@ctrl/shared-torrent": "^1.1.2",
@@ -44,6 +46,7 @@
     "@types/url-join": "4.0.0",
     "@typescript-eslint/eslint-plugin": "1.7.0",
     "@typescript-eslint/parser": "1.7.0",
+    "del-cli": "1.1.0",
     "eslint": "5.16.0",
     "eslint-config-prettier": "4.2.0",
     "eslint-config-xo-space": "0.21.0",
@@ -51,7 +54,6 @@
     "eslint-plugin-import": "2.17.2",
     "jest": "24.7.1",
     "p-wait-for": "3.1.0",
-    "rimraf": "2.6.3",
     "semantic-release": "15.13.12",
     "ts-jest": "24.0.2",
     "typedoc": "0.14.2",
@@ -61,6 +63,6 @@
     "branch": "master"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=8"
   }
 }
