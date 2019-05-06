@@ -11,7 +11,11 @@ const torrentFile = path.join(__dirname, '/ubuntu-18.04.1-desktop-amd64.iso.torr
 const username = 'admin';
 const password = 'adminadmin';
 
-async function setupTorrent(client: QBittorrent) {
+/**
+ * Adds torrent and returns hash
+ * @returns torrent hash id
+ */
+async function setupTorrent(client: QBittorrent): Promise<string> {
   await client.addTorrent(torrentFile);
   await pWaitFor(
     async () => {
@@ -65,13 +69,23 @@ describe('QBittorrent', () => {
   });
   it('should add torrent with label', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
-    const res = await client.addTorrent(fs.readFileSync(torrentFile), undefined, {
+    const res = await client.addTorrent(fs.readFileSync(torrentFile), {
       category: 'swag',
     });
     expect(res).toBe(true);
     const torrents = await client.listTorrents();
     expect(torrents).toHaveLength(1);
     expect(torrents[0].category).toBe('swag');
+  });
+  it('should add normalized torrent with label', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const res = await client.normalizedAddTorrent(fs.readFileSync(torrentFile), {
+      label: 'swag',
+      startPaused: true,
+    });
+    expect(res.id).toEqual('e84213a794f3ccd890382a54a64ca68b7e925433');
+    expect(res.label).toEqual('swag');
+    expect(res.name).toEqual(torrentName);
   });
   it('should set torrent top priority', async () => {
     const client = new QBittorrent({ baseUrl, username, password });

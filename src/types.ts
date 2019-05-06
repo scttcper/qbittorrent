@@ -501,7 +501,16 @@ export enum TorrentPieceState {
   Downloaded = 2,
 }
 
+type TrueFalseStr = 'true' | 'false';
+
 export interface AddTorrentOptions {
+  /**
+   * not totally sure what its for but its required
+   * NOTE: not included in deluge options blob. This should be removed and passed in seperatly.
+   * Added to AddTorrentOptions to make the api's more similar with other clients
+   * default: torrent
+   */
+  filename: string;
   /**
    * Download folder
    */
@@ -513,15 +522,15 @@ export interface AddTorrentOptions {
   /**
    * Skip hash checking. Possible values are true, false (default)
    */
-  skip_checking: string;
+  skip_checking: TrueFalseStr;
   /**
    * Add torrents in the paused state. Possible values are true, false (default)
    */
-  paused: string;
+  paused: TrueFalseStr;
   /**
    * Create the root folder. Possible values are true, false, unset (default)
    */
-  root_folder: string;
+  root_folder: TrueFalseStr;
   /**
    * Rename torrent
    */
@@ -541,9 +550,9 @@ export interface AddTorrentOptions {
   /**
    * Enable sequential download. Possible values are true, false (default)
    */
-  sequentialDownload: string;
+  sequentialDownload: TrueFalseStr;
   /**
    * Prioritize download first last piece. Possible values are true, false (default)
    */
-  firstLastPiecePrio: string;
+  firstLastPiecePrio: TrueFalseStr;
 }

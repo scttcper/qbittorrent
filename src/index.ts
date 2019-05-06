@@ -3,6 +3,7 @@ import fs from 'fs';
 import got, { GotBodyOptions, GotFormOptions, GotJSONOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
 import urljoin from 'url-join';
+import parseTorrent from 'parse-torrent';
 
 import {
   AllClientData,
@@ -11,6 +12,7 @@ import {
   TorrentClient,
   TorrentSettings,
   TorrentState,
+  AddTorrentOptions as NormalizedAddTorrentOptions,
 } from '@ctrl/shared-torrent';
 
 import {
@@ -100,7 +102,7 @@ export class QBittorrent implements TorrentClient {
     return res.body;
   }
 
-  async getAllData() {
+  async getAllData(): Promise<AllClientData> {
     const listTorrents = await this.listTorrents();
     const results: AllClientData = {
       torrents: [],
@@ -264,14 +266,18 @@ export class QBittorrent implements TorrentClient {
 
   async addTorrent(
     torrent: string | Buffer,
-    filename = 'torrent',
-    options?: Partial<AddTorrentOptions>,
+    options: Partial<AddTorrentOptions> = {},
   ): Promise<boolean> {
     const form = new FormData();
     const fileOptions: FormData.AppendOptions = {
       contentType: 'application/x-bittorrent',
-      filename,
+      filename: options.filename || 'torrent',
     };
+
+    // remove options.filename, not used in form
+    if (options.filename) {
+      delete options.filename;
+    }
 
     if (typeof torrent === 'string') {
       if (fs.existsSync(torrent)) {
@@ -303,6 +309,25 @@ export class QBittorrent implements TorrentClient {
     }
 
     return true;
+  }
+
+  async normalizedAddTorrent(
+    torrent: string | Buffer,
+    options: Partial<NormalizedAddTorrentOptions> = {},
+  ): Promise<NormalizedTorrent> {
+    const torrentOptions: Partial<AddTorrentOptions> = {};
+
+    if (options.startPaused) {
+      torrentOptions.paused = 'true';
+    }
+
+    if (options.label) {
+      torrentOptions.category = options.label;
+    }
+
+    const hash = parseTorrent(torrent).infoHash;
+    await this.addTorrent(torrent, torrentOptions);
+    return this.getTorrent(hash);
   }
 
   async addTrackers(hash: string, urls: string): Promise<boolean> {
@@ -390,7 +415,7 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
-  logout() {
+  logout(): boolean {
     this._sid = undefined;
     return true;
   }

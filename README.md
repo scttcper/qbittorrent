@@ -72,6 +72,26 @@ const res = await client.removeTorrent('torrent_id', true);
 console.log(res);
 ```
 
+##### addTorrent
+Add a torrent, has client specific options. Also see normalizedAddTorrent
+
+```ts
+const result = await client.addTorrent(fs.readFileSync(torrentFile));
+console.log(result);
+```
+
+##### normalizedAddTorrent
+Add a torrent and return normalized torrent data, can start a torrent paused and add label
+
+```ts
+const result = await client.normalizedAddTorrent(fs.readFileSync(torrentFile), {
+    startPaused: false;
+    label: 'linux';
+});
+console.log(result);
+```
+
+
 ### See Also
 All torrent clients support the same normalized functions
 deluge - https://github.com/TypeCtrl/deluge  
