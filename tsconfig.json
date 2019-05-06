@@ -2,7 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "moduleResolution": "node",
-    "lib": ["es2018"],
+    "lib": ["es2018", "dom"],
     "target": "es2017",
     "module": "commonjs",
     "esModuleInterop": true,
