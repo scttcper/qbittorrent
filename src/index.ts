@@ -3,7 +3,7 @@ import fs from 'fs';
 import got, { GotBodyOptions, GotFormOptions, GotJSONOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
 import urljoin from 'url-join';
-import parseTorrent from 'parse-torrent';
+import { hash } from '@ctrl/torrent-file';
 
 import {
   AllClientData,
@@ -325,9 +325,13 @@ export class QBittorrent implements TorrentClient {
       torrentOptions.category = options.label;
     }
 
-    const hash = parseTorrent(torrent).infoHash;
+    if (!Buffer.isBuffer(torrent)) {
+      torrent = Buffer.from(torrent);
+    }
+
+    const torrentHash = await hash(torrent);
     await this.addTorrent(torrent, torrentOptions);
-    return this.getTorrent(hash);
+    return this.getTorrent(torrentHash);
   }
 
   async addTrackers(hash: string, urls: string): Promise<boolean> {

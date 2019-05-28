@@ -27,7 +27,7 @@ async function main() {
 
 ### API
 
-Docs: https://typectrl.github.io/qbittorrent/classes/qbittorrent.html  
+Docs: https://qbittorrent.netlify.com/   
 qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation  
 
 ### Normalized API
