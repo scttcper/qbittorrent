@@ -441,17 +441,20 @@ export class QBittorrent implements TorrentClient {
     }
 
     const url = urljoin(this.config.baseUrl, this.config.path, path);
-    const options: GotJSONOptions | GotBodyOptions<null> = {
+    const options: GotBodyOptions<null> | GotJSONOptions = {
       method,
       headers: {
         Cookie: `SID=${this._sid}`,
         ...headers,
       },
       retry: 0,
-      json,
       body,
       query: params,
     };
+
+    if (json) {
+      (options as GotJSONOptions).json = json;
+    }
 
     // allow proxy agent
     if (this.config.agent) {

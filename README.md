@@ -42,10 +42,10 @@ console.log(data.torrents);
 ```
 
 ##### getTorrent
-Returns one torrent data
+Returns one torrent data from torrent hash
 
 ```ts
-const data = await client.getTorrent();
+const data = await client.getTorrent('torrent-hash');
 console.log(data);
 ```
 
@@ -91,8 +91,9 @@ const result = await client.normalizedAddTorrent(fs.readFileSync(torrentFile), {
 console.log(result);
 ```
 
-
 ### See Also
-All torrent clients support the same normalized functions
+All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client. 
+
 deluge - https://github.com/TypeCtrl/deluge  
 transmission - https://github.com/TypeCtrl/transmission  
+utorrent - https://github.com/TypeCtrl/utorrent  
