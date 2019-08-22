@@ -1,19 +1,18 @@
-import FormData from 'form-data';
-import fs from 'fs';
-import got, { GotBodyOptions, GotFormOptions, GotJSONOptions, Response } from 'got';
-import { Cookie } from 'tough-cookie';
-import urljoin from 'url-join';
-import { hash } from '@ctrl/torrent-file';
-
 import {
+  AddTorrentOptions as NormalizedAddTorrentOptions,
   AllClientData,
   Label,
   NormalizedTorrent,
   TorrentClient,
   TorrentSettings,
   TorrentState,
-  AddTorrentOptions as NormalizedAddTorrentOptions,
 } from '@ctrl/shared-torrent';
+import { hash } from '@ctrl/torrent-file';
+import FormData from 'form-data';
+import fs from 'fs';
+import got, { GotBodyOptions, GotFormOptions, GotJSONOptions, Response } from 'got';
+import { Cookie } from 'tough-cookie';
+import urljoin from 'url-join';
 
 import {
   AddTorrentOptions,
@@ -85,7 +84,7 @@ export class QBittorrent implements TorrentClient {
     filter?: TorrentFilters,
     category?: string,
   ): Promise<Torrent[]> {
-    const params: any = {};
+    const params: Record<string, string> = {};
     if (hashes) {
       params.hashes = this._normalizeHashes(hashes);
     }

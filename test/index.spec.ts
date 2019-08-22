@@ -38,7 +38,7 @@ describe('QBittorrent', () => {
       await client.removeTorrent(torrent.hash, false);
     }
   });
-  it('should be instantiable', async () => {
+  it('should be instantiable', () => {
     const client = new QBittorrent({ baseUrl, username, password });
     expect(client).toBeTruthy();
   });
