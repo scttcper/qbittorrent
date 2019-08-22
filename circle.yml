@@ -30,7 +30,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          key: dependency-cache-{{ checksum "package-lock.json" }}
       - run: npm ci
       - run: npm run build
       - run: npm run semantic-release
