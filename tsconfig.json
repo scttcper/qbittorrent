@@ -2,20 +2,18 @@
   "compileOnSave": false,
   "compilerOptions": {
     "moduleResolution": "node",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2018"],
     "target": "es2017",
     "module": "commonjs",
     "esModuleInterop": true,
     "strict": true,
     "noImplicitAny": false,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "declaration": true,
     "sourceMap": true,
     "inlineSources": true,
-    "incremental": true,
     "outDir": "dist"
   },
-  "include": ["src/index.ts"],
   "typedocOptions": {
     "out": "docs",
     "mode": "file",
