@@ -51,7 +51,7 @@
     "eslint-plugin-import": "2.18.2",
     "jest": "24.9.0",
     "p-wait-for": "3.1.0",
-    "semantic-release": "15.13.24",
+    "semantic-release": "15.13.28",
     "ts-jest": "24.1.0",
     "typedoc": "0.15.0",
     "typescript": "3.6.4"
