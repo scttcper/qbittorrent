@@ -35,6 +35,7 @@ describe('QBittorrent', () => {
     const torrents = await client.listTorrents();
     for (const torrent of torrents) {
       // clean up all torrents
+      // eslint-disable-next-line no-await-in-loop
       await client.removeTorrent(torrent.hash, false);
     }
   });

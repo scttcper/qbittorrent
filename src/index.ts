@@ -270,7 +270,7 @@ export class QBittorrent implements TorrentClient {
     const form = new FormData();
     const fileOptions: FormData.AppendOptions = {
       contentType: 'application/x-bittorrent',
-      filename: options.filename || 'torrent',
+      filename: options.filename ?? 'torrent',
     };
 
     // remove options.filename, not used in form
@@ -423,10 +423,11 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
-  // eslint-disable-next-line max-params
+  // eslint-disable-next-line max-params, @typescript-eslint/no-untyped-public-signature
   async request<T extends object | string>(
     path: string,
     method: string,
+    // eslint-disable-next-line default-param-last
     params: any = {},
     body?: any,
     headers: any = {},
@@ -443,7 +444,7 @@ export class QBittorrent implements TorrentClient {
     const options: GotBodyOptions<null> | GotJSONOptions = {
       method,
       headers: {
-        Cookie: `SID=${this._sid}`,
+        Cookie: `SID=${this._sid ?? ''}`,
         ...headers,
       },
       retry: 0,
