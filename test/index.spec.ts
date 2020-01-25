@@ -1,9 +1,10 @@
-import path from 'path';
-import pWaitFor from 'p-wait-for';
 import fs from 'fs';
+import pWaitFor from 'p-wait-for';
+import path from 'path';
+
+import { TorrentState } from '@ctrl/shared-torrent';
 
 import { QBittorrent } from '../src/index';
-import { TorrentState } from '@ctrl/shared-torrent';
 
 const baseUrl = 'http://localhost:8080';
 const torrentName = 'ubuntu-18.04.1-desktop-amd64.iso';

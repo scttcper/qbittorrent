@@ -3,9 +3,10 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "lib": ["es2018"],
-    "target": "es2017",
+    "target": "es2018",
     "module": "commonjs",
     "esModuleInterop": true,
+    "noFallthroughCasesInSwitch": true,
     "strict": true,
     "noImplicitAny": false,
     "noUnusedLocals": true,

@@ -1,3 +1,10 @@
+import FormData from 'form-data';
+import fs from 'fs';
+import got, { Method, Response } from 'got';
+import { Cookie } from 'tough-cookie';
+import { URLSearchParams } from 'url';
+import urljoin from 'url-join';
+
 import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
   AllClientData,
@@ -8,11 +15,6 @@ import {
   TorrentState,
 } from '@ctrl/shared-torrent';
 import { hash } from '@ctrl/torrent-file';
-import FormData from 'form-data';
-import fs from 'fs';
-import got, { GotBodyOptions, GotFormOptions, GotJSONOptions, Response } from 'got';
-import { Cookie } from 'tough-cookie';
-import urljoin from 'url-join';
 
 import {
   AddTorrentOptions,
@@ -385,26 +387,19 @@ export class QBittorrent implements TorrentClient {
 
   async login(): Promise<boolean> {
     const url = urljoin(this.config.baseUrl, this.config.path, '/auth/login');
-    const options: GotFormOptions<null> = {
-      form: true,
-      body: {
-        username: this.config.username,
-        password: this.config.password,
-      },
+    const form = new FormData();
+    form.append('username', this.config.username);
+    form.append('password', this.config.password);
+
+    const res = await got.post(url, {
+      isStream: false as any,
+      body: form,
       followRedirect: false,
       retry: 0,
-    };
-
-    // allow proxy agent
-    if (this.config.agent) {
-      options.agent = this.config.agent;
-    }
-
-    if (this.config.timeout) {
-      options.timeout = this.config.timeout;
-    }
-
-    const res = await got.post(url, options);
+      // allow proxy agent
+      agent: this.config.agent,
+      timeout: this.config.timeout,
+    });
     if (!res.headers['set-cookie'] || !res.headers['set-cookie'].length) {
       throw new Error('Cookie not found. Auth Failed.');
     }
@@ -426,7 +421,7 @@ export class QBittorrent implements TorrentClient {
   // eslint-disable-next-line max-params, @typescript-eslint/no-untyped-public-signature
   async request<T extends object | string>(
     path: string,
-    method: string,
+    method: Method,
     // eslint-disable-next-line default-param-last
     params: any = {},
     body?: any,
@@ -441,7 +436,9 @@ export class QBittorrent implements TorrentClient {
     }
 
     const url = urljoin(this.config.baseUrl, this.config.path, path);
-    const options: GotBodyOptions<null> | GotJSONOptions = {
+    const res = await got<T>(url, {
+      isStream: false,
+      resolveBodyOnly: false,
       method,
       headers: {
         Cookie: `SID=${this._sid ?? ''}`,
@@ -449,23 +446,14 @@ export class QBittorrent implements TorrentClient {
       },
       retry: 0,
       body,
-      query: params,
-    };
+      searchParams: new URLSearchParams(params),
+      // allow proxy agent
+      agent: this.config.agent,
+      timeout: this.config.timeout,
+      responseType: json ? 'json' : 'text' as 'json',
+    });
 
-    if (json) {
-      (options as GotJSONOptions).json = json;
-    }
-
-    // allow proxy agent
-    if (this.config.agent) {
-      options.agent = this.config.agent;
-    }
-
-    if (this.config.timeout) {
-      options.timeout = this.config.timeout;
-    }
-
-    return got(url, options as any);
+    return res;
   }
 
   /**
