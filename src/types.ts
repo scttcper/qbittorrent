@@ -555,3 +555,44 @@ export interface AddTorrentOptions {
    */
   firstLastPiecePrio: TrueFalseStr;
 }
+
+export interface AddMagnetOptions {
+  savepath: string;
+  cookie: string;
+  /**
+   * Category for the torrent
+   */
+  category: string;
+  /**
+   * Skip hash checking. Possible values are true, false (default)
+   */
+  skip_checking: TrueFalseStr;
+  /**
+   * Add torrents in the paused state. Possible values are true, false (default)
+   */
+  paused: TrueFalseStr;
+  /**
+   * Create the root folder. Possible values are true, false, unset (default)
+   */
+  root_folder: TrueFalseStr;
+  /**
+   * Rename torrent
+   */
+  rename: string;
+  /**
+   * Set torrent upload speed limit. Unit in bytes/second
+   */
+  upLimit: number;
+  /**
+   * Set torrent download speed limit. Unit in bytes/second
+   */
+  dlLimit: number;
+  /**
+   * Enable sequential download. Possible values are true, false (default)
+   */
+  sequentialDownload: TrueFalseStr;
+  /**
+   * Prioritize download first last piece. Possible values are true, false (default)
+   */
+  firstLastPiecePrio: TrueFalseStr;
+}
