@@ -27,6 +27,7 @@ import {
   TorrentState as qbtState,
   TorrentTrackers,
   WebSeed,
+  AddMagnetOptions,
 } from './types';
 
 const defaults: TorrentSettings = {
@@ -335,6 +336,36 @@ export class QBittorrent implements TorrentClient {
     return this.getTorrent(torrentHash);
   }
 
+  /**
+   * @param urls URLs separated with newlines
+   * @param options
+   */
+  async addMagnet(urls: string, options: Partial<AddMagnetOptions>): Promise<boolean> {
+    const form = new FormData();
+    form.append('url', urls);
+
+    if (options) {
+      for (const key of Object.keys(options)) {
+        form.append(key, options[key]);
+      }
+    }
+
+    const res = await this.request<string>(
+      '/torrents/add',
+      'POST',
+      undefined,
+      form,
+      form.getHeaders(),
+      false,
+    );
+
+    if (res.body === 'Fails.') {
+      throw new Error('Failed to add torrent');
+    }
+
+    return true;
+  }
+
   async addTrackers(hash: string, urls: string): Promise<boolean> {
     const params = { hash, urls };
     await this.request('/torrents/addTrackers', 'GET', params);
@@ -449,7 +480,7 @@ export class QBittorrent implements TorrentClient {
       // allow proxy agent
       agent: this.config.agent,
       timeout: this.config.timeout,
-      responseType: json ? 'json' : 'text' as 'json',
+      responseType: json ? 'json' : ('text' as 'json'),
     });
 
     return res;
