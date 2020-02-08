@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 export interface BuildInfo {
   /**
    * 	QT version

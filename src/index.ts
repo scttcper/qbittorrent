@@ -418,11 +418,10 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
-  // eslint-disable-next-line max-params, @typescript-eslint/no-untyped-public-signature
+  // eslint-disable-next-line max-params
   async request<T extends object | string>(
     path: string,
     method: Method,
-    // eslint-disable-next-line default-param-last
     params: any = {},
     body?: any,
     headers: any = {},
