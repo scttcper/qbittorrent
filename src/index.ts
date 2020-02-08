@@ -342,7 +342,7 @@ export class QBittorrent implements TorrentClient {
    */
   async addMagnet(urls: string, options: Partial<AddMagnetOptions> = {}): Promise<boolean> {
     const form = new FormData();
-    form.append('url', urls);
+    form.append('urls', urls);
 
     if (options) {
       for (const key of Object.keys(options)) {
