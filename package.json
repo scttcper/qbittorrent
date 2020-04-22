@@ -30,31 +30,31 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
-    "@ctrl/shared-torrent": "^2.0.0",
-    "@ctrl/torrent-file": "^1.1.0",
+    "@ctrl/shared-torrent": "^3.0.0",
+    "@ctrl/torrent-file": "^1.2.0",
     "form-data": "^3.0.0",
-    "got": "^10.5.2",
-    "tough-cookie": "^3.0.1",
+    "got": "^11.0.2",
+    "tough-cookie": "^4.0.0",
     "url-join": "^4.0.1"
   },
   "devDependencies": {
     "@types/form-data": "2.5.0",
-    "@types/jest": "25.1.4",
-    "@types/node": "13.9.8",
-    "@types/tough-cookie": "2.3.7",
+    "@types/jest": "25.2.1",
+    "@types/node": "13.13.2",
+    "@types/tough-cookie": "4.0.0",
     "@types/url-join": "4.0.0",
-    "@typescript-eslint/eslint-plugin": "2.19.0",
-    "@typescript-eslint/parser": "2.19.0",
+    "@typescript-eslint/eslint-plugin": "2.29.0",
+    "@typescript-eslint/parser": "2.29.0",
     "eslint": "6.8.0",
     "eslint-config-xo-space": "0.24.0",
-    "eslint-config-xo-typescript": "0.26.0",
-    "eslint-plugin-import": "2.20.1",
-    "jest": "25.1.0",
+    "eslint-config-xo-typescript": "0.27.0",
+    "eslint-plugin-import": "2.20.2",
+    "jest": "25.4.0",
     "p-wait-for": "3.1.0",
-    "semantic-release": "17.0.4",
-    "ts-jest": "25.2.1",
-    "typedoc": "0.16.11",
-    "typescript": "3.7.5"
+    "semantic-release": "17.0.7",
+    "ts-jest": "25.4.0",
+    "typedoc": "0.17.4",
+    "typescript": "3.8.3"
   },
   "jest": {
     "preset": "ts-jest",
@@ -64,6 +64,6 @@
     "branch": "master"
   },
   "engines": {
-    "node": ">=8"
+    "node": ">=10.19.0"
   }
 }
