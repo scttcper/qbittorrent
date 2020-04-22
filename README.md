@@ -2,8 +2,6 @@
 
 > TypeScript api wrapper for [qBittorrent](https://www.qbittorrent.org/) using [got](https://github.com/sindresorhus/got)
 
-DOCS: https://qbittorrent.netlify.app  
-
 ### Install
 
 ```console
@@ -29,7 +27,7 @@ async function main() {
 
 ### API
 
-Docs: https://qbittorrent.netlify.com/   
+Docs: https://qbittorrent.netlify.app  
 qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation  
 
 ### Normalized API
