@@ -588,6 +588,10 @@ export interface AddMagnetOptions {
    */
   dlLimit: number;
   /**
+   * Whether Automatic Torrent Management should be used
+   */
+  useAutoTMM: boolean;
+  /**
    * Enable sequential download. Possible values are true, false (default)
    */
   sequentialDownload: TrueFalseStr;
