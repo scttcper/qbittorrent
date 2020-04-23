@@ -337,6 +337,29 @@ export class QBittorrent implements TorrentClient {
   }
 
   /**
+   * @param hash Hash for desired torrent
+   * @param id id of the file to be renamed
+   * @param name new name to be assigned to the file
+   */
+  async renameFile(hash: string, id: number, name: string): Promise<boolean> {
+    const form = new FormData();
+    form.append('hash', hash);
+    form.append('id', id);
+    form.append('name', name);
+
+    await this.request<string>(
+      '/torrents/renameFile',
+      'POST',
+      undefined,
+      form,
+      form.getHeaders(),
+      false,
+    );
+
+    return true;
+  }
+
+  /**
    * @param urls URLs separated with newlines
    * @param options
    */
