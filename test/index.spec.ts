@@ -23,6 +23,7 @@ async function setupTorrent(client: QBittorrent): Promise<string> {
     },
     { timeout: 10000 },
   );
+  await new Promise(resolve => setTimeout(() => resolve(), 500));
   const torrents = await client.listTorrents();
   expect(Object.keys(torrents)).toHaveLength(1);
   return torrents[0].hash;
@@ -37,6 +38,8 @@ describe('QBittorrent', () => {
       // eslint-disable-next-line no-await-in-loop
       await client.removeTorrent(torrent.hash, false);
     }
+
+    await new Promise(resolve => setTimeout(() => resolve(), 1000));
   });
   it('should be instantiable', () => {
     const client = new QBittorrent({ baseUrl, username, password });
