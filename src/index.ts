@@ -257,9 +257,9 @@ export class QBittorrent implements TorrentClient {
   /**
    * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#set-torrent-name
    */
-  async setTorrentName(hashes: string | string[] | 'all', name: string): Promise<boolean> {
+  async setTorrentName(hash: string, name: string): Promise<boolean> {
     const form = new FormData();
-    form.append('hashes', this._normalizeHashes(hashes));
+    form.append('hash', hash);
     form.append('name', name);
 
     await this.request('/torrents/rename', 'POST', undefined, form);
