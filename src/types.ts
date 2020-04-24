@@ -980,7 +980,7 @@ export interface Preferences {
   /**
    * For API ≥ v2.3.0: Plaintext WebUI password, not readable, write-only. For API < v2.3.0: MD5 hash of WebUI password, hash is generated from the following string: username:Web UI Access:plain_text_web_ui_password
    */
-  web_ui_password: string;
+  web_ui_password?: string;
   /**
    * True if WebUI CSRF protection is enabled
    */
