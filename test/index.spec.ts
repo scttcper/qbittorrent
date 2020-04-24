@@ -26,7 +26,7 @@ async function setupTorrent(client: QBittorrent): Promise<string> {
     { timeout: 10000 },
   );
   const torrents = await client.listTorrents();
-  expect(Object.keys(torrents).length).toEqual(1);
+  expect(Object.keys(torrents)).toHaveLength(1);
   return torrents[0].hash;
 }
 
@@ -85,9 +85,9 @@ describe('QBittorrent', () => {
       label: 'swag',
       startPaused: true,
     });
-    expect(res.id).toEqual('e84213a794f3ccd890382a54a64ca68b7e925433');
-    expect(res.label).toEqual('swag');
-    expect(res.name).toEqual(torrentName);
+    expect(res.id).toBe('e84213a794f3ccd890382a54a64ca68b7e925433');
+    expect(res.label).toBe('swag');
+    expect(res.name).toBe(torrentName);
   });
   it('should set torrent top priority', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
@@ -111,7 +111,7 @@ describe('QBittorrent', () => {
     const torrentFiles = await client.torrentFiles(torrentId);
 
     expect(res).toBe(true);
-    expect(torrentFiles[0].name).toEqual('ubuntu');
+    expect(torrentFiles[0].name).toBe('ubuntu');
   });
   it('should recheck torrent', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
