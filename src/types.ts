@@ -845,7 +845,7 @@ export interface Preferences {
   /**
    * True if DHT is enabled
    */
-  dht: boolean;
+  dht?: boolean;
   /**
    * True if DHT port should match TCP port
    */

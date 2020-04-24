@@ -155,6 +155,6 @@ describe('QBittorrent', () => {
   it('should get preferences', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
     const preferences = await client.getPreferences();
-    expect(preferences.dht).toBe(true);
+    expect(preferences.max_active_torrents).toBe(5);
   });
 });
