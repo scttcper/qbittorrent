@@ -600,3 +600,431 @@ export interface AddMagnetOptions {
    */
   firstLastPiecePrio: TrueFalseStr;
 }
+
+export interface getPreference {
+/**
+* Currently selected language (e.g. en_GB for English)
+*/
+  locale: string;
+  /**
+* True if a subfolder should be created when adding a torrent
+*/
+  create_subfolder_enabled: boolean;
+  /**
+* True if torrents should be added in a Paused state
+*/
+  start_paused_enabled: boolean;
+  /**
+* TODO
+*/
+  auto_delete_mode: number;
+  /**
+* True if disk space should be pre-allocated for all files
+*/
+  preallocate_all: boolean;
+  /**
+* True if ".!qB" should be appended to incomplete files
+*/
+  incomplete_files_ext: boolean;
+  /**
+* True if Automatic Torrent Management is enabled by default
+*/
+  auto_tmm_enabled: boolean;
+  /**
+* True if torrent should be relocated when its Category changes
+*/
+  torrent_changed_tmm_enabled: boolean;
+  /**
+* True if torrent should be relocated when the default save path changes
+*/
+  save_path_changed_tmm_enabled: boolean;
+  /**
+* True if torrent should be relocated when its Category's save path changes
+*/
+  category_changed_tmm_enabled: boolean;
+  /**
+* Default save path for torrents, separated by slashes
+*/
+  save_path: string;
+  /**
+* True if folder for incomplete torrents is enabled
+*/
+  temp_path_enabled: boolean;
+  /**
+* Path for incomplete torrents, separated by slashes
+*/
+  temp_path: string;
+  /**
+* Property: directory to watch for torrent files, value: where torrents loaded from this directory should be downloaded to (see list of possible values below). Slashes are used as path separators; multiple key/value pairs can be specified
+*/
+  scan_dirs: object;
+  /**
+* Path to directory to copy .torrent files to. Slashes are used as path separators
+*/
+  export_dir: string;
+  /**
+* Path to directory to copy .torrent files of completed downloads to. Slashes are used as path separators
+*/
+  export_dir_fin: string;
+  /**
+* True if e-mail notification should be enabled
+*/
+  mail_notification_enabled: boolean;
+  /**
+* e-mail where notifications should originate from
+*/
+  mail_notification_sender: string;
+  /**
+* e-mail to send notifications to
+*/
+  mail_notification_email: string;
+  /**
+* smtp server for e-mail notifications
+*/
+  mail_notification_smtp: string;
+  /**
+* True if smtp server requires SSL connection
+*/
+  mail_notification_ssl_enabled: boolean;
+  /**
+* True if smtp server requires authentication
+*/
+  mail_notification_auth_enabled: boolean;
+  /**
+* Username for smtp authentication
+*/
+  mail_notification_username: string;
+  /**
+* Password for smtp authentication
+*/
+  mail_notification_password: string;
+  /**
+* True if external program should be run after torrent has finished downloading
+*/
+  autorun_enabled: boolean;
+  /**
+* Program path/name/arguments to run if autorun_enabled is enabled; path is separated by slashes; you can use %f and %n arguments, which will be expanded by qBittorent as path_to_torrent_file and torrent_name (from the GUI; not the .torrent file name) respectively
+*/
+  autorun_program: string;
+  /**
+* True if torrent queuing is enabled
+*/
+  queueing_enabled: boolean;
+  /**
+* Maximum number of active simultaneous downloads
+*/
+  max_active_downloads: number;
+  /**
+* Maximum number of active simultaneous downloads and uploads
+*/
+  max_active_torrents: number;
+  /**
+* Maximum number of active simultaneous uploads
+*/
+  max_active_uploads: number;
+  /**
+* If true torrents w/o any activity (stalled ones) will not be counted towards max_active_* limits; see [dont_count_slow_torrents](https://www.libtorrent.org/reference-Settings.html#dont_count_slow_torrents) for more information
+*/
+  dont_count_slow_torrents: boolean;
+  /**
+* Download rate in KiB/s for a torrent to be considered "slow"
+*/
+  slow_torrent_dl_rate_threshold: number;
+  /**
+* Upload rate in KiB/s for a torrent to be considered "slow"
+*/
+  slow_torrent_ul_rate_threshold: number;
+  /**
+* Seconds a torrent should be inactive before considered "slow"
+*/
+  slow_torrent_inactive_timer: number;
+  /**
+* True if share ratio limit is enabled
+*/
+  max_ratio_enabled: boolean;
+  /**
+* Get the global share ratio limit
+*/
+  max_ratio: number;
+  /**
+* Action performed when a torrent reaches the maximum share ratio. See list of possible values here below.
+*/
+  max_ratio_act: boolean;
+  /**
+* Port for incoming connections
+*/
+  listen_port: number;
+  /**
+* True if UPnP/NAT-PMP is enabled
+*/
+  upnp: boolean;
+  /**
+* True if the port is randomly selected
+*/
+  random_port: boolean;
+  /**
+* Global download speed limit in KiB/s; -1 means no limit is applied
+*/
+  dl_limit: number;
+  /**
+* Global upload speed limit in KiB/s; -1 means no limit is applied
+*/
+  up_limit: number;
+  /**
+* Maximum global number of simultaneous connections
+*/
+  max_connec: number;
+  /**
+* Maximum number of simultaneous connections per torrent
+*/
+  max_connec_per_torrent: number;
+  /**
+* Maximum number of upload slots
+*/
+  max_uploads: number;
+  /**
+* Maximum number of upload slots per torrent
+*/
+  max_uploads_per_torrent: number;
+  /**
+* Timeout in seconds for a stopped announce request to trackers
+*/
+  stop_tracker_timeout: number;
+  /**
+* True if the advanced libtorrent option piece_extent_affinity is enabled
+*/
+  piece_extent_affinity: boolean;
+  /**
+* True if uTP protocol should be enabled; this option is only available in qBittorent built against libtorrent version 0.16.X and higher
+*/
+  enable_utp: boolean;
+  /**
+* True if [du]l_limit should be applied to uTP connections; this option is only available in qBittorent built against libtorrent version 0.16.X and higher
+*/
+  limit_utp_rate: boolean;
+  /**
+* True if [du]l_limit should be applied to estimated TCP overhead (service data: e.g. packet headers)
+*/
+  limit_tcp_overhead: boolean;
+  /**
+* True if [du]l_limit should be applied to peers on the LAN
+*/
+  limit_lan_peers: boolean;
+  /**
+* Alternative global download speed limit in KiB/s
+*/
+  alt_dl_limit: number;
+  /**
+* Alternative global upload speed limit in KiB/s
+*/
+  alt_up_limit: number;
+  /**
+* True if alternative limits should be applied according to schedule
+*/
+  scheduler_enabled: boolean;
+  /**
+* Scheduler starting hour
+*/
+  schedule_from_hour: number;
+  /**
+* Scheduler starting minute
+*/
+  schedule_from_min: number;
+  /**
+* Scheduler ending hour
+*/
+  schedule_to_hour: number;
+  /**
+* Scheduler ending minute
+*/
+  schedule_to_min: number;
+  /**
+* Scheduler days. See possible values here below
+*/
+  scheduler_days: number;
+  /**
+* True if DHT is enabled
+*/
+  dht: boolean;
+  /**
+* True if DHT port should match TCP port
+*/
+  dhtSameAsBT: boolean;
+  /**
+* DHT port if dhtSameAsBT is false
+*/
+  dht_port: number;
+  /**
+* True if PeX is enabled
+*/
+  pex: boolean;
+  /**
+* True if LSD is enabled
+*/
+  lsd: boolean;
+  /**
+* See list of possible values here below
+*/
+  encryption: number;
+  /**
+* If true anonymous mode will be enabled; read more [here](Anonymous-Mode); this option is only available in qBittorent built against libtorrent version 0.16.X and higher
+*/
+  anonymous_mode: boolean;
+  /**
+* See list of possible values here below
+*/
+  proxy_type: number;
+  /**
+* Proxy IP address or domain name
+*/
+  proxy_ip: string;
+  /**
+* Proxy port
+*/
+  proxy_port: number;
+  /**
+* True if peer and web seed connections should be proxified; this option will have any effect only in qBittorent built against libtorrent version 0.16.X and higher
+*/
+  proxy_peer_connections: boolean;
+  /**
+* True if the connections not supported by the proxy are disabled
+*/
+  force_proxy: boolean;
+  /**
+* True proxy requires authentication; doesn't apply to SOCKS4 proxies
+*/
+  proxy_auth_enabled: boolean;
+  /**
+* Username for proxy authentication
+*/
+  proxy_username: string;
+  /**
+* Password for proxy authentication
+*/
+  proxy_password: string;
+  /**
+* True if external IP filter should be enabled
+*/
+  ip_filter_enabled: boolean;
+  /**
+* Path to IP filter file (.dat, .p2p, .p2b files are supported); path is separated by slashes
+*/
+  ip_filter_path: string;
+  /**
+* True if IP filters are applied to trackers
+*/
+  ip_filter_trackers: boolean;
+  /**
+* Comma-separated list of domains to accept when performing Host header validation
+*/
+  web_ui_domain_list: string;
+  /**
+* IP address to use for the WebUI
+*/
+  web_ui_address: string;
+  /**
+* WebUI port
+*/
+  web_ui_port: number;
+  /**
+* True if UPnP is used for the WebUI port
+*/
+  web_ui_upnp: boolean;
+  /**
+* WebUI username
+*/
+  web_ui_username: string;
+  /**
+* For API ≥ v2.3.0: Plaintext WebUI password, not readable, write-only. For API < v2.3.0: MD5 hash of WebUI password, hash is generated from the following string: username:Web UI Access:plain_text_web_ui_password
+*/
+  web_ui_password: string;
+  /**
+* True if WebUI CSRF protection is enabled
+*/
+  web_ui_csrf_protection_enabled: boolean;
+  /**
+* True if WebUI clickjacking protection is enabled
+*/
+  web_ui_clickjacking_protection_enabled: boolean;
+  /**
+* True if WebUI cookie Secure flag is enabled
+*/
+  web_ui_secure_cookie_enabled: boolean;
+  /**
+* Maximum number of authentication failures before WebUI access ban
+*/
+  web_ui_max_auth_fail_count: number;
+  /**
+* WebUI access ban duration in seconds
+*/
+  web_ui_ban_duration: number;
+  /**
+* True if authentication challenge for loopback address (127.0.0.1) should be disabled
+*/
+  bypass_local_auth: boolean;
+  /**
+* True if webui authentication should be bypassed for clients whose ip resides within (at least) one of the subnets on the whitelist
+*/
+  bypass_auth_subnet_whitelist_enabled: boolean;
+  /**
+* (White)list of ipv4/ipv6 subnets for which webui authentication should be bypassed; list entries are separated by commas
+*/
+  bypass_auth_subnet_whitelist: string;
+  /**
+* True if an alternative WebUI should be used
+*/
+  alternative_webui_enabled: boolean;
+  /**
+* File path to the alternative WebUI
+*/
+  alternative_webui_path: string;
+  /**
+* True if WebUI HTTPS access is enabled
+*/
+  use_https: boolean;
+  /**
+* SSL keyfile contents (this is a not a path)
+*/
+  ssl_key: string;
+  /**
+* SSL certificate contents (this is a not a path)
+*/
+  ssl_cert: string;
+  /**
+* True if server DNS should be updated dynamically
+*/
+  dyndns_enabled: boolean;
+  /**
+* See list of possible values here below
+*/
+  dyndns_service: number;
+  /**
+* Username for DDNS service
+*/
+  dyndns_username: string;
+  /**
+* Password for DDNS service
+*/
+  dyndns_password: string;
+  /**
+* Your DDNS domain name
+*/
+  dyndns_domain: string;
+  /**
+* RSS refresh interval
+*/
+  rss_refresh_interval: number;
+  /**
+* Max stored articles per RSS feed
+*/
+  rss_max_articles_per_feed: number;
+  /**
+* Enable processing of RSS feeds
+*/
+  rss_processing_enabled: boolean;
+  /**
+* Enable auto-downloading of torrents from the RSS feeds
+*/
+  rss_auto_downloading_enabled: boolean;
+
+}
