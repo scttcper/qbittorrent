@@ -86,6 +86,7 @@ describe('QBittorrent', () => {
     expect(res.id).toBe('e84213a794f3ccd890382a54a64ca68b7e925433');
     expect(res.label).toBe('swag');
     expect(res.name).toBe(torrentName);
+    await client.removeCategory('swag');
   });
   it('should set torrent top priority', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
@@ -178,7 +179,7 @@ describe('QBittorrent', () => {
     categories = await client.getCategories();
     expect(categories.movie).toBeUndefined();
   });
-  it.only('should get / create / remove tags', async () => {
+  it('should get / create / remove tags', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
     let tags = await client.getTags();
     expect(tags).not.toContain('movies');
@@ -190,5 +191,15 @@ describe('QBittorrent', () => {
     await client.deleteTags('movies,dank');
     tags = await client.getTags();
     expect(tags).toHaveLength(0);
+  });
+  it('should set categories to torrent', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const torrentId = await setupTorrent(client);
+    const cat = 'parks-and-rec';
+    await client.createCategory(cat);
+    await client.setTorrentCategory(torrentId, cat);
+    const allData = await client.getTorrent(torrentId);
+    expect(allData.label).toBe(cat);
+    await client.removeCategory(cat);
   });
 });

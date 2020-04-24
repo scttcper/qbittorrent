@@ -9,7 +9,6 @@ import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
   AllClientData,
   Label,
-  NormalizedTorrent,
   TorrentClient,
   TorrentSettings,
   TorrentState,
@@ -26,6 +25,7 @@ import {
   TorrentProperties,
   TorrentState as qbtState,
   TorrentTrackers,
+  NormalizedTorrentQbittorrent,
   WebSeed,
   AddMagnetOptions,
   Preferences,
@@ -67,7 +67,7 @@ export class QBittorrent implements TorrentClient {
     return res.body;
   }
 
-  async getTorrent(hash: string): Promise<NormalizedTorrent> {
+  async getTorrent(hash: string): Promise<NormalizedTorrentQbittorrent> {
     const torrentsResponse = await this.listTorrents(hash);
     const torrentData = torrentsResponse[0];
     if (!torrentData) {
@@ -127,7 +127,7 @@ export class QBittorrent implements TorrentClient {
     };
     const labels: { [key: string]: Label } = {};
     for (const torrent of listTorrents) {
-      const torrentData: NormalizedTorrent = this._normalizeTorrentData(torrent);
+      const torrentData: NormalizedTorrentQbittorrent = this._normalizeTorrentData(torrent);
       results.torrents.push(torrentData);
 
       // setup label
@@ -261,21 +261,47 @@ export class QBittorrent implements TorrentClient {
     form.append('category', category);
     form.append('savePath', savePath);
 
-    await this.request('/torrents/editCategory', 'POST', undefined, form);
+    await this.request('/torrents/editCategory', 'POST', undefined, form, undefined, false);
     return true;
   }
 
-  async removeCategory(category: string): Promise<boolean> {
+  async removeCategory(categories: string): Promise<boolean> {
     const form = new FormData();
-    form.append('categories', category);
-    await this.request('/torrents/removeCategories', 'POST', undefined, form);
+    form.append('categories', categories);
+    await this.request('/torrents/removeCategories', 'POST', undefined, form, undefined, false);
     return true;
   }
 
-  async setTorrentCategory(hashes: string | string[] | 'all', category: string): Promise<boolean> {
+  async addTorrentTags(hashes: string | string[] | 'all', tags: string): Promise<boolean> {
     const form = new FormData();
-    form.append('category', category);
     form.append('hashes', this._normalizeHashes(hashes));
+    form.append('tags', tags);
+    await this.request('/torrents/addTags', 'POST', undefined, form, undefined, false);
+    return true;
+  }
+
+  /**
+   * if tags are not passed, removes all tags
+   */
+  async removeTorrentTags(hashes: string | string[] | 'all', tags?: string): Promise<boolean> {
+    const form = new FormData();
+    form.append('hashes', this._normalizeHashes(hashes));
+    if (tags) {
+      form.append('tags', tags);
+    }
+
+    await this.request('/torrents/removeTags', 'POST', undefined, form, undefined, false);
+    return true;
+  }
+
+  async resetTorrentCategory(hashes: string | string[] | 'all'): Promise<boolean> {
+    return this.setTorrentCategory(hashes);
+  }
+
+  async setTorrentCategory(hashes: string | string[] | 'all', category = ''): Promise<boolean> {
+    const form = new FormData();
+    form.append('hashes', this._normalizeHashes(hashes));
+    form.append('category', category);
 
     await this.request('/torrents/setCategory', 'POST', undefined, form);
     return true;
@@ -375,7 +401,7 @@ export class QBittorrent implements TorrentClient {
   async normalizedAddTorrent(
     torrent: string | Buffer,
     options: Partial<NormalizedAddTorrentOptions> = {},
-  ): Promise<NormalizedTorrent> {
+  ): Promise<NormalizedTorrentQbittorrent> {
     const torrentOptions: Partial<AddTorrentOptions> = {};
 
     if (options.startPaused) {
@@ -580,7 +606,7 @@ export class QBittorrent implements TorrentClient {
     return hashes;
   }
 
-  private _normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
+  private _normalizeTorrentData(torrent: Torrent): NormalizedTorrentQbittorrent {
     let state = TorrentState.unknown;
 
     switch (torrent.state) {
@@ -623,7 +649,7 @@ export class QBittorrent implements TorrentClient {
 
     const isCompleted = torrent.progress >= 100;
 
-    const result: NormalizedTorrent = {
+    const result: NormalizedTorrentQbittorrent = {
       id: torrent.hash,
       name: torrent.name,
       stateMessage: '',

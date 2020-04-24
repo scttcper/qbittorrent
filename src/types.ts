@@ -1,3 +1,12 @@
+import { NormalizedTorrent } from '@ctrl/shared-torrent';
+
+/**
+ * refine the normalized torrent options for qbittorrent
+ */
+export interface NormalizedTorrentQbittorrent extends NormalizedTorrent {
+  id: string;
+}
+
 export interface BuildInfo {
   /**
    * 	QT version
