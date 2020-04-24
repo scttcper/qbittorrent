@@ -1,10 +1,14 @@
-import { NormalizedTorrent } from '@ctrl/shared-torrent';
+import { NormalizedTorrent, AllClientData } from '@ctrl/shared-torrent';
 
 /**
  * refine the normalized torrent options for qbittorrent
  */
 export interface NormalizedTorrentQbittorrent extends NormalizedTorrent {
   id: string;
+}
+
+export interface AllClientDataQbittorrent extends AllClientData {
+  torrents: NormalizedTorrentQbittorrent[];
 }
 
 export interface BuildInfo {

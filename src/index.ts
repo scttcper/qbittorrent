@@ -1,13 +1,12 @@
 import FormData from 'form-data';
 import fs from 'fs';
-import got, { Response, Options as GotOptions } from 'got';
+import got, { Options as GotOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
 import { URLSearchParams } from 'url';
 import urljoin from 'url-join';
 
 import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
-  AllClientData,
   Label,
   TorrentClient,
   TorrentSettings,
@@ -16,7 +15,12 @@ import {
 import { hash } from '@ctrl/torrent-file';
 
 import {
+  AddMagnetOptions,
   AddTorrentOptions,
+  AllClientDataQbittorrent,
+  Categories,
+  NormalizedTorrentQbittorrent,
+  Preferences,
   Torrent,
   TorrentFile,
   TorrentFilePriority,
@@ -25,11 +29,7 @@ import {
   TorrentProperties,
   TorrentState as qbtState,
   TorrentTrackers,
-  NormalizedTorrentQbittorrent,
   WebSeed,
-  AddMagnetOptions,
-  Preferences,
-  Categories,
 } from './types';
 
 const defaults: TorrentSettings = {
@@ -119,9 +119,9 @@ export class QBittorrent implements TorrentClient {
     return res.body;
   }
 
-  async getAllData(): Promise<AllClientData> {
+  async getAllData(): Promise<AllClientDataQbittorrent> {
     const listTorrents = await this.listTorrents();
-    const results: AllClientData = {
+    const results: AllClientDataQbittorrent = {
       torrents: [],
       labels: [],
     };
@@ -242,11 +242,17 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-all-categories
+   */
   async getCategories(): Promise<Categories> {
     const res = await this.request<Categories>('/torrents/categories', 'get');
     return res.body;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#add-new-category
+   */
   async createCategory(category: string, savePath = ''): Promise<boolean> {
     const form = new FormData();
     form.append('category', category);
@@ -256,6 +262,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#edit-category
+   */
   async editCategory(category: string, savePath = ''): Promise<boolean> {
     const form = new FormData();
     form.append('category', category);
@@ -265,6 +274,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#remove-categories
+   */
   async removeCategory(categories: string): Promise<boolean> {
     const form = new FormData();
     form.append('categories', categories);
@@ -282,6 +294,7 @@ export class QBittorrent implements TorrentClient {
 
   /**
    * if tags are not passed, removes all tags
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#remove-torrent-tags
    */
   async removeTorrentTags(hashes: string | string[] | 'all', tags?: string): Promise<boolean> {
     const form = new FormData();
@@ -294,10 +307,16 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * helper function to remove torrent category
+   */
   async resetTorrentCategory(hashes: string | string[] | 'all'): Promise<boolean> {
     return this.setTorrentCategory(hashes);
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#set-torrent-category
+   */
   async setTorrentCategory(hashes: string | string[] | 'all', category = ''): Promise<boolean> {
     const form = new FormData();
     form.append('hashes', this._normalizeHashes(hashes));
@@ -307,6 +326,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#pause-torrents
+   */
   async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
@@ -315,6 +337,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#resume-torrents
+   */
   async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
@@ -335,6 +360,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#recheck-torrents
+   */
   async recheckTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
@@ -343,6 +371,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#reannounce-torrents
+   */
   async reannounceTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
