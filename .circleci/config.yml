@@ -32,8 +32,11 @@ jobs:
           name: codecov
           command: bash <(curl -s https://codecov.io/bash)
       - run:
-          name: codecov
+          name: codeclimate
           command: ./cc-test-reporter after-build
+      - run:
+          name: codacy
+          command: bash <(curl -Ls https://coverage.codacy.com/get.sh)
   release:
     docker:
       - image: circleci/node:12
