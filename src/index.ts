@@ -53,11 +53,31 @@ export class QBittorrent implements TorrentClient {
   }
 
   /**
-   * Get application version
+   * @deprecated
    */
   async version(): Promise<string> {
+    return this.getAppVersion();
+  }
+
+  /**
+   * Get application version
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-application-version
+   */
+  async getAppVersion(): Promise<string> {
     const res = await this.request<string>(
       '/app/version',
+      'GET',
+      undefined,
+      undefined,
+      undefined,
+      false,
+    );
+    return res.body;
+  }
+
+  async getApiVersion(): Promise<string> {
+    const res = await this.request<string>(
+      '/app/webapiVersion',
       'GET',
       undefined,
       undefined,
@@ -77,11 +97,17 @@ export class QBittorrent implements TorrentClient {
     return this._normalizeTorrentData(torrentData);
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-application-preferences
+   */
   async getPreferences(): Promise<Preferences> {
     const res = await this.request<Preferences>('/app/preferences', 'GET');
     return res.body;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#set-application-preferences
+   */
   async setPreferences(preferences: Partial<Preferences>): Promise<boolean> {
     const form = new FormData();
     form.append('json', JSON.stringify(preferences));
@@ -147,16 +173,25 @@ export class QBittorrent implements TorrentClient {
     return results;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-torrent-generic-properties
+   */
   async torrentProperties(hash: string): Promise<TorrentProperties> {
     const res = await this.request<TorrentProperties>('/torrents/properties', 'GET', { hash });
     return res.body;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-torrent-trackers
+   */
   async torrentTrackers(hash: string): Promise<TorrentTrackers[]> {
     const res = await this.request<TorrentTrackers[]>('/torrents/trackers', 'GET', { hash });
     return res.body;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-torrent-web-seeds
+   */
   async torrentWebSeeds(hash: string): Promise<WebSeed[]> {
     const res = await this.request<WebSeed[]>('/torrents/webseeds', 'GET', { hash });
     return res.body;
@@ -180,6 +215,9 @@ export class QBittorrent implements TorrentClient {
     return res.body;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-torrent-pieces-states
+   */
   async torrentPieceStates(hash: string): Promise<TorrentPieceState[]> {
     const res = await this.request<TorrentPieceState[]>('/torrents/pieceStates', 'GET', { hash });
     return res.body;
@@ -188,12 +226,16 @@ export class QBittorrent implements TorrentClient {
   /**
    * Torrents piece hashes
    * @returns an array of hashes (strings) of all pieces (in order) of a specific torrent
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-torrent-pieces-hashes
    */
   async torrentPieceHashes(hash: string): Promise<string[]> {
     const res = await this.request<string[]>('/torrents/pieceHashes', 'GET', { hash });
     return res.body;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#set-torrent-location
+   */
   async setTorrentLocation(hashes: string | string[] | 'all', location: string): Promise<boolean> {
     const form = new FormData();
     form.append('location', location);
@@ -203,20 +245,21 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#set-torrent-name
+   */
   async setTorrentName(hashes: string | string[] | 'all', name: string): Promise<boolean> {
-    const body = {
-      hashes: this._normalizeHashes(hashes),
-      name,
-    };
     const form = new FormData();
-    for (const [key, value] of Object.entries(body)) {
-      form.append(key, value);
-    }
+    form.append('hashes', this._normalizeHashes(hashes));
+    form.append('name', name);
 
     await this.request('/torrents/rename', 'POST', undefined, form);
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-all-tags
+   */
   async getTags(): Promise<string[]> {
     const res = await this.request<string[]>('/torrents/tags', 'get');
     return res.body;
@@ -224,6 +267,7 @@ export class QBittorrent implements TorrentClient {
 
   /**
    * @param tags comma separated list
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#create-tags
    */
   async createTags(tags: string): Promise<boolean> {
     const form = new FormData();
@@ -234,6 +278,7 @@ export class QBittorrent implements TorrentClient {
 
   /**
    * @param tags comma separated list
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#delete-tags
    */
   async deleteTags(tags: string): Promise<boolean> {
     const form = new FormData();
@@ -284,6 +329,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#add-torrent-tags
+   */
   async addTorrentTags(hashes: string | string[] | 'all', tags: string): Promise<boolean> {
     const form = new FormData();
     form.append('hashes', this._normalizeHashes(hashes));
@@ -505,24 +553,36 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#add-trackers-to-torrent
+   */
   async addTrackers(hash: string, urls: string): Promise<boolean> {
     const params = { hash, urls };
     await this.request('/torrents/addTrackers', 'GET', params);
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#edit-trackers
+   */
   async editTrackers(hash: string, origUrl: string, newUrl: string): Promise<boolean> {
     const params = { hash, origUrl, newUrl };
     await this.request('/torrents/editTrackers', 'GET', params);
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#remove-trackers
+   */
   async removeTrackers(hash: string, urls: string): Promise<boolean> {
     const params = { hash, urls };
     await this.request('/torrents/editTrackers', 'GET', params);
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#increase-torrent-priority
+   */
   async queueUp(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
@@ -531,6 +591,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#decrease-torrent-priority
+   */
   async queueDown(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
@@ -539,6 +602,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#maximal-torrent-priority
+   */
   async topPriority(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
@@ -547,6 +613,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#minimal-torrent-priority
+   */
   async bottomPriority(hashes: string | string[] | 'all'): Promise<boolean> {
     const params = {
       hashes: this._normalizeHashes(hashes),
@@ -555,6 +624,9 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#login
+   */
   async login(): Promise<boolean> {
     const url = urljoin(this.config.baseUrl, this.config.path, '/auth/login');
     const form = new FormData();

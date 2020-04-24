@@ -202,4 +202,22 @@ describe('QBittorrent', () => {
     expect(allData.label).toBe(cat);
     await client.removeCategory(cat);
   });
+  it('should get application version', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const version = await client.getAppVersion();
+    expect(version).toBeDefined();
+  });
+  it('should get api version', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const version = await client.getApiVersion();
+    expect(version).toBeDefined();
+  });
+  it('should set torrent name', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const torrentId = await setupTorrent(client);
+    const name = 'important-utorrent';
+    await client.setTorrentName(torrentId, name);
+    const torrentData = await client.getTorrent(torrentId);
+    expect(torrentData.name).toBe(name);
+  });
 });
