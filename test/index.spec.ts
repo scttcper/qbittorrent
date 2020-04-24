@@ -165,7 +165,7 @@ describe('QBittorrent', () => {
     expect(preferences.max_active_torrents).toBe(10);
     await client.setPreferences({ max_active_torrents: 5 });
   });
-  it('should create / edit / remove category', async ()=> {
+  it('should create / edit / remove category', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
     await client.createCategory('movie', '/data');
     await client.editCategory('movie', '/swag');
