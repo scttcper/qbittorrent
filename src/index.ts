@@ -1,6 +1,6 @@
 import FormData from 'form-data';
 import fs from 'fs';
-import got, { Method, Response } from 'got';
+import got, { Method, Response, Options as GotOptions } from 'got';
 import { Cookie } from 'tough-cookie';
 import { URLSearchParams } from 'url';
 import urljoin from 'url-join';
@@ -76,16 +76,16 @@ export class QBittorrent implements TorrentClient {
     return this._normalizeTorrentData(torrentData);
   }
 
-  /**
-   * Preferences
-   */
   async getPreferences(): Promise<Preferences> {
-    const res = await this.request<Preferences>('/app/preferences', 'GET', undefined, undefined, undefined, false);
+    const res = await this.request<Preferences>('/app/preferences', 'GET');
     return res.body;
   }
 
-  async setPreferences(params: Preferences): Promise<boolean> {
-    await this.request('/app/setPreferences', 'GET', params);
+  async setPreferences(preferences: Partial<Preferences>): Promise<boolean> {
+    const form = new FormData();
+    form.append('json', JSON.stringify(preferences));
+
+    await this.request('/app/setPreferences', 'POST', undefined, form);
     return true;
   }
 
@@ -194,11 +194,11 @@ export class QBittorrent implements TorrentClient {
   }
 
   async setTorrentLocation(hashes: string | string[] | 'all', location: string): Promise<boolean> {
-    const body = {
-      hashes: this._normalizeHashes(hashes),
-      location,
-    };
-    await this.request('/torrents/setLocation', 'POST', undefined, body);
+    const form = new FormData();
+    form.append('location', location);
+    form.append('hashes', this._normalizeHashes(hashes));
+
+    await this.request('/torrents/setLocation', 'POST', undefined, form);
     return true;
   }
 
@@ -207,32 +207,46 @@ export class QBittorrent implements TorrentClient {
       hashes: this._normalizeHashes(hashes),
       name,
     };
-    await this.request('/torrents/rename', 'POST', undefined, body);
+    const form = new FormData();
+    for (const [key, value] of Object.entries(body)) {
+      form.append(key, value);
+    }
+
+    await this.request('/torrents/rename', 'POST', undefined, form);
     return true;
   }
 
-  async createCategory(category: string): Promise<boolean> {
-    const body = {
-      category,
-    };
-    await this.request('/torrents/createCategory', 'POST', undefined, body);
+  async createCategory(category: string, savePath = ''): Promise<boolean> {
+    const form = new FormData();
+    form.append('category', category);
+    form.append('savePath', savePath);
+
+    await this.request('/torrents/createCategory', 'POST', undefined, form);
+    return true;
+  }
+
+  async editCategory(category: string, savePath = ''): Promise<boolean> {
+    const form = new FormData();
+    form.append('category', category);
+    form.append('savePath', savePath);
+
+    await this.request('/torrents/editCategory', 'POST', undefined, form);
     return true;
   }
 
   async removeCategory(category: string): Promise<boolean> {
-    const body = {
-      category,
-    };
-    await this.request('/torrents/removeCategories', 'POST', undefined, body);
+    const form = new FormData();
+    form.append('categories', category);
+    await this.request('/torrents/removeCategories', 'POST', undefined, form);
     return true;
   }
 
   async setTorrentCategory(hashes: string | string[] | 'all', category: string): Promise<boolean> {
-    const body = {
-      hashes: this._normalizeHashes(hashes),
-      category,
-    };
-    await this.request('/torrents/setCategory', 'POST', undefined, body);
+    const form = new FormData();
+    form.append('category', category);
+    form.append('hashes', this._normalizeHashes(hashes));
+
+    await this.request('/torrents/setCategory', 'POST', undefined, form);
     return true;
   }
 
@@ -491,7 +505,7 @@ export class QBittorrent implements TorrentClient {
     path: string,
     method: Method,
     params: any = {},
-    body?: any,
+    body?: GotOptions['body'],
     headers: any = {},
     json = true,
   ): Promise<Response<T>> {
