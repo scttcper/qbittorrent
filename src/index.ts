@@ -28,6 +28,7 @@ import {
   TorrentTrackers,
   WebSeed,
   AddMagnetOptions,
+  getPreference,
 } from './types';
 
 const defaults: TorrentSettings = {
@@ -73,6 +74,19 @@ export class QBittorrent implements TorrentClient {
     }
 
     return this._normalizeTorrentData(torrentData);
+  }
+
+  /**
+   * Preferences
+   */
+  async getPreferences(): Promise<getPreference> {
+    const res = await this.request<getPreference>('/app/preferences', 'GET', undefined, undefined, undefined, false);
+    return res.body;
+  }
+
+  async setPreferences(params: getPreference): Promise<boolean> {
+    await this.request('/app/setPreferences', 'GET', params);
+    return true;
   }
 
   /**
