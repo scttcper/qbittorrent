@@ -18,6 +18,7 @@ import {
   AddMagnetOptions,
   AddTorrentOptions,
   AllClientDataQbittorrent,
+  BuildInfo,
   Categories,
   NormalizedTorrentQbittorrent,
   Preferences,
@@ -84,6 +85,14 @@ export class QBittorrent implements TorrentClient {
       undefined,
       false,
     );
+    return res.body;
+  }
+
+  /**
+   * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#get-build-info
+   */
+  async getBuildInfo(): Promise<BuildInfo> {
+    const res = await this.request<BuildInfo>('/app/buildInfo', 'GET');
     return res.body;
   }
 

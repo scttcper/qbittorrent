@@ -212,6 +212,11 @@ describe('QBittorrent', () => {
     const version = await client.getApiVersion();
     expect(version).toBeDefined();
   });
+  it('should get build info', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const buildInfo = await client.getBuildInfo();
+    expect(buildInfo.libtorrent).toBeDefined();
+  });
   it('should set torrent name', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
     const torrentId = await setupTorrent(client);
