@@ -152,4 +152,9 @@ describe('QBittorrent', () => {
     expect(torrent.totalUploaded).toBe(0);
     expect(torrent.uploadSpeed).toBe(0);
   });
+  it('should get preferences', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const preferences = await client.getPreferences();
+    expect(preferences.dht).toBe(true);
+  });
 });
