@@ -1,6 +1,6 @@
 import FormData from 'form-data';
 import fs from 'fs';
-import got, { Method, Response, Options as GotOptions } from 'got';
+import got, { Response, Options as GotOptions } from 'got';
 import { Cookie } from 'tough-cookie';
 import { URLSearchParams } from 'url';
 import urljoin from 'url-join';
@@ -29,6 +29,7 @@ import {
   WebSeed,
   AddMagnetOptions,
   Preferences,
+  Categories,
 } from './types';
 
 const defaults: TorrentSettings = {
@@ -214,6 +215,36 @@ export class QBittorrent implements TorrentClient {
 
     await this.request('/torrents/rename', 'POST', undefined, form);
     return true;
+  }
+
+  async getTags(): Promise<string[]> {
+    const res = await this.request<string[]>('/torrents/tags', 'get');
+    return res.body;
+  }
+
+  /**
+   * @param tags comma separated list
+   */
+  async createTags(tags: string): Promise<boolean> {
+    const form = new FormData();
+    form.append('tags', tags);
+    await this.request('/torrents/createTags', 'POST', undefined, form, undefined, false);
+    return true;
+  }
+
+  /**
+   * @param tags comma separated list
+   */
+  async deleteTags(tags: string): Promise<boolean> {
+    const form = new FormData();
+    form.append('tags', tags);
+    await this.request('/torrents/deleteTags', 'POST', undefined, form, undefined, false);
+    return true;
+  }
+
+  async getCategories(): Promise<Categories> {
+    const res = await this.request<Categories>('/torrents/categories', 'get');
+    return res.body;
   }
 
   async createCategory(category: string, savePath = ''): Promise<boolean> {
@@ -503,7 +534,7 @@ export class QBittorrent implements TorrentClient {
   // eslint-disable-next-line max-params
   async request<T extends object | string>(
     path: string,
-    method: Method,
+    method: GotOptions['method'],
     params: any = {},
     body?: GotOptions['body'],
     headers: any = {},

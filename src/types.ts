@@ -176,6 +176,12 @@ export interface Torrent {
   category: string;
 }
 
+export type Categories = Record<string, Category>;
+export interface Category {
+  name: string;
+  savePath: string;
+}
+
 export enum TorrentState {
   /**
    * Some error occurred, applies to paused torrents
