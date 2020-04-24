@@ -41,7 +41,10 @@ export type TorrentFilters =
   | 'paused'
   | 'active'
   | 'inactive'
-  | 'resumed';
+  | 'resumed'
+  | 'stalled'
+  | 'stalled_uploading'
+  | 'stalled_downloading';
 
 export interface Torrent {
   /**
@@ -240,17 +243,38 @@ export enum TorrentState {
    * Torrent is being downloaded, but no connection were made
    */
   StalledDL = 'stalledDL',
+  /**
+   * Torrent is forced to downloading to ignore queue limit
+   */
   ForcedDL = 'forcedDL',
+  /**
+   * Torrent is forced to uploading and ignore queue limit
+   */
   ForcedUP = 'forcedUP',
   /**
    * Torrent has just started downloading and is fetching metadata
    */
   MetaDL = 'metaDL',
+  /**
+   * Torrent is allocating disk space for download
+   */
   Allocating = 'allocating',
   QueuedForChecking = 'queuedForChecking',
+  /**
+   * Checking resume data on qBt startup
+   */
   CheckingResumeData = 'checkingResumeData',
+  /**
+   * Torrent is moving to another location
+   */
   Moving = 'moving',
+  /**
+   * Unknown status
+   */
   Unknown = 'unknown',
+  /**
+   * Torrent data files is missing
+   */
   MissingFiles = 'missingFiles',
 }
 
