@@ -465,6 +465,13 @@ export class QBittorrent implements TorrentClient {
     }
 
     if (options) {
+      // if no savepath is provided, use auto tmm
+      if (options.savepath) {
+        options.useAutoTMM = false;
+      } else {
+        options.useAutoTMM = true;
+      }
+
       for (const key of Object.keys(options)) {
         form.append(key, options[key]);
       }
@@ -541,6 +548,13 @@ export class QBittorrent implements TorrentClient {
     form.append('urls', urls);
 
     if (options) {
+      // if no savepath is provided, use auto tmm
+      if (options.savepath) {
+        options.useAutoTMM = false;
+      } else {
+        options.useAutoTMM = true;
+      }
+
       for (const key of Object.keys(options)) {
         form.append(key, options[key]);
       }
