@@ -88,6 +88,26 @@ describe('QBittorrent', () => {
     expect(res.name).toBe(torrentName);
     await client.removeCategory('swag');
   });
+  it('should add torrent with savePath', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    const path = '/downloads/linux/';
+    await client.addTorrent(fs.readFileSync(torrentFile), {
+      savepath: path,
+      paused: 'true',
+    });
+    const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
+    expect(torrentData.savePath).toBe(path);
+  });
+  it('should add torrent with autoTMM enabled, ignoring savepath', async () => {
+    const client = new QBittorrent({ baseUrl, username, password });
+    await client.addTorrent(fs.readFileSync(torrentFile), {
+      savepath: '/downlods/linux',
+      useAutoTMM: 'true',
+      paused: 'true',
+    });
+    const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
+    expect(torrentData.savePath).toBe('/downloads/');
+  });
   it('should set torrent top priority', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
     const torrentId = await setupTorrent(client);

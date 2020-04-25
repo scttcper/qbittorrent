@@ -586,7 +586,7 @@ export interface AddTorrentOptions {
    */
   dlLimit: number;
   /**
-   * Whether Automatic Torrent Management should be used
+   * Whether Automatic Torrent Management should be used, disables use of savepath
    */
   useAutoTMM: TrueFalseStr;
   /**
@@ -631,7 +631,7 @@ export interface AddMagnetOptions {
    */
   dlLimit: number;
   /**
-   * Whether Automatic Torrent Management should be used
+   * Whether Automatic Torrent Management should be used, disables use of savepath
    */
   useAutoTMM: TrueFalseStr;
   /**
