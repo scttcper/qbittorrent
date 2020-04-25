@@ -588,7 +588,7 @@ export interface AddTorrentOptions {
   /**
    * Whether Automatic Torrent Management should be used
    */
-  useAutoTMM: boolean;
+  useAutoTMM: TrueFalseStr;
   /**
    * Enable sequential download. Possible values are true, false (default)
    */
@@ -633,7 +633,7 @@ export interface AddMagnetOptions {
   /**
    * Whether Automatic Torrent Management should be used
    */
-  useAutoTMM: boolean;
+  useAutoTMM: TrueFalseStr;
   /**
    * Enable sequential download. Possible values are true, false (default)
    */
