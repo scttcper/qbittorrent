@@ -759,7 +759,7 @@ export class QBittorrent implements TorrentClient {
         break;
     }
 
-    const isCompleted = torrent.progress >= 100;
+    const isCompleted = torrent.progress === 1;
 
     const result: NormalizedTorrentQbittorrent = {
       id: torrent.hash,
