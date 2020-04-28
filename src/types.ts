@@ -586,9 +586,9 @@ export interface AddTorrentOptions {
    */
   dlLimit: number;
   /**
-   * Whether Automatic Torrent Management should be used
+   * Whether Automatic Torrent Management should be used, disables use of savepath
    */
-  useAutoTMM: boolean;
+  useAutoTMM: TrueFalseStr;
   /**
    * Enable sequential download. Possible values are true, false (default)
    */
@@ -631,9 +631,9 @@ export interface AddMagnetOptions {
    */
   dlLimit: number;
   /**
-   * Whether Automatic Torrent Management should be used
+   * Whether Automatic Torrent Management should be used, disables use of savepath
    */
-  useAutoTMM: boolean;
+  useAutoTMM: TrueFalseStr;
   /**
    * Enable sequential download. Possible values are true, false (default)
    */
