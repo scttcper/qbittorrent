@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import FormData from 'form-data';
 import fs from 'fs';
 import got, { Options as GotOptions, Response } from 'got';

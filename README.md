@@ -1,4 +1,4 @@
-# qBittorrent [![npm](https://img.shields.io/npm/v/@ctrl/qbittorrent.svg?maxAge=3600)](https://www.npmjs.com/package/@ctrl/qbittorrent) [![CircleCI](https://circleci.com/gh/TypeCtrl/qbittorrent.svg?style=svg)](https://circleci.com/gh/TypeCtrl/qbittorrent) [![coverage status](https://codecov.io/gh/typectrl/qbittorrent/branch/master/graph/badge.svg)](https://codecov.io/gh/typectrl/qbittorrent)
+# qBittorrent [![npm](https://badgen.net/npm/v/@ctrl/qbittorrent)](https://www.npmjs.com/package/@ctrl/qbittorrent) [![CircleCI](https://badgen.net/circleci/github/scttcper/qbittorrent)](https://circleci.com/gh/scttcper/qbittorrent) [![coverage](https://badgen.net/codecov/c/github/scttcper/qbittorrent)](https://codecov.io/gh/scttcper/qbittorrent) [![bundlesize](https://badgen.net/bundlephobia/min/@ctrl/qbittorrent)](https://bundlephobia.com/result?p=@ctrl/qbittorrent)
 
 > TypeScript api wrapper for [qBittorrent](https://www.qbittorrent.org/) using [got](https://github.com/sindresorhus/got)
 
@@ -27,7 +27,7 @@ async function main() {
 
 ### API
 
-Docs: https://qbittorrent.netlify.app  
+Docs: https://qbittorrent.vercel.app  
 qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation  
 
 ### Normalized API
@@ -94,6 +94,6 @@ console.log(result);
 ### See Also
 All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client. 
 
-deluge - https://github.com/TypeCtrl/deluge  
-transmission - https://github.com/TypeCtrl/transmission  
-utorrent - https://github.com/TypeCtrl/utorrent  
+deluge - https://github.com/scttcper/deluge  
+transmission - https://github.com/scttcper/transmission  
+utorrent - https://github.com/scttcper/utorrent  

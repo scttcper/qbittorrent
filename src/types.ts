@@ -700,7 +700,7 @@ export interface Preferences {
   /**
    * Property: directory to watch for torrent files, value: where torrents loaded from this directory should be downloaded to (see list of possible values below). Slashes are used as path separators; multiple key/value pairs can be specified
    */
-  scan_dirs: object;
+  scan_dirs: Record<string, unknown>;
   /**
    * Path to directory to copy .torrent files to. Slashes are used as path separators
    */
