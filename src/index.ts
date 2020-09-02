@@ -133,6 +133,7 @@ export class QBittorrent implements TorrentClient {
    * @param category Get torrents with the given category (empty string means "without category"; no "category" parameter means "any category")
    * @returns list of torrents
    */
+  // eslint-disable-next-line max-params
   async listTorrents(
     hashes?: string | string[],
     filter?: TorrentFilters,
