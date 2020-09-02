@@ -31,7 +31,7 @@ Docs: https://qbittorrent.vercel.app
 qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation  
 
 ### Normalized API
-These functions have been normalized between torrent clients. Can easily support multiple torrent clients. See below for alternative supported torrent clients
+These functions have been normalized between torrent clients to easily support switching between multiple torrent clients. See [below](#see-also) for alternative supported torrent clients
 
 ##### getAllData
 Returns all torrent data and an array of label objects. Data has been normalized and does not match the output of native `listTorrents()`.
