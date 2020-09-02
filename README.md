@@ -28,12 +28,14 @@ async function main() {
 ### API
 
 Docs: https://qbittorrent.vercel.app  
-qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation  
+qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation
 
 ### Normalized API
+
 These functions have been normalized between torrent clients to easily support switching between multiple torrent clients. See [below](#see-also) for alternative supported torrent clients
 
 ##### getAllData
+
 Returns all torrent data and an array of label objects. Data has been normalized and does not match the output of native `listTorrents()`.
 
 ```ts
@@ -42,6 +44,7 @@ console.log(data.torrents);
 ```
 
 ##### getTorrent
+
 Returns one torrent data from torrent hash
 
 ```ts
@@ -50,6 +53,7 @@ console.log(data);
 ```
 
 ##### pauseTorrent and resumeTorrent
+
 Pause or resume a torrent
 
 ```ts
@@ -60,6 +64,7 @@ console.log(resumed);
 ```
 
 ##### removeTorrent
+
 Remove a torrent. Does not remove data on disk by default.
 
 ```ts
@@ -73,6 +78,7 @@ console.log(res);
 ```
 
 ##### addTorrent
+
 Add a torrent, has client specific options. Also see normalizedAddTorrent
 
 ```ts
@@ -81,6 +87,7 @@ console.log(result);
 ```
 
 ##### normalizedAddTorrent
+
 Add a torrent and return normalized torrent data, can start a torrent paused and add label
 
 ```ts
@@ -92,8 +99,9 @@ console.log(result);
 ```
 
 ### See Also
-All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client. 
+
+All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client.
 
 deluge - https://github.com/scttcper/deluge  
 transmission - https://github.com/scttcper/transmission  
-utorrent - https://github.com/scttcper/utorrent  
+utorrent - https://github.com/scttcper/utorrent
