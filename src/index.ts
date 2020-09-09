@@ -5,7 +5,7 @@ import { URLSearchParams } from 'url';
 import FormData from 'form-data';
 import got, { Options as GotOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
-import { urljoin } from '@ctrl/url-join';
+import { urlJoin } from '@ctrl/url-join';
 import { hash } from '@ctrl/torrent-file';
 import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
@@ -668,7 +668,7 @@ export class QBittorrent implements TorrentClient {
    * @link https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation#login
    */
   async login(): Promise<boolean> {
-    const url = urljoin(this.config.baseUrl, this.config.path, '/auth/login');
+    const url = urlJoin(this.config.baseUrl, this.config.path, '/auth/login');
     const form = new FormData();
     form.append('username', this.config.username);
     form.append('password', this.config.password);
@@ -716,7 +716,7 @@ export class QBittorrent implements TorrentClient {
       }
     }
 
-    const url = urljoin(this.config.baseUrl, this.config.path, path);
+    const url = urlJoin(this.config.baseUrl, this.config.path, path);
     const res = await got<T>(url, {
       isStream: false,
       resolveBodyOnly: false,
