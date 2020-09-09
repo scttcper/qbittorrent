@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import { existsSync, readFileSync } from 'fs';
+import { URLSearchParams } from 'url';
+
 import FormData from 'form-data';
-import fs from 'fs';
 import got, { Options as GotOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
-import { URLSearchParams } from 'url';
-import urljoin from 'url-join';
-
+import { urljoin } from '@ctrl/url-join';
+import { hash } from '@ctrl/torrent-file';
 import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
   Label,
@@ -13,7 +14,6 @@ import {
   TorrentSettings,
   TorrentState,
 } from '@ctrl/shared-torrent';
-import { hash } from '@ctrl/torrent-file';
 
 import {
   AddMagnetOptions,
@@ -472,8 +472,8 @@ export class QBittorrent implements TorrentClient {
     }
 
     if (typeof torrent === 'string') {
-      if (fs.existsSync(torrent)) {
-        form.append('file', Buffer.from(fs.readFileSync(torrent)), fileOptions);
+      if (existsSync(torrent)) {
+        form.append('file', Buffer.from(readFileSync(torrent)), fileOptions);
       } else {
         form.append('file', Buffer.from(torrent, 'base64'), fileOptions);
       }
