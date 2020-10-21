@@ -181,7 +181,7 @@ export class QBittorrent implements TorrentClient {
       torrents: [],
       labels: [],
     };
-    const labels: { [key: string]: Label } = {};
+    const labels: Record<string, Label> = {};
     for (const torrent of listTorrents) {
       const torrentData: NormalizedTorrentQbittorrent = this._normalizeTorrentData(torrent);
       results.torrents.push(torrentData);
@@ -694,7 +694,6 @@ export class QBittorrent implements TorrentClient {
     if (!cookie || cookie.key !== 'SID') {
       throw new Error('Invalid cookie');
     }
-
 
     this._sid = cookie.value;
     this._exp = cookie.expiryDate();
