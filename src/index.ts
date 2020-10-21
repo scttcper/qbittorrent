@@ -49,6 +49,10 @@ export class QBittorrent implements TorrentClient {
    * auth cookie
    */
   private _sid?: string;
+  /**
+   * cookie expiration
+   */
+  private _exp?: Date;
 
   constructor(options: Partial<TorrentSettings> = {}) {
     this.config = { ...defaults, ...options };
@@ -691,12 +695,15 @@ export class QBittorrent implements TorrentClient {
       throw new Error('Invalid cookie');
     }
 
+
     this._sid = cookie.value;
+    this._exp = cookie.expiryDate();
     return true;
   }
 
   logout(): boolean {
     this._sid = undefined;
+    this._exp = undefined;
     return true;
   }
 
@@ -709,7 +716,7 @@ export class QBittorrent implements TorrentClient {
     headers: any = {},
     json = true,
   ): Promise<Response<T>> {
-    if (!this._sid) {
+    if (!this._sid || !this._exp || this._exp.getTime() < new Date().getTime()) {
       const authed = await this.login();
       if (!authed) {
         throw new Error('Auth Failed');
