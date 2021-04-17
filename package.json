@@ -23,32 +23,32 @@
     "lint:fix": "eslint --fix --ext .js,.ts, .",
     "prepare": "npm run build",
     "build": "tsc -p tsconfig.build.json",
-    "build:docs": "typedoc --out docs --hideGenerator --target ES6 --mode file src",
+    "build:docs": "typedoc",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
     "test:ci": "jest --ci --reporters=default --reporters=jest-junit --runInBand --coverage"
   },
   "dependencies": {
     "@ctrl/shared-torrent": "^3.0.4",
-    "@ctrl/torrent-file": "^1.3.1",
-    "@ctrl/url-join": "^1.0.2",
-    "form-data": "^3.0.0",
-    "got": "^11.8.1",
+    "@ctrl/torrent-file": "^1.3.3",
+    "@ctrl/url-join": "^1.0.4",
+    "form-data": "^4.0.0",
+    "got": "^11.8.2",
     "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.12.1",
-    "@babel/preset-typescript": "7.12.7",
-    "@ctrl/eslint-config": "1.2.8",
+    "@babel/plugin-transform-modules-commonjs": "7.13.8",
+    "@babel/preset-typescript": "7.13.0",
+    "@ctrl/eslint-config": "1.3.4",
     "@jest/globals": "26.6.2",
     "@types/form-data": "2.5.0",
-    "@types/node": "14.14.13",
+    "@types/node": "14.14.41",
     "@types/tough-cookie": "4.0.0",
     "jest": "26.6.3",
     "jest-junit": "12.0.0",
-    "p-wait-for": "3.1.0",
-    "typedoc": "0.19.2",
-    "typescript": "4.1.3"
+    "p-wait-for": "3.2.0",
+    "typedoc": "0.20.35",
+    "typescript": "4.2.4"
   },
   "jest": {
     "testEnvironment": "node"
