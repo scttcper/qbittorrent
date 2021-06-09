@@ -116,7 +116,7 @@ describe('QBittorrent', () => {
     const res = await client.topPriority(torrentId);
     expect(res).toBe(true);
   });
-  it('should rename file within torrent', async () => {
+  it.skip('should rename file within torrent', async () => {
     const client = new QBittorrent({ baseUrl, username, password });
     const torrentId = await setupTorrent(client);
     await pWaitFor(
