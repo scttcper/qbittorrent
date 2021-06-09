@@ -1,4 +1,4 @@
-import { NormalizedTorrent, AllClientData } from '@ctrl/shared-torrent';
+import { AllClientData, NormalizedTorrent } from '@ctrl/shared-torrent';
 
 /**
  * refine the normalized torrent options for qbittorrent

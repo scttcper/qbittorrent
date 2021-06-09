@@ -5,8 +5,7 @@ import { URLSearchParams } from 'url';
 import FormData from 'form-data';
 import got, { Options as GotOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
-import { urlJoin } from '@ctrl/url-join';
-import { hash } from '@ctrl/torrent-file';
+
 import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
   Label,
@@ -14,6 +13,8 @@ import {
   TorrentSettings,
   TorrentState,
 } from '@ctrl/shared-torrent';
+import { hash } from '@ctrl/torrent-file';
+import { urlJoin } from '@ctrl/url-join';
 
 import {
   AddMagnetOptions,

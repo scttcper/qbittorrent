@@ -1,7 +1,8 @@
-import { describe, afterEach, expect, it } from '@jest/globals';
 import fs from 'fs';
-import pWaitFor from 'p-wait-for';
 import path from 'path';
+
+import { afterEach, describe, expect, it } from '@jest/globals';
+import pWaitFor from 'p-wait-for';
 
 import { QBittorrent } from '../src/index';
 
