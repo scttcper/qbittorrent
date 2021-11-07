@@ -11,7 +11,7 @@ import {
   Label,
   TorrentClient,
   TorrentSettings,
-  TorrentState,
+  TorrentState as NormalizedTorrentState,
 } from '@ctrl/shared-torrent';
 import { hash } from '@ctrl/torrent-file';
 import { urlJoin } from '@ctrl/url-join';
@@ -30,10 +30,13 @@ import {
   TorrentFilters,
   TorrentPieceState,
   TorrentProperties,
-  TorrentState as qbtState,
+  TorrentState,
   TorrentTrackers,
+  TorrentTrackerStatus,
   WebSeed,
 } from './types';
+
+export { TorrentState, TorrentTrackerStatus, TorrentFilePriority, TorrentPieceState };
 
 const defaults: TorrentSettings = {
   baseUrl: 'http://localhost:9091/',
@@ -757,41 +760,41 @@ export class QBittorrent implements TorrentClient {
   }
 
   private _normalizeTorrentData(torrent: Torrent): NormalizedTorrentQbittorrent {
-    let state = TorrentState.unknown;
+    let state = NormalizedTorrentState.unknown;
 
     switch (torrent.state) {
-      case qbtState.ForcedDL:
-      case qbtState.MetaDL:
-        state = TorrentState.downloading;
+      case TorrentState.ForcedDL:
+      case TorrentState.MetaDL:
+        state = NormalizedTorrentState.downloading;
         break;
-      case qbtState.Allocating:
+      case TorrentState.Allocating:
         // state = 'stalledDL';
-        state = TorrentState.queued;
+        state = NormalizedTorrentState.queued;
         break;
-      case qbtState.ForcedUP:
-        state = TorrentState.seeding;
+      case TorrentState.ForcedUP:
+        state = NormalizedTorrentState.seeding;
         break;
-      case qbtState.PausedDL:
-        state = TorrentState.paused;
+      case TorrentState.PausedDL:
+        state = NormalizedTorrentState.paused;
         break;
-      case qbtState.PausedUP:
+      case TorrentState.PausedUP:
         // state = 'completed';
-        state = TorrentState.paused;
+        state = NormalizedTorrentState.paused;
         break;
-      case qbtState.QueuedDL:
-      case qbtState.QueuedUP:
-        state = TorrentState.queued;
+      case TorrentState.QueuedDL:
+      case TorrentState.QueuedUP:
+        state = NormalizedTorrentState.queued;
         break;
-      case qbtState.CheckingDL:
-      case qbtState.CheckingUP:
-      case qbtState.QueuedForChecking:
-      case qbtState.CheckingResumeData:
-      case qbtState.Moving:
-        state = TorrentState.checking;
+      case TorrentState.CheckingDL:
+      case TorrentState.CheckingUP:
+      case TorrentState.QueuedForChecking:
+      case TorrentState.CheckingResumeData:
+      case TorrentState.Moving:
+        state = NormalizedTorrentState.checking;
         break;
-      case qbtState.Unknown:
-      case qbtState.MissingFiles:
-        state = TorrentState.error;
+      case TorrentState.Unknown:
+      case TorrentState.MissingFiles:
+        state = NormalizedTorrentState.error;
         break;
       default:
         break;
