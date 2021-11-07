@@ -4,13 +4,12 @@ orbs:
   codecov: codecov/codecov@3
 jobs:
   test:
-    executor:
-      name: node/default
-      tag: 'current'
     docker:
+      - image: cimg/base:stable
       - image: linuxserver/qbittorrent
     steps:
       - checkout
+      - node/install
       - node/install-packages
       - run:
           name: test
