@@ -149,6 +149,8 @@ export class QBittorrent implements TorrentClient {
     sort?: string,
     offset?: number,
     reverse?: boolean,
+    // TODO: refactor filters into an object with optional properties
+    tag?: string,
   ): Promise<Torrent[]> {
     const params: Record<string, string> = {};
     if (hashes) {
@@ -161,6 +163,10 @@ export class QBittorrent implements TorrentClient {
 
     if (category) {
       params.category = category;
+    }
+
+    if (tag) {
+      params.tag = tag;
     }
 
     if (offset !== undefined) {
