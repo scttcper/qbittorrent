@@ -7,10 +7,10 @@
   "repository": "scttcper/qbittorrent",
   "homepage": "https://qbittorrent.vercel.app",
   "type": "module",
-  "main": "./src/dist/index.js",
-  "typings": "./src/dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts",
   "files": [
-    "dist"
+    "dist/src"
   ],
   "sideEffects": false,
   "publishConfig": {
