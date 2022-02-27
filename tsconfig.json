@@ -1,16 +1,11 @@
 {
-  "compileOnSave": false,
+  "extends": "@sindresorhus/tsconfig",
   "compilerOptions": {
-    "moduleResolution": "node",
-    "lib": ["es2019"],
-    "target": "es2018",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "noFallthroughCasesInSwitch": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "declaration": true,
-    "sourceMap": false,
-    "outDir": "dist"
+    "outDir": "dist",
+    "strictNullChecks": false,
+    "noPropertyAccessFromIndexSignature": false
+  },
+  "ts-node": {
+    "transpileOnly": true
   }
 }

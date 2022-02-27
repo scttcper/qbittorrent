@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { URLSearchParams } from 'url';
 
-import FormData from 'form-data';
+import { File, FormData } from 'formdata-node';
+import { fileFromPath } from 'formdata-node/file-from-path';
 import got, { Options as GotOptions, Response } from 'got';
 import { Cookie } from 'tough-cookie';
 
+import { magnetDecode } from '@ctrl/magnet-link';
 import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
   Label,
@@ -34,7 +36,7 @@ import {
   TorrentTrackers,
   TorrentTrackerStatus,
   WebSeed,
-} from './types';
+} from './types.js';
 
 export { TorrentState, TorrentTrackerStatus, TorrentFilePriority, TorrentPieceState };
 
@@ -80,6 +82,7 @@ export class QBittorrent implements TorrentClient {
       undefined,
       undefined,
       undefined,
+      undefined,
       false,
     );
     return res.body;
@@ -89,6 +92,7 @@ export class QBittorrent implements TorrentClient {
     const res = await this.request<string>(
       '/app/webapiVersion',
       'GET',
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -106,7 +110,7 @@ export class QBittorrent implements TorrentClient {
   }
 
   async getTorrent(hash: string): Promise<NormalizedTorrentQbittorrent> {
-    const torrentsResponse = await this.listTorrents(hash);
+    const torrentsResponse = await this.listTorrents({ hashes: hash });
     const torrentData = torrentsResponse[0];
     if (!torrentData) {
       throw new Error('Torrent not found');
@@ -127,10 +131,9 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-application-preferences}
    */
   async setPreferences(preferences: Partial<Preferences>): Promise<boolean> {
-    const form = new FormData();
-    form.append('json', JSON.stringify(preferences));
-
-    await this.request('/app/setPreferences', 'POST', undefined, form);
+    await this.request('/app/setPreferences', 'POST', undefined, undefined, {
+      json: JSON.stringify(preferences),
+    });
     return true;
   }
 
@@ -141,17 +144,23 @@ export class QBittorrent implements TorrentClient {
    * @param category Get torrents with the given category (empty string means "without category"; no "category" parameter means "any category")
    * @returns list of torrents
    */
-  // eslint-disable-next-line max-params
-  async listTorrents(
-    hashes?: string | string[],
-    filter?: TorrentFilters,
-    category?: string,
-    sort?: string,
-    offset?: number,
-    reverse?: boolean,
-    // TODO: refactor filters into an object with optional properties
-    tag?: string,
-  ): Promise<Torrent[]> {
+  async listTorrents({
+    hashes,
+    filter,
+    category,
+    sort,
+    offset,
+    reverse,
+    tag,
+  }: {
+    hashes?: string | string[];
+    filter?: TorrentFilters;
+    sort?: string;
+    tag?: string;
+    category?: string;
+    offset?: number;
+    reverse?: boolean;
+  } = {}): Promise<Torrent[]> {
     const params: Record<string, string> = {};
     if (hashes) {
       params.hashes = this._normalizeHashes(hashes);
@@ -277,11 +286,10 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-location}
    */
   async setTorrentLocation(hashes: string | string[] | 'all', location: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('location', location);
-    form.append('hashes', this._normalizeHashes(hashes));
-
-    await this.request('/torrents/setLocation', 'POST', undefined, form);
+    await this.request('/torrents/setLocation', 'POST', undefined, undefined, {
+      location,
+      hashes: this._normalizeHashes(hashes),
+    });
     return true;
   }
 
@@ -289,11 +297,10 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-name}
    */
   async setTorrentName(hash: string, name: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('hash', hash);
-    form.append('name', name);
-
-    await this.request('/torrents/rename', 'POST', undefined, form);
+    await this.request('/torrents/rename', 'POST', undefined, undefined, {
+      hash,
+      name,
+    });
     return true;
   }
 
@@ -310,9 +317,17 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#create-tags}
    */
   async createTags(tags: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('tags', tags);
-    await this.request('/torrents/createTags', 'POST', undefined, form, undefined, false);
+    await this.request(
+      '/torrents/createTags',
+      'POST',
+      undefined,
+      undefined,
+      {
+        tags,
+      },
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -321,9 +336,15 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#delete-tags}
    */
   async deleteTags(tags: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('tags', tags);
-    await this.request('/torrents/deleteTags', 'POST', undefined, form, undefined, false);
+    await this.request(
+      '/torrents/deleteTags',
+      'POST',
+      undefined,
+      undefined,
+      { tags },
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -339,11 +360,18 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#add-new-category}
    */
   async createCategory(category: string, savePath = ''): Promise<boolean> {
-    const form = new FormData();
-    form.append('category', category);
-    form.append('savePath', savePath);
-
-    await this.request('/torrents/createCategory', 'POST', undefined, form);
+    await this.request(
+      '/torrents/createCategory',
+      'POST',
+      undefined,
+      undefined,
+      {
+        category,
+        savePath,
+      },
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -351,11 +379,18 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#edit-category}
    */
   async editCategory(category: string, savePath = ''): Promise<boolean> {
-    const form = new FormData();
-    form.append('category', category);
-    form.append('savePath', savePath);
-
-    await this.request('/torrents/editCategory', 'POST', undefined, form, undefined, false);
+    await this.request(
+      '/torrents/editCategory',
+      'POST',
+      undefined,
+      undefined,
+      {
+        category,
+        savePath,
+      },
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -363,9 +398,17 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#remove-categories}
    */
   async removeCategory(categories: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('categories', categories);
-    await this.request('/torrents/removeCategories', 'POST', undefined, form, undefined, false);
+    await this.request(
+      '/torrents/removeCategories',
+      'POST',
+      undefined,
+      undefined,
+      {
+        categories,
+      },
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -373,10 +416,18 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#add-torrent-tags}
    */
   async addTorrentTags(hashes: string | string[] | 'all', tags: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('hashes', this._normalizeHashes(hashes));
-    form.append('tags', tags);
-    await this.request('/torrents/addTags', 'POST', undefined, form, undefined, false);
+    await this.request(
+      '/torrents/addTags',
+      'POST',
+      undefined,
+      undefined,
+      {
+        hashes: this._normalizeHashes(hashes),
+        tags,
+      },
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -385,13 +436,20 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#remove-torrent-tags}
    */
   async removeTorrentTags(hashes: string | string[] | 'all', tags?: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('hashes', this._normalizeHashes(hashes));
+    const form: Record<string, string> = { hashes: this._normalizeHashes(hashes) };
     if (tags) {
-      form.append('tags', tags);
+      form.tags = tags;
     }
 
-    await this.request('/torrents/removeTags', 'POST', undefined, form, undefined, false);
+    await this.request(
+      '/torrents/removeTags',
+      'POST',
+      undefined,
+      undefined,
+      form,
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -406,11 +464,10 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-category}
    */
   async setTorrentCategory(hashes: string | string[] | 'all', category = ''): Promise<boolean> {
-    const form = new FormData();
-    form.append('hashes', this._normalizeHashes(hashes));
-    form.append('category', category);
-
-    await this.request('/torrents/setCategory', 'POST', undefined, form);
+    await this.request('/torrents/setCategory', 'POST', undefined, undefined, {
+      hashes: this._normalizeHashes(hashes),
+      category,
+    });
     return true;
   }
 
@@ -475,24 +532,28 @@ export class QBittorrent implements TorrentClient {
     options: Partial<AddTorrentOptions> = {},
   ): Promise<boolean> {
     const form = new FormData();
-    const fileOptions: FormData.AppendOptions = {
-      contentType: 'application/x-bittorrent',
-      filename: options.filename ?? 'torrent',
-    };
 
     // remove options.filename, not used in form
     if (options.filename) {
       delete options.filename;
     }
 
+    const type = { type: 'application/x-bittorrent' };
     if (typeof torrent === 'string') {
       if (existsSync(torrent)) {
-        form.append('file', Buffer.from(readFileSync(torrent)), fileOptions);
+        const file = await fileFromPath(torrent, options.filename ?? 'torrent', type);
+        form.set('file', file);
       } else {
-        form.append('file', Buffer.from(torrent, 'base64'), fileOptions);
+        const file = new File(
+          [Buffer.from(torrent, 'base64').toString('utf-8')],
+          options.filename ?? 'torrent',
+          type,
+        );
+        form.set('file', file);
       }
     } else {
-      form.append('file', torrent, fileOptions);
+      const file = new File([torrent], options.filename ?? 'torrent', type);
+      form.set('file', file);
     }
 
     if (options) {
@@ -513,7 +574,8 @@ export class QBittorrent implements TorrentClient {
       'POST',
       undefined,
       form,
-      form.getHeaders(),
+      undefined,
+      undefined,
       false,
     );
 
@@ -538,12 +600,19 @@ export class QBittorrent implements TorrentClient {
       torrentOptions.category = options.label;
     }
 
-    if (!Buffer.isBuffer(torrent)) {
-      torrent = Buffer.from(torrent);
+    let torrentHash: string;
+    if (typeof torrent === 'string' && torrent.startsWith('magnet:')) {
+      torrentHash = magnetDecode(torrent).infoHash;
+      await this.addMagnet(torrent, torrentOptions);
+    } else {
+      if (!Buffer.isBuffer(torrent)) {
+        torrent = Buffer.from(torrent);
+      }
+
+      torrentHash = await hash(torrent);
+      await this.addTorrent(torrent, torrentOptions);
     }
 
-    const torrentHash = await hash(torrent);
-    await this.addTorrent(torrent, torrentOptions);
     return this.getTorrent(torrentHash);
   }
 
@@ -558,14 +627,7 @@ export class QBittorrent implements TorrentClient {
     form.append('id', id);
     form.append('name', name);
 
-    await this.request<string>(
-      '/torrents/renameFile',
-      'POST',
-      undefined,
-      form,
-      form.getHeaders(),
-      false,
-    );
+    await this.request<string>('/torrents/renameFile', 'POST', undefined, form, undefined, false);
 
     return true;
   }
@@ -596,7 +658,8 @@ export class QBittorrent implements TorrentClient {
       'POST',
       undefined,
       form,
-      form.getHeaders(),
+      undefined,
+      undefined,
       false,
     );
 
@@ -683,19 +746,21 @@ export class QBittorrent implements TorrentClient {
    */
   async login(): Promise<boolean> {
     const url = urlJoin(this.config.baseUrl, this.config.path, '/auth/login');
-    const form = new FormData();
-    form.append('username', this.config.username);
-    form.append('password', this.config.password);
 
-    const res = await got.post(url, {
-      isStream: false as any,
-      body: form,
+    const res = await got({
+      url,
+      method: 'POST',
+      form: {
+        username: this.config.username ?? '',
+        password: this.config.password ?? '',
+      },
       followRedirect: false,
-      retry: 0,
+      retry: { limit: 0 },
+      timeout: { request: this.config.timeout },
       // allow proxy agent
-      agent: this.config.agent,
-      timeout: this.config.timeout,
+      ...(this.config.agent ? { agent: this.config.agent } : {}),
     });
+
     if (!res.headers['set-cookie'] || !res.headers['set-cookie'].length) {
       throw new Error('Cookie not found. Auth Failed.');
     }
@@ -722,6 +787,7 @@ export class QBittorrent implements TorrentClient {
     method: GotOptions['method'],
     params: any = {},
     body?: GotOptions['body'],
+    form?: GotOptions['form'],
     headers: any = {},
     json = true,
   ): Promise<Response<T>> {
@@ -741,13 +807,14 @@ export class QBittorrent implements TorrentClient {
         Cookie: `SID=${this._sid ?? ''}`,
         ...headers,
       },
-      retry: 0,
+      retry: { limit: 0 },
       body,
+      form,
       searchParams: new URLSearchParams(params),
       // allow proxy agent
-      agent: this.config.agent,
-      timeout: this.config.timeout,
+      timeout: { request: this.config.timeout },
       responseType: json ? 'json' : ('text' as 'json'),
+      ...(this.config.agent ? { agent: this.config.agent } : {}),
     });
 
     return res;

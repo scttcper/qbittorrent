@@ -195,7 +195,7 @@ export interface Torrent {
 export type Categories = Record<string, Category>;
 export interface Category {
   name: string;
-  savePath: string;
+  save_path: string;
 }
 
 export enum TorrentState {
