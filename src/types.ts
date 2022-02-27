@@ -1,16 +1,3 @@
-import { AllClientData, NormalizedTorrent } from '@ctrl/shared-torrent';
-
-/**
- * refine the normalized torrent options for qbittorrent
- */
-export interface NormalizedTorrentQbittorrent extends NormalizedTorrent {
-  id: string;
-}
-
-export interface AllClientDataQbittorrent extends AllClientData {
-  torrents: NormalizedTorrentQbittorrent[];
-}
-
 export interface BuildInfo {
   /**
    * 	QT version
@@ -192,8 +179,8 @@ export interface Torrent {
   category: string;
 }
 
-export type Categories = Record<string, Category>;
-export interface Category {
+export type TorrentCategories = Record<string, Category>;
+interface Category {
   name: string;
   savePath: string;
 }

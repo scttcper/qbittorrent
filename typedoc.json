@@ -1,6 +1,6 @@
 {
-  "entryPoints": ["src/index.ts"],
-  "tsconfig": "tsconfig.build.json",
+  "entryPoints": ["src"],
+  "tsconfig": "tsconfig.json",
   "out": "docs",
   "excludePrivate": true,
   "excludeProtected": true,
