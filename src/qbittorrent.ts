@@ -10,7 +10,9 @@ import { Cookie } from 'tough-cookie';
 import { magnetDecode } from '@ctrl/magnet-link';
 import {
   AddTorrentOptions as NormalizedAddTorrentOptions,
+  AllClientData,
   Label,
+  NormalizedTorrent,
   TorrentClient,
   TorrentSettings,
   TorrentState as NormalizedTorrentState,
@@ -21,12 +23,10 @@ import { urlJoin } from '@ctrl/url-join';
 import {
   AddMagnetOptions,
   AddTorrentOptions,
-  AllClientDataQbittorrent,
   BuildInfo,
-  Categories,
-  NormalizedTorrentQbittorrent,
   Preferences,
   Torrent,
+  TorrentCategories,
   TorrentFile,
   TorrentFilePriority,
   TorrentFilters,
@@ -34,11 +34,8 @@ import {
   TorrentProperties,
   TorrentState,
   TorrentTrackers,
-  TorrentTrackerStatus,
   WebSeed,
 } from './types.js';
-
-export { TorrentState, TorrentTrackerStatus, TorrentFilePriority, TorrentPieceState };
 
 const defaults: TorrentSettings = {
   baseUrl: 'http://localhost:9091/',
@@ -109,7 +106,7 @@ export class QBittorrent implements TorrentClient {
     return res.body;
   }
 
-  async getTorrent(hash: string): Promise<NormalizedTorrentQbittorrent> {
+  async getTorrent(hash: string): Promise<NormalizedTorrent> {
     const torrentsResponse = await this.listTorrents({ hashes: hash });
     const torrentData = torrentsResponse[0];
     if (!torrentData) {
@@ -194,15 +191,15 @@ export class QBittorrent implements TorrentClient {
     return res.body;
   }
 
-  async getAllData(): Promise<AllClientDataQbittorrent> {
+  async getAllData(): Promise<AllClientData> {
     const listTorrents = await this.listTorrents();
-    const results: AllClientDataQbittorrent = {
+    const results: AllClientData = {
       torrents: [],
       labels: [],
     };
     const labels: Record<string, Label> = {};
     for (const torrent of listTorrents) {
-      const torrentData: NormalizedTorrentQbittorrent = this._normalizeTorrentData(torrent);
+      const torrentData: NormalizedTorrent = this._normalizeTorrentData(torrent);
       results.torrents.push(torrentData);
 
       // setup label
@@ -351,8 +348,8 @@ export class QBittorrent implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-all-categories}
    */
-  async getCategories(): Promise<Categories> {
-    const res = await this.request<Categories>('/torrents/categories', 'get');
+  async getCategories(): Promise<TorrentCategories> {
+    const res = await this.request<TorrentCategories>('/torrents/categories', 'get');
     return res.body;
   }
 
@@ -589,7 +586,7 @@ export class QBittorrent implements TorrentClient {
   async normalizedAddTorrent(
     torrent: string | Buffer,
     options: Partial<NormalizedAddTorrentOptions> = {},
-  ): Promise<NormalizedTorrentQbittorrent> {
+  ): Promise<NormalizedTorrent> {
     const torrentOptions: Partial<AddTorrentOptions> = {};
 
     if (options.startPaused) {
@@ -832,7 +829,7 @@ export class QBittorrent implements TorrentClient {
     return hashes;
   }
 
-  private _normalizeTorrentData(torrent: Torrent): NormalizedTorrentQbittorrent {
+  private _normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     let state = NormalizedTorrentState.unknown;
 
     switch (torrent.state) {
@@ -875,7 +872,7 @@ export class QBittorrent implements TorrentClient {
 
     const isCompleted = torrent.progress === 1;
 
-    const result: NormalizedTorrentQbittorrent = {
+    const result: NormalizedTorrent = {
       id: torrent.hash,
       name: torrent.name,
       stateMessage: '',
