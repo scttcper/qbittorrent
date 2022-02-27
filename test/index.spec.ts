@@ -282,10 +282,10 @@ test.serial('should get / create / edit / remove category', async t => {
   t.is(categories.movie, undefined);
   await client.createCategory('movie', '/data');
   categories = await client.getCategories();
-  t.deepEqual(categories.movie, { name: 'movie', save_path: '/data' });
+  t.deepEqual(categories.movie, { name: 'movie', savePath: '/data' });
   await client.editCategory('movie', '/swag');
   categories = await client.getCategories();
-  t.deepEqual(categories.movie, { name: 'movie', save_path: '/swag' });
+  t.deepEqual(categories.movie, { name: 'movie', savePath: '/swag' });
   await client.removeCategory('movie');
   categories = await client.getCategories();
   t.is(categories.movie, undefined);
@@ -316,12 +316,14 @@ test.serial('should set categories to torrent', async t => {
 test.serial('should get application version', async t => {
   const client = new QBittorrent({ baseUrl, username, password });
   const version = await client.getAppVersion();
+  console.log('App version', version);
   t.truthy(version);
   t.assert(typeof version === 'string');
 });
 test.serial('should get api version', async t => {
   const client = new QBittorrent({ baseUrl, username, password });
   const version = await client.getApiVersion();
+  console.log('API version', version);
   t.truthy(version);
   t.assert(typeof version === 'string');
 });
