@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@ctrl/magnet-link": "^3.1.0",
-    "@ctrl/shared-torrent": "^4.0.0",
+    "@ctrl/shared-torrent": "^4.1.0",
     "@ctrl/torrent-file": "^2.0.1",
     "@ctrl/url-join": "^2.0.0",
     "formdata-node": "^4.3.2",
