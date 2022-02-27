@@ -541,12 +541,7 @@ export class QBittorrent implements TorrentClient {
         const file = await fileFromPath(torrent, options.filename ?? 'torrent', type);
         form.set('file', file);
       } else {
-        const file = new File(
-          [Buffer.from(torrent, 'base64').toString('utf-8')],
-          options.filename ?? 'torrent',
-          type,
-        );
-        form.set('file', file);
+        form.set('file', new File([Buffer.from(torrent, 'base64')], 'file.torrent', type));
       }
     } else {
       const file = new File([torrent], options.filename ?? 'torrent', type);
@@ -597,9 +592,13 @@ export class QBittorrent implements TorrentClient {
       torrentOptions.category = options.label;
     }
 
-    let torrentHash: string;
+    let torrentHash: string | undefined;
     if (typeof torrent === 'string' && torrent.startsWith('magnet:')) {
       torrentHash = magnetDecode(torrent).infoHash;
+      if (!torrentHash) {
+        throw new Error('Magnet did not contain hash');
+      }
+
       await this.addMagnet(torrent, torrentOptions);
     } else {
       if (!Buffer.isBuffer(torrent)) {

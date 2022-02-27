@@ -57,6 +57,13 @@ test.serial('should logout', async t => {
   const res = await client.login();
   t.is(res, true);
 });
+test.serial('should add torrent from string', async t => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const res = await client.addTorrent(fs.readFileSync(torrentFile).toString('base64'));
+  t.is(res, true);
+  const torrents = await client.listTorrents();
+  t.is(torrents.length, 1);
+});
 test.serial('should add torrent from buffer', async t => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile));
