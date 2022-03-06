@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  node: circleci/node@4
+  node: circleci/node@5
   codecov: codecov/codecov@3
 jobs:
   test:
@@ -9,7 +9,8 @@ jobs:
       - image: linuxserver/qbittorrent
     steps:
       - checkout
-      - node/install
+      - node/install:
+          node-version: '16'
       - node/install-packages
       - run:
           name: test
@@ -21,7 +22,7 @@ jobs:
   release:
     executor:
       name: node/default
-      tag: 'current'
+      tag: '16'
     steps:
       - checkout
       - node/install-packages
