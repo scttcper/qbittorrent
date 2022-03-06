@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout
       - node/install:
-          node-version: '16'
+          node-version: 'lts'
       - node/install-packages
       - run:
           name: test
@@ -22,7 +22,7 @@ jobs:
   release:
     executor:
       name: node/default
-      tag: '16'
+      tag: 'lts'
     steps:
       - checkout
       - node/install-packages
