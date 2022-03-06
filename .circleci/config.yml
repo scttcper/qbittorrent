@@ -9,8 +9,7 @@ jobs:
       - image: linuxserver/qbittorrent
     steps:
       - checkout
-      - node/install:
-          node-version: 'lts'
+      - node/install
       - node/install-packages
       - run:
           name: test
@@ -22,7 +21,7 @@ jobs:
   release:
     executor:
       name: node/default
-      tag: 'lts'
+      tag: 'default'
     steps:
       - checkout
       - node/install-packages
