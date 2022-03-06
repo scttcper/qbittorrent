@@ -21,7 +21,7 @@ jobs:
   release:
     executor:
       name: node/default
-      tag: 'default'
+      tag: 'current'
     steps:
       - checkout
       - node/install-packages
