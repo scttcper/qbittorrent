@@ -1,22 +1,22 @@
 export interface BuildInfo {
   /**
-   * 	QT version
+   * QT version
    */
   qt: string;
   /**
-   * 	libtorrent version
+   * libtorrent version
    */
   libtorrent: string;
   /**
-   * 	Boost version
+   * Boost version
    */
   boost: string;
   /**
-   * 	OpenSSL version
+   * OpenSSL version
    */
   openssl: string;
   /**
-   * 	Application bitness (e.g. 64-bit)
+   * Application bitness (e.g. 64-bit)
    */
   bitness: string;
 }
@@ -573,6 +573,14 @@ export interface AddTorrentOptions {
    */
   dlLimit: number;
   /**
+   * Set torrent share ratio limit
+   */
+  ratioLimit: number;
+  /**
+   * Set torrent seeding time limit. Unit in seconds
+   */
+  seedingTimeLimit: number;
+  /**
    * Whether Automatic Torrent Management should be used, disables use of savepath
    */
   useAutoTMM: TrueFalseStr;
@@ -823,11 +831,14 @@ export interface Preferences {
   /**
    * True if the advanced libtorrent option piece_extent_affinity is enabled
    */
-  piece_extent_affinity: boolean;
+  enable_piece_extent_affinity: boolean;
   /**
-   * True if uTP protocol should be enabled; this option is only available in qBittorent built against libtorrent version 0.16.X and higher
+   * Bittorrent Protocol to use
+   * 0	TCP and μTP
+   * 1	TCP
+   * 2	μTP
    */
-  enable_utp: boolean;
+  bittorrent_protocol: 0 | 1 | 2;
   /**
    * True if [du]l_limit should be applied to uTP connections; this option is only available in qBittorent built against libtorrent version 0.16.X and higher
    */
@@ -877,14 +888,6 @@ export interface Preferences {
    */
   dht: boolean;
   /**
-   * True if DHT port should match TCP port
-   */
-  dhtSameAsBT: boolean;
-  /**
-   * DHT port if dhtSameAsBT is false
-   */
-  dht_port: number;
-  /**
    * True if PeX is enabled
    */
   pex: boolean;
@@ -894,10 +897,13 @@ export interface Preferences {
   lsd: boolean;
   /**
    * See list of possible values here below
+   * 0	Prefer encryption
+   * 1	Force encryption on
+   * 2	Force encryption off
    */
-  encryption: number;
+  encryption: 0 | 1 | 2;
   /**
-   * If true anonymous mode will be enabled; read more [here](Anonymous-Mode); this option is only available in qBittorent built against libtorrent version 0.16.X and higher
+   * If true anonymous mode will be enabled; read more [here](https://github.com/qbittorrent/qBittorrent/wiki/Anonymous-Mode); this option is only available in qBittorent built against libtorrent version 0.16.X and higher
    */
   anonymous_mode: boolean;
   /**
@@ -917,10 +923,6 @@ export interface Preferences {
    */
   proxy_peer_connections: boolean;
   /**
-   * True if the connections not supported by the proxy are disabled
-   */
-  force_proxy: boolean;
-  /**
    * True proxy requires authentication; doesn't apply to SOCKS4 proxies
    */
   proxy_auth_enabled: boolean;
@@ -932,6 +934,10 @@ export interface Preferences {
    * Password for proxy authentication
    */
   proxy_password: string;
+  /**
+   * True if proxy is only used for torrents
+   */
+  proxy_torrents_only: boolean;
   /**
    * True if external IP filter should be enabled
    */
@@ -989,6 +995,14 @@ export interface Preferences {
    */
   web_ui_ban_duration: number;
   /**
+   * Seconds until WebUI is automatically signed off
+   */
+  web_ui_session_timeout: number;
+  /**
+   * True if WebUI host header validation is enabled
+   */
+  web_ui_host_header_validation_enabled: boolean;
+  /**
    * True if authentication challenge for loopback address (127.0.0.1) should be disabled
    */
   bypass_local_auth: boolean;
@@ -1020,6 +1034,14 @@ export interface Preferences {
    * SSL certificate contents (this is a not a path)
    */
   ssl_cert: string;
+  /**
+   * For API ≥ v2.0.1: Path to SSL keyfile
+   */
+  web_ui_https_key_path: string;
+  /**
+   * For API ≥ v2.0.1: Path to SSL certificate
+   */
+  web_ui_https_cert_path: string;
   /**
    * True if server DNS should be updated dynamically
    */
@@ -1056,4 +1078,156 @@ export interface Preferences {
    * Enable auto-downloading of torrents from the RSS feeds
    */
   rss_auto_downloading_enabled: boolean;
+  /**
+   * For API ≥ v2.5.1: Enable downloading of repack/proper Episodes
+   */
+  rss_download_repack_proper_episodes: boolean;
+  /**
+   * For API ≥ v2.5.1: List of RSS Smart Episode Filters
+   */
+  rss_smart_episode_filters: string;
+  /**
+   * Enable automatic adding of trackers to new torrents
+   */
+  add_trackers_enabled: boolean;
+  /**
+   * List of trackers to add to new torrent
+   */
+  add_trackers: string;
+  /**
+   * For API ≥ v2.5.1: Enable custom http headers
+   */
+  web_ui_use_custom_http_headers_enabled: boolean;
+  /**
+   * For API ≥ v2.5.1: List of custom http headers
+   */
+  web_ui_custom_http_headers: string;
+  /**
+   * True enables max seeding time
+   */
+  max_seeding_time_enabled: boolean;
+  /**
+   * Number of minutes to seed a torrent
+   */
+  max_seeding_time: number;
+  /**
+   * TODO
+   */
+  announce_ip: string;
+  /**
+   * True always announce to all tiers
+   */
+  announce_to_all_tiers: boolean;
+  /**
+   * True always announce to all trackers in a tier
+   */
+  announce_to_all_trackers: boolean;
+  /**
+   * Number of asynchronous I/O threads
+   */
+  async_io_threads: number;
+  /**
+   * List of banned IPs
+   */
+  banned_IPs: string;
+  /**
+   * Outstanding memory when checking torrents in MiB
+   */
+  checking_memory_use: number;
+  /**
+   * IP Address to bind to. Empty String means All addresses
+   */
+  current_interface_address: string;
+  /**
+   * Network Interface used
+   */
+  current_network_interface: string;
+  /**
+   * Disk cache used in MiB
+   */
+  disk_cache: number;
+  /**
+   * Disk cache expiry interval in seconds
+   */
+  disk_cache_ttl: number;
+  /**
+   * Port used for embedded tracker
+   */
+  embedded_tracker_port: number;
+  /**
+   * True enables coalesce reads & writes
+   */
+  enable_coalesce_read_write: boolean;
+  /**
+   * True enables embedded tracker
+   */
+  enable_embedded_tracker: boolean;
+  /**
+   * True allows multiple connections from the same IP address
+   */
+  enable_multi_connections_from_same_ip: boolean;
+  /**
+   * True enables os cache
+   */
+  enable_os_cache: boolean;
+  /**
+   * True enables sending of upload piece suggestions
+   */
+  enable_upload_suggestions: boolean;
+  /**
+   * File pool size
+   */
+  file_pool_size: number;
+  /**
+   * Maximal outgoing port (0: Disabled)
+   */
+  outgoing_ports_max: number;
+  /**
+   * Minimal outgoing port (0: Disabled)
+   */
+  outgoing_ports_min: number;
+  /**
+   * True rechecks torrents on completion
+   */
+  recheck_completed_torrents: boolean;
+  /**
+   * True resolves peer countries
+   */
+  resolve_peer_countries: boolean;
+  /**
+   * Save resume data interval in min
+   */
+  save_resume_data_interval: number;
+  /**
+   * Send buffer low watermark in KiB
+   */
+  send_buffer_low_watermark: number;
+  /**
+   * Send buffer watermark in KiB
+   */
+  send_buffer_watermark: number;
+  /**
+   * Send buffer watermark factor in percent
+   */
+  send_buffer_watermark_factor: number;
+  /**
+   * Socket backlog size
+   */
+  socket_backlog_size: number;
+  /**
+   * Upload choking algorithm used (see list of possible values below)
+   */
+  upload_choking_algorithm: number;
+  /**
+   * Upload slots behavior used (see list of possible values below)
+   */
+  upload_slots_behavior: number;
+  /**
+   * UPnP lease duration (0: Permanent lease)
+   */
+  upnp_lease_duration: number;
+  /**
+   * μTP-TCP mixed mode algorithm (see list of possible values below)
+   */
+  utp_tcp_mixed_mode: number;
 }
