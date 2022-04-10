@@ -693,9 +693,13 @@ export interface Preferences {
    */
   temp_path: string;
   /**
-   * Property: directory to watch for torrent files, value: where torrents loaded from this directory should be downloaded to (see list of possible values below). Slashes are used as path separators; multiple key/value pairs can be specified
+   * Directory to watch for torrent files, value: where torrents loaded from this directory should be downloaded to (see list of possible values below). Slashes are used as path separators; multiple key/value pairs can be specified
+   * Possible values of scan_dirs:
+   * 0	Download to the monitored folder
+   * 1	Download to the default save path
+   * "/path/to/download/to"	Download to this path
    */
-  scan_dirs: Record<string, unknown>;
+  scan_dirs: Record<string, 0 | 1 | string>;
   /**
    * Path to directory to copy .torrent files to. Slashes are used as path separators
    */
@@ -881,8 +885,18 @@ export interface Preferences {
   schedule_to_min: number;
   /**
    * Scheduler days. See possible values here below
+   * 0	Every day
+   * 1	Every weekday
+   * 2	Every weekend
+   * 3	Every Monday
+   * 4	Every Tuesday
+   * 5	Every Wednesday
+   * 6	Every Thursday
+   * 7	Every Friday
+   * 8	Every Saturday
+   * 9	Every Sunday
    */
-  scheduler_days: number;
+  scheduler_days: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   /**
    * True if DHT is enabled
    */
