@@ -36,21 +36,21 @@
     "@ctrl/torrent-file": "^2.0.1",
     "@ctrl/url-join": "^2.0.0",
     "formdata-node": "^4.3.2",
-    "got": "^12.0.3",
+    "got": "^12.0.4",
     "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
-    "@ctrl/eslint-config": "3.4.1",
+    "@ctrl/eslint-config": "3.4.2",
     "@sindresorhus/tsconfig": "2.0.0",
-    "@types/node": "17.0.23",
-    "@types/tough-cookie": "4.0.1",
+    "@types/node": "17.0.31",
+    "@types/tough-cookie": "4.0.2",
     "ava": "4.2.0",
-    "c8": "7.11.0",
+    "c8": "7.11.2",
     "p-wait-for": "4.1.0",
     "tap-junit": "5.0.2",
     "ts-node": "10.7.0",
     "typedoc": "0.22.15",
-    "typescript": "4.6.3"
+    "typescript": "4.6.4"
   },
   "ava": {
     "files": [
