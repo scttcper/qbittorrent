@@ -557,9 +557,10 @@ export interface AddTorrentOptions {
    */
   paused: TrueFalseStr;
   /**
-   * Create the root folder. Possible values are true, false, unset (default)
+   * Control filesystem structure for content (added in Web API v2.7)
+   * Migrating from rootFolder example rootFolder ? 'Original' :  'NoSubfolder'
    */
-  root_folder: TrueFalseStr;
+  contentLayout: 'Original' | 'Subfolder' | 'NoSubfolder';
   /**
    * Rename torrent
    */
