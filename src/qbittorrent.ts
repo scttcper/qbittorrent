@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 /* eslint-disable @typescript-eslint/ban-types */
 import { existsSync } from 'fs';
 import { URLSearchParams } from 'url';
