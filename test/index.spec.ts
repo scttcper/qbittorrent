@@ -113,7 +113,7 @@ it('should add torrent with autoTMM enabled, ignoring savepath', async () => {
     paused: 'true',
   });
   const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
-  t.is(torrentData.savePath, '/downloads/');
+  expect(torrentData.savePath).toBe('/downloads/');
 });
 it('should set torrent priority', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
