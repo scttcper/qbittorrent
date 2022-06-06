@@ -2,8 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import test from 'ava';
 import pWaitFor from 'p-wait-for';
+import { afterEach, expect, it } from 'vitest';
 
 import { QBittorrent } from '../src/index.js';
 
@@ -33,7 +33,7 @@ async function setupTorrent(client: QBittorrent): Promise<string> {
   return torrents[0].hash;
 }
 
-test.serial.afterEach(async () => {
+afterEach(async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrents = await client.listTorrents();
   for (const torrent of torrents) {
@@ -42,64 +42,60 @@ test.serial.afterEach(async () => {
   }
 });
 
-test.serial('should be instantiable', t => {
-  const client = new QBittorrent({ baseUrl, username, password });
-  t.truthy(client);
-});
-test.serial('should login', async t => {
+it('should login', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.login();
-  t.is(res, true);
+  expect(res).toBe(true);
 });
-test.serial('should logout', async t => {
+it('should logout', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   await client.login();
   const res = await client.login();
-  t.is(res, true);
+  expect(res).toBe(true);
 });
-test.serial('should add torrent from string', async t => {
+it('should add torrent from string', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile).toString('base64'));
-  t.is(res, true);
+  expect(res).toBe(true);
   const torrents = await client.listTorrents();
-  t.is(torrents.length, 1);
+  expect(torrents.length).toBe(1);
 });
-test.serial('should add torrent from buffer', async t => {
+it('should add torrent from buffer', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile));
-  t.is(res, true);
+  expect(res).toBe(true);
   const torrents = await client.listTorrents();
-  t.is(torrents.length, 1);
+  expect(torrents.length).toBe(1);
 });
-test.serial('should add torrent from filename', async t => {
+it('should add torrent from filename', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(torrentFile);
-  t.true(res);
+  expect(res).toBe(true);
   const torrents = await client.listTorrents();
-  t.is(torrents.length, 1);
+  expect(torrents.length).toBe(1);
 });
-test.serial('should add torrent with label', async t => {
+it('should add torrent with label', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile), {
     category: 'swag',
   });
-  t.true(res);
+  expect(res).toBe(true);
   const torrents = await client.listTorrents();
-  t.is(torrents.length, 1);
-  t.is(torrents[0].category, 'swag');
+  expect(torrents.length).toBe(1);
+  expect(torrents[0].category).toBe('swag');
 });
-test.serial('should add normalized torrent with label', async t => {
+it('should add normalized torrent with label', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.normalizedAddTorrent(fs.readFileSync(torrentFile), {
     label: 'swag',
     startPaused: true,
   });
-  t.is(res.id, 'e84213a794f3ccd890382a54a64ca68b7e925433');
-  t.is(res.label, 'swag');
-  t.is(res.name, torrentName);
+  expect(res.id).toBe('e84213a794f3ccd890382a54a64ca68b7e925433');
+  expect(res.label).toBe('swag');
+  expect(res.name).toBe(torrentName);
   await client.removeCategory('swag');
 });
-test.serial('should add torrent with savePath', async t => {
+it('should add torrent with savePath', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const path = '/downloads/linux/';
   await client.addTorrent(fs.readFileSync(torrentFile), {
@@ -107,9 +103,9 @@ test.serial('should add torrent with savePath', async t => {
     paused: 'true',
   });
   const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
-  t.is(torrentData.savePath, path);
+  expect(torrentData.savePath).toBe(path);
 });
-test.serial('should add torrent with autoTMM enabled, ignoring savepath', async t => {
+it('should add torrent with autoTMM enabled, ignoring savepath', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   await client.addTorrent(fs.readFileSync(torrentFile), {
     savepath: '/downlods/linux',
@@ -117,77 +113,77 @@ test.serial('should add torrent with autoTMM enabled, ignoring savepath', async 
     paused: 'true',
   });
   const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
-  t.is(torrentData.savePath, '/downloads/');
+  expect(torrentData.savePath).toBe('/downloads/');
 });
-test.serial('should set torrent priority', async t => {
+it('should set torrent priority', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
-  t.true(await client.topPriority(torrentId));
-  t.true(await client.bottomPriority(torrentId));
-  t.true(await client.queueDown(torrentId));
-  t.true(await client.queueUp(torrentId));
+  expect(await client.topPriority(torrentId)).toBe(true);
+  expect(await client.bottomPriority(torrentId)).toBe(true);
+  expect(await client.queueDown(torrentId)).toBe(true);
+  expect(await client.queueUp(torrentId)).toBe(true);
 });
-test.serial('should get torrent properties', async t => {
+it('should get torrent properties', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.torrentProperties(torrentId);
-  t.is(res.save_path, '/downloads/');
+  expect(res.save_path).toBe('/downloads/');
 });
-test.serial('should get torrent trackers', async t => {
+it('should get torrent trackers', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.torrentTrackers(torrentId);
   const urls = res.map(x => x.url);
-  t.assert(urls.includes('http://ipv6.torrent.ubuntu.com:6969/announce'));
+  expect(urls.includes('http://ipv6.torrent.ubuntu.com:6969/announce')).toBeTruthy();
 });
-test.serial('should get torrent web seeds', async t => {
+it('should get torrent web seeds', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.torrentWebSeeds(torrentId);
   const urls = res.map(x => x.url);
-  t.is(urls.length, 0);
+  expect(urls.length).toBe(0);
 });
-test.serial('should get torrent files', async t => {
+it('should get torrent files', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.torrentFiles(torrentId);
   const names = res.map(x => x.name);
-  t.assert(names.includes('ubuntu-18.04.1-desktop-amd64.iso'));
+  expect(names.includes('ubuntu-18.04.1-desktop-amd64.iso')).toBeTruthy();
 });
-test.serial('should get torrent piece state', async t => {
+it('should get torrent piece state', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.torrentPieceStates(torrentId);
-  t.is(res.length, 3726);
+  expect(res.length).toBe(3726);
 });
-test.serial('should get torrent piece hashes', async t => {
+it('should get torrent piece hashes', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.torrentPieceHashes(torrentId);
-  t.is(res.length, 3726);
+  expect(res.length).toBe(3726);
 });
-test.serial('should add/remove torrent tag', async t => {
+it('should add/remove torrent tag', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.addTorrentTags(torrentId, 'movie');
-  t.true(res);
+  expect(res).toBe(true);
   const res2 = await client.removeTorrentTags(torrentId, 'movie');
-  t.true(res2);
+  expect(res2).toBe(true);
   await client.deleteTags('movie');
 });
-test.serial('should pause/resume torrent', async t => {
+it('should pause/resume torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
-  t.true(await client.pauseTorrent(torrentId));
-  t.true(await client.resumeTorrent(torrentId));
+  expect(await client.pauseTorrent(torrentId)).toBeTruthy();
+  expect(await client.resumeTorrent(torrentId)).toBeTruthy();
 });
-test.serial.skip('should set torrent location', async t => {
+it.skip('should set torrent location', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.setTorrentLocation(torrentId, '/downloads/linux');
-  t.true(res);
+  expect(res).toBe(true);
 });
-test.serial.skip('should rename file within torrent', async t => {
+it.skip('should rename file within torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   await pWaitFor(
@@ -202,149 +198,149 @@ test.serial.skip('should rename file within torrent', async t => {
   const res = await client.renameFile(torrentId, 0, 'ubuntu');
   const torrentFiles = await client.torrentFiles(torrentId);
 
-  t.true(res);
-  t.is(torrentFiles[0].name, 'ubuntu');
+  expect(res).toBe(true);
+  expect(torrentFiles[0].name).toBe('ubuntu');
 });
-test.serial('should recheck torrent', async t => {
+it('should recheck torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const res = await client.recheckTorrent(torrentId);
-  t.true(res);
+  expect(res).toBe(true);
 });
-test.serial('should add magnet link', async t => {
+it('should add magnet link', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  const result = await client.addMagnet(magnet);
-  t.truthy(result);
+  const res = await client.addMagnet(magnet);
+  expect(res).toBeTruthy();
 });
-test.serial('should return normalized torrent data', async t => {
+it('should return normalized torrent data', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   await setupTorrent(client);
   const res = await client.getAllData();
   const torrent = res.torrents[0];
-  t.is(torrent.connectedPeers, 0);
-  t.is(torrent.connectedSeeds, 0);
-  t.is(torrent.downloadSpeed, 0);
-  t.is(torrent.eta, 8640000);
-  t.is(torrent.isCompleted, false);
-  t.is(torrent.label, '');
-  t.is(torrent.name, torrentName);
-  t.is(torrent.progress, 0);
-  t.is(torrent.queuePosition, 1);
-  t.is(torrent.ratio, 0);
-  t.is(torrent.savePath, '/downloads/');
+  expect(torrent.connectedPeers).toBe(0);
+  expect(torrent.connectedSeeds).toBe(0);
+  expect(torrent.downloadSpeed).toBe(0);
+  expect(torrent.eta).toBe(8640000);
+  expect(torrent.isCompleted).toBe(false);
+  expect(torrent.label).toBe('');
+  expect(torrent.name).toBe(torrentName);
+  expect(torrent.progress).toBe(0);
+  expect(torrent.queuePosition).toBe(1);
+  expect(torrent.ratio).toBe(0);
+  expect(torrent.savePath).toBe('/downloads/');
   // state sometimes depends on speed of processor
   // expect(torrent.state).toBe(TorrentState.checking);
-  t.is(torrent.stateMessage, '');
-  t.is(torrent.totalDownloaded, 0);
-  t.is(torrent.totalPeers, 0);
-  t.is(torrent.totalSeeds, 0);
+  expect(torrent.stateMessage).toBe('');
+  expect(torrent.totalDownloaded).toBe(0);
+  expect(torrent.totalPeers).toBe(0);
+  expect(torrent.totalSeeds).toBe(0);
   // expect(torrent.totalSelected).toBe(1953349632);
   // expect(torrent.totalSize).toBe(1953349632);
-  t.is(torrent.totalUploaded, 0);
-  t.is(torrent.uploadSpeed, 0);
+  expect(torrent.totalUploaded).toBe(0);
+  expect(torrent.uploadSpeed).toBe(0);
 });
-test.serial('should add normalized torrent from magnet', async t => {
+it('should add normalized torrent from magnet', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrent = await client.normalizedAddTorrent(magnet, { startPaused: true });
-  t.is(torrent.connectedPeers, 0);
-  t.is(torrent.connectedSeeds, 0);
-  t.is(torrent.downloadSpeed, 0);
-  t.is(torrent.eta, 8640000);
-  t.is(torrent.isCompleted, false);
-  t.is(torrent.label, '');
-  t.is(torrent.name, 'Ubuntu 11 10 Alternate Amd64 Iso');
-  t.is(torrent.progress, 0);
-  t.is(torrent.queuePosition, 1);
-  t.is(torrent.ratio, 0);
-  t.is(torrent.savePath, '/downloads/');
+  expect(torrent.connectedPeers).toBe(0);
+  expect(torrent.connectedSeeds).toBe(0);
+  expect(torrent.downloadSpeed).toBe(0);
+  expect(torrent.eta).toBe(8640000);
+  expect(torrent.isCompleted).toBe(false);
+  expect(torrent.label).toBe('');
+  expect(torrent.name).toBe('Ubuntu 11 10 Alternate Amd64 Iso');
+  expect(torrent.progress).toBe(0);
+  expect(torrent.queuePosition).toBe(1);
+  expect(torrent.ratio).toBe(0);
+  expect(torrent.savePath).toBe('/downloads/');
   // state sometimes depends on speed of processor
   // expect(torrent.state).toBe(TorrentState.checking);
-  t.is(torrent.stateMessage, '');
-  t.is(torrent.totalDownloaded, 0);
-  t.is(torrent.totalPeers, 0);
-  t.is(torrent.totalSeeds, 0);
+  expect(torrent.stateMessage).toBe('');
+  expect(torrent.totalDownloaded).toBe(0);
+  expect(torrent.totalPeers).toBe(0);
+  expect(torrent.totalSeeds).toBe(0);
   // expect(torrent.totalSelected).toBe(1953349632);
   // expect(torrent.totalSize).toBe(1953349632);
-  t.is(torrent.totalUploaded, 0);
-  t.is(torrent.uploadSpeed, 0);
+  expect(torrent.totalUploaded).toBe(0);
+  expect(torrent.uploadSpeed).toBe(0);
 });
-test.serial('should get preferences', async t => {
+it('should get preferences', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const preferences = await client.getPreferences();
-  t.is(preferences.max_active_torrents, 5);
-  t.true(preferences.dht);
+  expect(preferences.max_active_torrents).toBe(5);
+  expect(preferences.dht).toBe(true);
 });
-test.serial('should set preferences', async t => {
+it('should set preferences', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   await client.setPreferences({ max_active_torrents: 10 });
 
   const preferences = await client.getPreferences();
-  t.is(preferences.max_active_torrents, 10);
+  expect(preferences.max_active_torrents).toBe(10);
 
   await client.setPreferences({ max_active_torrents: 5 });
 });
-test.serial('should get / create / edit / remove category', async t => {
+it('should get / create / edit / remove category', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   let categories = await client.getCategories();
-  t.is(categories.movie, undefined);
+  expect(categories.movie).toBe(undefined);
   await client.createCategory('movie', '/data');
   categories = await client.getCategories();
-  t.deepEqual(categories.movie, { name: 'movie', savePath: '/data' });
+  expect(categories.movie).toEqual({ name: 'movie', savePath: '/data' });
   await client.editCategory('movie', '/swag');
   categories = await client.getCategories();
-  t.deepEqual(categories.movie, { name: 'movie', savePath: '/swag' });
+  expect(categories.movie).toEqual({ name: 'movie', savePath: '/swag' });
   await client.removeCategory('movie');
   categories = await client.getCategories();
-  t.is(categories.movie, undefined);
+  expect(categories.movie).toBe(undefined);
 });
-test.serial('should get / create / remove tags', async t => {
+it('should get / create / remove tags', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   let tags = await client.getTags();
-  t.assert(!tags.includes('movies'));
-  t.is(tags.length, 0);
+  expect(!tags.includes('movies')).toBeTruthy();
+  expect(tags.length).toBe(0);
   await client.createTags('movies,dank');
   tags = await client.getTags();
-  t.assert(tags.includes('movies'));
-  t.assert(tags.includes('dank'));
+  expect(tags.includes('movies')).toBeTruthy();
+  expect(tags.includes('dank')).toBeTruthy();
   await client.deleteTags('movies,dank');
   tags = await client.getTags();
-  t.is(tags.length, 0);
+  expect(tags.length).toBe(0);
 });
-test.serial('should set categories to torrent', async t => {
+it('should set categories to torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const cat = 'parks-and-rec';
   await client.createCategory(cat);
   await client.setTorrentCategory(torrentId, cat);
   const allData = await client.getTorrent(torrentId);
-  t.is(allData.label, cat);
+  expect(allData.label).toBe(cat);
   await client.removeCategory(cat);
 });
-test.serial('should get application version', async t => {
+it('should get application version', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const version = await client.getAppVersion();
   console.log('App version', version);
-  t.truthy(version);
-  t.assert(typeof version === 'string');
+  expect(version).toBeTruthy();
+  expect(typeof version).toBe('string');
 });
-test.serial('should get api version', async t => {
+it('should get api version', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const version = await client.getApiVersion();
   console.log('API version', version);
-  t.truthy(version);
-  t.assert(typeof version === 'string');
+  expect(version).toBeTruthy();
+  expect(typeof version).toBe('string');
 });
-test.serial('should get build info', async t => {
+it('should get build info', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const buildInfo = await client.getBuildInfo();
-  t.truthy(buildInfo.libtorrent);
-  t.assert(typeof buildInfo.libtorrent === 'string');
+  expect(buildInfo.libtorrent).toBeTruthy();
+  expect(typeof buildInfo.libtorrent).toBe('string');
 });
-test.serial('should set torrent name', async t => {
+it('should set torrent name', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   const name = 'important-utorrent';
   await client.setTorrentName(torrentId, name);
   const torrentData = await client.getTorrent(torrentId);
-  t.is(torrentData.name, name);
+  expect(torrentData.name).toBe(name);
 });

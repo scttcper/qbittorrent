@@ -18,7 +18,7 @@ jobs:
           name: test
           command: npm run test:ci
       - store_test_results:
-          path: ./junit
+          path: ./junit.xml
       - codecov/upload
   release:
     executor:
