@@ -320,7 +320,7 @@ it('should get application version', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const version = await client.getAppVersion();
   console.log('App version', version);
-  expect(version).toBe(true);
+  expect(version).toBeTruthy();
   expect(typeof version).toBe('string');
 });
 it('should get api version', async () => {
