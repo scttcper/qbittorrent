@@ -4,8 +4,5 @@
     "outDir": "dist",
     "strictNullChecks": false,
     "noPropertyAccessFromIndexSignature": false
-  },
-  "ts-node": {
-    "transpileOnly": true
   }
 }
