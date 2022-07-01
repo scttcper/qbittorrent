@@ -5,8 +5,8 @@ orbs:
 jobs:
   test:
     docker:
-      - image: cimg/base:stable
       - image: linuxserver/qbittorrent
+      - image: cimg/base:stable
     steps:
       - checkout
       - node/install
