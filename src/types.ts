@@ -441,21 +441,21 @@ export enum TorrentTrackerStatus {
    */
   Disabled = 0,
   /**
+   * Tracker has not been contacted yet
+   */
+  Waiting = 1,
+  /**
    * Tracker has been contacted and is working
    */
-  Working = 1,
+  Working = 2,
   /**
-   * Tracker is currently being updated
+   * Tracker is updating
    */
-  Updating = 2,
+  Updating = 3,
   /**
    * Tracker has been contacted, but it is not working (or doesn't send proper replies)
    */
-  Errored = 3,
-  /**
-   * Tracker has not been contacted yet
-   */
-  Waiting = 4,
+  Errored = 4,
 }
 
 export interface WebSeed {
