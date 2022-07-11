@@ -630,6 +630,20 @@ export class QBittorrent implements TorrentClient {
   }
 
   /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#rename-folder}
+   */
+  async renameFolder(hash: string, oldPath: string, newPath: string): Promise<boolean> {
+    const form = new FormData();
+    form.append('hash', hash);
+    form.append('oldPath', oldPath);
+    form.append('newPath', newPath);
+
+    await this.request<string>('/torrents/renameFolder', 'POST', undefined, form, undefined, false);
+
+    return true;
+  }
+
+  /**
    * @param urls URLs separated with newlines
    * @param options
    */
