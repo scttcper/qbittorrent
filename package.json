@@ -42,13 +42,13 @@
   "devDependencies": {
     "@ctrl/eslint-config": "3.4.6",
     "@sindresorhus/tsconfig": "3.0.1",
-    "@types/node": "18.0.0",
+    "@types/node": "18.0.3",
     "@types/tough-cookie": "4.0.2",
     "c8": "7.11.3",
     "p-wait-for": "4.1.0",
-    "typedoc": "0.23.2",
+    "typedoc": "0.23.7",
     "typescript": "4.7.4",
-    "vitest": "0.16.0"
+    "vitest": "0.18.0"
   },
   "release": {
     "branches": [
