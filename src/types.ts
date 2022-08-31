@@ -235,6 +235,10 @@ export enum TorrentState {
    */
   ForcedDL = 'forcedDL',
   /**
+   * Forced Downloading Metadata
+   */
+  ForcedMetaDL = 'ForcedMetaDL',
+  /**
    * Torrent is forced to uploading and ignore queue limit
    */
   ForcedUP = 'forcedUP',

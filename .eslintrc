@@ -3,5 +3,8 @@
   "env": {
     "node": true
   },
-  "extends": ["@ctrl/eslint-config"]
+  "extends": ["@ctrl/eslint-config"],
+  "rules": {
+    "complexity": "off"
+  }
 }
