@@ -5,23 +5,24 @@ import { URLSearchParams } from 'url';
 
 import { File, FormData } from 'formdata-node';
 import { fileFromPath } from 'formdata-node/file-from-path';
-import got, { Options as GotOptions, Response } from 'got';
+import type { Options as GotOptions, Response } from 'got';
+import got from 'got';
 import { Cookie } from 'tough-cookie';
 
 import { magnetDecode } from '@ctrl/magnet-link';
-import {
+import type {
   AddTorrentOptions as NormalizedAddTorrentOptions,
   AllClientData,
   Label,
   NormalizedTorrent,
   TorrentClient,
   TorrentSettings,
-  TorrentState as NormalizedTorrentState,
 } from '@ctrl/shared-torrent';
+import { TorrentState as NormalizedTorrentState } from '@ctrl/shared-torrent';
 import { hash } from '@ctrl/torrent-file';
 import { urlJoin } from '@ctrl/url-join';
 
-import {
+import type {
   AddMagnetOptions,
   AddTorrentOptions,
   BuildInfo,
@@ -33,10 +34,10 @@ import {
   TorrentFilters,
   TorrentPieceState,
   TorrentProperties,
-  TorrentState,
   TorrentTrackers,
   WebSeed,
 } from './types.js';
+import { TorrentState } from './types.js';
 
 const defaults: TorrentSettings = {
   baseUrl: 'http://localhost:9091/',
@@ -845,40 +846,60 @@ export class QBittorrent implements TorrentClient {
 
   private _normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     let state = NormalizedTorrentState.unknown;
+    let stateMessage = '';
+    let { eta } = torrent;
 
+    /**
+     * Good references https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/www/private/scripts/dynamicTable.js#L933
+     * https://github.com/Radarr/Radarr/blob/develop/src/NzbDrone.Core/Download/Clients/QBittorrent/QBittorrent.cs#L242
+     */
     switch (torrent.state) {
-      case TorrentState.ForcedDL:
-      case TorrentState.MetaDL:
+      case TorrentState.Error:
+        state = NormalizedTorrentState.warning;
+        stateMessage = 'qBittorrent is reporting an error';
+        break;
+      case TorrentState.PausedDL:
+        state = NormalizedTorrentState.paused;
+        break;
+      case TorrentState.QueuedDL: // queuing is enabled and torrent is queued for download
+      case TorrentState.CheckingDL: // same as checkingUP, but torrent has NOT finished downloading
+      case TorrentState.CheckingUP: // torrent has finished downloading and is being checked. Set when `recheck torrent on completion` is enabled. In the event the check fails we shouldn't treat it as completed.
+        state = NormalizedTorrentState.queued;
+        break;
+      case TorrentState.MetaDL: // Metadl could be an error if DHT is not enabled
+      case TorrentState.ForcedDL: // torrent is being downloaded, and was forced started
+      case TorrentState.ForcedMetaDL: // torrent metadata is being forcibly downloaded
+      case TorrentState.Downloading: // torrent is being downloaded and data is being transferred
         state = NormalizedTorrentState.downloading;
         break;
       case TorrentState.Allocating:
         // state = 'stalledDL';
         state = NormalizedTorrentState.queued;
         break;
-      case TorrentState.ForcedUP:
-        state = NormalizedTorrentState.seeding;
+      case TorrentState.StalledDL:
+        state = NormalizedTorrentState.warning;
+        stateMessage = 'The download is stalled with no connection';
         break;
-      case TorrentState.PausedDL:
-        state = NormalizedTorrentState.paused;
-        break;
-      case TorrentState.PausedUP:
+      case TorrentState.PausedUP: // torrent is paused and has finished downloading:
+      case TorrentState.Uploading: // torrent is being seeded and data is being transferred
+      case TorrentState.StalledUP: // torrent is being seeded, but no connection were made
+      case TorrentState.QueuedUP: // queuing is enabled and torrent is queued for upload
+      case TorrentState.ForcedUP: // torrent has finished downloading and is being forcibly seeded
         // state = 'completed';
-        state = NormalizedTorrentState.paused;
+        state = NormalizedTorrentState.seeding;
+        eta = 0; // qBittorrent sends eta=8640000 for completed torrents
         break;
-      case TorrentState.QueuedDL:
-      case TorrentState.QueuedUP:
-        state = NormalizedTorrentState.queued;
-        break;
-      case TorrentState.CheckingDL:
-      case TorrentState.CheckingUP:
+      case TorrentState.Moving: // torrent is being moved from a folder
       case TorrentState.QueuedForChecking:
       case TorrentState.CheckingResumeData:
-      case TorrentState.Moving:
         state = NormalizedTorrentState.checking;
         break;
       case TorrentState.Unknown:
+        state = NormalizedTorrentState.error;
+        break;
       case TorrentState.MissingFiles:
         state = NormalizedTorrentState.error;
+        stateMessage = 'The download is missing files';
         break;
       default:
         break;
@@ -889,8 +910,9 @@ export class QBittorrent implements TorrentClient {
     const result: NormalizedTorrent = {
       id: torrent.hash,
       name: torrent.name,
-      stateMessage: '',
+      stateMessage,
       state,
+      eta,
       dateAdded: new Date(torrent.added_on * 1000).toISOString(),
       isCompleted,
       progress: torrent.progress,
@@ -899,7 +921,6 @@ export class QBittorrent implements TorrentClient {
       savePath: torrent.save_path,
       uploadSpeed: torrent.upspeed,
       downloadSpeed: torrent.dlspeed,
-      eta: torrent.eta,
       queuePosition: torrent.priority,
       connectedPeers: torrent.num_leechs,
       connectedSeeds: torrent.num_seeds,

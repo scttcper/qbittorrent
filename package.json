@@ -32,23 +32,24 @@
   },
   "dependencies": {
     "@ctrl/magnet-link": "^3.1.1",
-    "@ctrl/shared-torrent": "^4.1.1",
+    "@ctrl/shared-torrent": "^4.2.0",
     "@ctrl/torrent-file": "^2.0.2",
     "@ctrl/url-join": "^2.0.2",
-    "formdata-node": "^4.3.3",
-    "got": "^12.1.0",
-    "tough-cookie": "^4.0.0"
+    "formdata-node": "^5.0.0",
+    "got": "^12.3.1",
+    "tough-cookie": "^4.1.2"
   },
   "devDependencies": {
-    "@ctrl/eslint-config": "3.4.6",
+    "@ctrl/eslint-config": "3.4.10",
     "@sindresorhus/tsconfig": "3.0.1",
-    "@types/node": "18.0.3",
+    "@types/node": "18.7.14",
     "@types/tough-cookie": "4.0.2",
-    "c8": "7.11.3",
-    "p-wait-for": "4.1.0",
-    "typedoc": "0.23.7",
-    "typescript": "4.7.4",
-    "vitest": "0.18.0"
+    "@vitest/coverage-c8": "0.22.1",
+    "c8": "7.12.0",
+    "p-wait-for": "5.0.0",
+    "typedoc": "0.23.11",
+    "typescript": "4.8.2",
+    "vitest": "0.22.1"
   },
   "release": {
     "branches": [
