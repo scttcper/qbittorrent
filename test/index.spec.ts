@@ -115,7 +115,7 @@ it('should add torrent with autoTMM enabled, ignoring savepath', async () => {
   const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
   expect(torrentData.savePath).toEqual(expect.stringMatching(/downloads/i));
 });
-it('should set torrent priority', async () => {
+it.skip('should set torrent priority', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   expect(await client.topPriority(torrentId)).toBe(true);
