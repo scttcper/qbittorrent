@@ -6,7 +6,7 @@ jobs:
   test:
     docker:
       - image: cimg/base:stable
-      - image: linuxserver/qbittorrent@sha256:80f218cde99a0fe907b8ccd554b9337a37227d2755ef4fc549e770aa835bf2e5
+      - image: linuxserver/qbittorrent
     steps:
       - checkout
       - node/install
