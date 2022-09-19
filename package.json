@@ -28,7 +28,7 @@
     "build:docs": "typedoc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ci": "vitest run --coverage --reporter=junit --outputFile=./junit.xml"
+    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./junit.xml"
   },
   "dependencies": {
     "@ctrl/magnet-link": "^3.1.1",
