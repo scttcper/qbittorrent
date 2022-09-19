@@ -167,9 +167,14 @@ it('should add/remove torrent tag', async () => {
   const torrentId = await setupTorrent(client);
   const res = await client.addTorrentTags(torrentId, 'movie');
   expect(res).toBe(true);
+  await client.addTorrentTags(torrentId, '4k');
+  const torrent = await client.getTorrent(torrentId);
+  expect(torrent.tags.sort()).toEqual(['4k', 'movie']);
   const res2 = await client.removeTorrentTags(torrentId, 'movie');
   expect(res2).toBe(true);
+  await client.removeTorrentTags(torrentId, '4k');
   await client.deleteTags('movie');
+  await client.deleteTags('4k');
 });
 it('should pause/resume torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });

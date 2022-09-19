@@ -198,6 +198,7 @@ export class QBittorrent implements TorrentClient {
     const results: AllClientData = {
       torrents: [],
       labels: [],
+      raw: listTorrents,
     };
     const labels: Record<string, Label> = {};
     for (const torrent of listTorrents) {
@@ -917,6 +918,7 @@ export class QBittorrent implements TorrentClient {
       isCompleted,
       progress: torrent.progress,
       label: torrent.category,
+      tags: torrent.tags.split(', '),
       dateCompleted: new Date(torrent.completion_on * 1000).toISOString(),
       savePath: torrent.save_path,
       uploadSpeed: torrent.upspeed,
@@ -931,6 +933,7 @@ export class QBittorrent implements TorrentClient {
       totalUploaded: torrent.uploaded,
       totalDownloaded: torrent.downloaded,
       ratio: torrent.ratio,
+      raw: torrent,
     };
     return result;
   }
