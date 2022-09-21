@@ -5,12 +5,19 @@ orbs:
 jobs:
   test:
     docker:
-      - image: cimg/base:stable
-      - image: linuxserver/qbittorrent@sha256:80f218cde99a0fe907b8ccd554b9337a37227d2755ef4fc549e770aa835bf2e5
+      - image: cimg/node:current
     steps:
       - checkout
-      - node/install
       - node/install-packages
+      - run:
+          name: setup qbittorrent
+          command: |
+            sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
+            sudo apt-get update
+            sudo apt-get install qbittorrent-nox
+            qbittorrent-nox -d
+            sudo mkdir /downloads
+            mkdir ~/downloads
       - run:
           name: lint
           command: npm run lint

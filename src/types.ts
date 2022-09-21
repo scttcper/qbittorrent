@@ -108,6 +108,7 @@ export interface Torrent {
    * Torrent tracker
    */
   tracker: string;
+  trackers_count: number;
   /**
    * Torrent download limit
    */
@@ -161,6 +162,10 @@ export interface Torrent {
    */
   seeding_time_limit: number;
   /**
+   * True if super seeding is enabled
+   */
+  super_seeding: boolean;
+  /**
    * Indicates the time when the torrent was last seen complete/whole
    */
   seen_complete: number;
@@ -177,6 +182,10 @@ export interface Torrent {
    * Category name
    */
   category: string;
+  /**
+   * Comma-concatenated tag list of the torrent e.g. - "abc, 123"
+   */
+  tags: string;
 }
 
 export type TorrentCategories = Record<string, Category>;

@@ -28,28 +28,28 @@
     "build:docs": "typedoc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ci": "vitest run --coverage --reporter=junit --outputFile=./junit.xml"
+    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./junit.xml"
   },
   "dependencies": {
     "@ctrl/magnet-link": "^3.1.1",
-    "@ctrl/shared-torrent": "^4.2.0",
+    "@ctrl/shared-torrent": "^4.3.1",
     "@ctrl/torrent-file": "^2.0.2",
     "@ctrl/url-join": "^2.0.2",
     "formdata-node": "^5.0.0",
-    "got": "^12.3.1",
+    "got": "^12.5.0",
     "tough-cookie": "^4.1.2"
   },
   "devDependencies": {
-    "@ctrl/eslint-config": "3.4.10",
+    "@ctrl/eslint-config": "3.5.0",
     "@sindresorhus/tsconfig": "3.0.1",
-    "@types/node": "18.7.14",
+    "@types/node": "18.7.18",
     "@types/tough-cookie": "4.0.2",
-    "@vitest/coverage-c8": "0.22.1",
+    "@vitest/coverage-c8": "0.23.4",
     "c8": "7.12.0",
     "p-wait-for": "5.0.0",
-    "typedoc": "0.23.11",
-    "typescript": "4.8.2",
-    "vitest": "0.22.1"
+    "typedoc": "0.23.15",
+    "typescript": "4.8.3",
+    "vitest": "0.23.4"
   },
   "release": {
     "branches": [
