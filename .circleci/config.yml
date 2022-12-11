@@ -12,7 +12,7 @@ jobs:
       - run:
           name: setup qbittorrent
           command: |
-            sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
+            sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable -y
             sudo apt-get update
             sudo apt-get install qbittorrent-nox
             qbittorrent-nox -d
