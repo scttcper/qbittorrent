@@ -12,9 +12,9 @@ jobs:
       - run:
           name: setup qbittorrent
           command: |
-            sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable -y
-            sudo apt-get update
-            sudo apt-get install qbittorrent-nox=1:4.3.9.99~202110311443-7435-01519b5e7~ubuntu21.04.1
+            mkdir -p ~/bin && source ~/.profile
+            wget -qO ~/bin/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-4.4.5_v2.0.8/aarch64-qbittorrent-nox
+            chmod 700 ~/bin/qbittorrent-nox
             qbittorrent-nox -d
             sudo mkdir /downloads
             mkdir ~/downloads
