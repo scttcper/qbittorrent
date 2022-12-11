@@ -169,11 +169,11 @@ export class QBittorrent implements TorrentClient {
       params.filter = filter;
     }
 
-    if (category) {
+    if (category !== undefined) {
       params.category = category;
     }
 
-    if (tag) {
+    if (tag !== undefined) {
       params.tag = tag;
     }
 
