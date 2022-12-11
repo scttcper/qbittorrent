@@ -774,6 +774,7 @@ export class QBittorrent implements TorrentClient {
       ...(this.config.agent ? { agent: this.config.agent } : {}),
     });
 
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
     if (!res.headers['set-cookie'] || !res.headers['set-cookie'].length) {
       throw new Error('Cookie not found. Auth Failed.');
     }

@@ -5,6 +5,7 @@
   },
   "extends": ["@ctrl/eslint-config"],
   "rules": {
-    "complexity": "off"
+    "complexity": "off",
+    "@typescript-eslint/prefer-nullish-coalescing": "off"
   }
 }
