@@ -14,7 +14,7 @@ jobs:
           command: |
             sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable -y
             sudo apt-get update
-            sudo apt-get install qbittorrent-nox=4.3.9
+            sudo apt-get install qbittorrent-nox=1:4.3.9.99~202110311443-7435-01519b5e7~ubuntu21.04.1
             qbittorrent-nox -d
             sudo mkdir /downloads
             mkdir ~/downloads
