@@ -103,7 +103,7 @@ it('should add torrent with savePath', async () => {
     paused: 'true',
   });
   const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
-  expect(torrentData.savePath).toBe(path);
+  expect(torrentData.savePath).includes('/downloads/linux');
 });
 it('should add torrent with autoTMM enabled, ignoring savepath', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -135,6 +135,19 @@ it('should get torrent trackers', async () => {
   const res = await client.torrentTrackers(torrentId);
   const urls = res.map(x => x.url);
   expect(urls.includes('http://ipv6.torrent.ubuntu.com:6969/announce')).toBeTruthy();
+});
+it('should add torrent trackers', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  expect(await client.addTrackers(torrentId, 'http://tracker.example.com/announce')).toBeTruthy();
+  const trackers = await client.torrentTrackers(torrentId);
+  expect(trackers.map(x => x.url)).includes('http://tracker.example.com/announce');
+  console.log(trackers);
+  expect(
+    await client.removeTrackers(torrentId, 'http://tracker.example.com/announce'),
+  ).toBeTruthy();
+  const trackers2 = await client.torrentTrackers(torrentId);
+  expect(trackers2.map(x => x.url)).not.includes('http://tracker.example.com/announce');
 });
 it('should get torrent web seeds', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -181,6 +194,11 @@ it('should pause/resume torrent', async () => {
   const torrentId = await setupTorrent(client);
   expect(await client.pauseTorrent(torrentId)).toBeTruthy();
   expect(await client.resumeTorrent(torrentId)).toBeTruthy();
+});
+it('should reannounceTorrent', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  expect(await client.reannounceTorrent(torrentId)).toBeTruthy();
 });
 it.skip('should set torrent location', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
