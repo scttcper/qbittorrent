@@ -478,7 +478,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/pause', 'GET', params);
+    await this.request('/torrents/pause', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -489,7 +489,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/resume', 'GET', params);
+    await this.request('/torrents/resume', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -501,7 +501,7 @@ export class QBittorrent implements TorrentClient {
       hashes: this._normalizeHashes(hashes),
       deleteFiles,
     };
-    await this.request('/torrents/delete', 'GET', params);
+    await this.request('/torrents/delete', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -512,7 +512,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/recheck', 'GET', params);
+    await this.request('/torrents/recheck', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -523,7 +523,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/reannounce', 'GET', params);
+    await this.request('/torrents/reannounce', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -688,7 +688,7 @@ export class QBittorrent implements TorrentClient {
    */
   async addTrackers(hash: string, urls: string): Promise<boolean> {
     const params = { hash, urls };
-    await this.request('/torrents/addTrackers', 'GET', params);
+    await this.request('/torrents/addTrackers', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -697,7 +697,7 @@ export class QBittorrent implements TorrentClient {
    */
   async editTrackers(hash: string, origUrl: string, newUrl: string): Promise<boolean> {
     const params = { hash, origUrl, newUrl };
-    await this.request('/torrents/editTrackers', 'GET', params);
+    await this.request('/torrents/editTrackers', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -706,7 +706,7 @@ export class QBittorrent implements TorrentClient {
    */
   async removeTrackers(hash: string, urls: string): Promise<boolean> {
     const params = { hash, urls };
-    await this.request('/torrents/editTrackers', 'GET', params);
+    await this.request('/torrents/removeTrackers', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -717,7 +717,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/increasePrio', 'GET', params);
+    await this.request('/torrents/increasePrio', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -728,7 +728,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/decreasePrio', 'GET', params);
+    await this.request('/torrents/decreasePrio', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -739,7 +739,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/topPrio', 'GET', params);
+    await this.request('/torrents/topPrio', 'POST', undefined, undefined, params);
     return true;
   }
 
@@ -750,7 +750,7 @@ export class QBittorrent implements TorrentClient {
     const params = {
       hashes: this._normalizeHashes(hashes),
     };
-    await this.request('/torrents/bottomPrio', 'GET', params);
+    await this.request('/torrents/bottomPrio', 'POST', undefined, undefined, params);
     return true;
   }
 
