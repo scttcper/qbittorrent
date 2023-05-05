@@ -32,6 +32,7 @@ import type {
   TorrentFile,
   TorrentFilePriority,
   TorrentFilters,
+  TorrentPeersResponse,
   TorrentPieceState,
   TorrentProperties,
   TorrentTrackers,
@@ -752,6 +753,21 @@ export class QBittorrent implements TorrentClient {
     };
     await this.request('/torrents/bottomPrio', 'POST', undefined, undefined, params);
     return true;
+  }
+
+  /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-torrent-peers-data}
+   * @param rid - Response ID. If not provided, rid=0 will be assumed. If the given rid is
+   *  different from the one of last server reply, full_update will be true (see the server reply details for more info)
+   */
+  async torrentPeers(hash: string, rid?: number): Promise<TorrentPeersResponse> {
+    const params: { hash: string; rid?: number } = { hash };
+    if (rid) {
+      params.rid = rid;
+    }
+
+    const res = await this.request<TorrentPeersResponse>('/sync/torrentPeers', 'GET', params);
+    return res.body;
   }
 
   /**
