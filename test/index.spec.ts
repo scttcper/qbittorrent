@@ -129,6 +129,13 @@ it('should get torrent properties', async () => {
   const res = await client.torrentProperties(torrentId);
   expect(res.save_path).toEqual(expect.stringMatching(/downloads/i));
 });
+it('should get torrent peers', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  const res = await client.torrentPeers(torrentId);
+  expect(res.full_update).toBe(true);
+  expect(res.peers).toBeDefined();
+});
 it('should get torrent trackers', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);

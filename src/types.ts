@@ -1259,3 +1259,30 @@ export interface Preferences {
    */
   utp_tcp_mixed_mode: number;
 }
+
+export interface TorrentPeersResponse {
+  full_update: boolean;
+  peers: Peers;
+  rid: number;
+  show_flags: boolean;
+}
+
+type Peers = Record<string, TorrentPeer>;
+
+export interface TorrentPeer {
+  client?: string;
+  connection?: string;
+  country?: string;
+  country_code?: string;
+  dl_speed?: number;
+  downloaded?: number;
+  files?: string;
+  flags?: string;
+  flags_desc?: string;
+  ip?: string;
+  port?: number;
+  progress?: number;
+  relevance?: number;
+  up_speed?: number;
+  uploaded?: number;
+}
