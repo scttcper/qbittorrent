@@ -57,6 +57,13 @@ it('should add torrent from string', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile).toString('base64'));
   expect(res).toBe(true);
+  await pWaitFor(
+    async () => {
+      const torrents = await client.listTorrents();
+      return Object.keys(torrents).length === 1;
+    },
+    { timeout: 10000 },
+  );
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
 });
@@ -73,6 +80,13 @@ it('should add torrent with label', async () => {
     category: 'swag',
   });
   expect(res).toBe(true);
+  await pWaitFor(
+    async () => {
+      const torrents = await client.listTorrents();
+      return Object.keys(torrents).length === 1;
+    },
+    { timeout: 10000 },
+  );
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
   expect(torrents[0].category).toBe('swag');
