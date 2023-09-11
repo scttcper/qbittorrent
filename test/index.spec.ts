@@ -21,7 +21,7 @@ const magnet =
  * @returns torrent hash id
  */
 async function setupTorrent(client: QBittorrent): Promise<string> {
-  await client.addTorrent(torrentFile);
+  await client.addTorrent(fs.readFileSync(torrentFile));
   await pWaitFor(
     async () => {
       const torrents = await client.listTorrents();
@@ -63,13 +63,6 @@ it('should add torrent from string', async () => {
 it('should add torrent from buffer', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile));
-  expect(res).toBe(true);
-  const torrents = await client.listTorrents();
-  expect(torrents.length).toBe(1);
-});
-it('should add torrent from filename', async () => {
-  const client = new QBittorrent({ baseUrl, username, password });
-  const res = await client.addTorrent(torrentFile);
   expect(res).toBe(true);
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
