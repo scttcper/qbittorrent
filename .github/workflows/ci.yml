@@ -19,8 +19,6 @@ jobs:
           cache: 'npm'
       - name: install dependencies
         run: npm ci
-      - name: lint
-        run: npm run lint
       - name: start qbittorrent
         run: |
             mkdir -p ~/bin && source ~/.profile
@@ -29,6 +27,8 @@ jobs:
             qbittorrent-nox -d
             sudo mkdir /downloads
             mkdir ~/downloads
+      - name: lint
+        run: npm run lint
       - name: test
         run: npm run test:ci
       - name: coverage
