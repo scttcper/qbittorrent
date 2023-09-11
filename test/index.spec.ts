@@ -16,12 +16,7 @@ const password = 'adminadmin';
 const magnet =
   'magnet:?xt=urn:btih:B0B81206633C42874173D22E564D293DAEFC45E2&dn=Ubuntu+11+10+Alternate+Amd64+Iso&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.open-internet.nl%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.si%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Fdenis.stalker.upeer.me%3A6969%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce';
 
-/**
- * Adds torrent and returns hash
- * @returns torrent hash id
- */
-async function setupTorrent(client: QBittorrent): Promise<string> {
-  await client.addTorrent(fs.readFileSync(torrentFile));
+async function waitForTorrent(client: QBittorrent) {
   await pWaitFor(
     async () => {
       const torrents = await client.listTorrents();
@@ -29,6 +24,15 @@ async function setupTorrent(client: QBittorrent): Promise<string> {
     },
     { timeout: 10000 },
   );
+}
+
+/**
+ * Adds torrent and returns hash
+ * @returns torrent hash id
+ */
+async function setupTorrent(client: QBittorrent): Promise<string> {
+  await client.addTorrent(fs.readFileSync(torrentFile));
+  await waitForTorrent(client);
   const torrents = await client.listTorrents();
   return torrents[0].hash;
 }
@@ -57,13 +61,7 @@ it('should add torrent from string', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile).toString('base64'));
   expect(res).toBe(true);
-  await pWaitFor(
-    async () => {
-      const torrents = await client.listTorrents();
-      return Object.keys(torrents).length === 1;
-    },
-    { timeout: 10000 },
-  );
+  await waitForTorrent(client);
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
 });
@@ -71,6 +69,7 @@ it('should add torrent from buffer', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const res = await client.addTorrent(fs.readFileSync(torrentFile));
   expect(res).toBe(true);
+  await waitForTorrent(client);
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
 });
@@ -80,13 +79,7 @@ it('should add torrent with label', async () => {
     category: 'swag',
   });
   expect(res).toBe(true);
-  await pWaitFor(
-    async () => {
-      const torrents = await client.listTorrents();
-      return Object.keys(torrents).length === 1;
-    },
-    { timeout: 10000 },
-  );
+  await waitForTorrent(client);
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
   expect(torrents[0].category).toBe('swag');
@@ -100,6 +93,7 @@ it('should add normalized torrent with label', async () => {
   expect(res.id).toBe('e84213a794f3ccd890382a54a64ca68b7e925433');
   expect(res.label).toBe('swag');
   expect(res.name).toBe(torrentName);
+  await waitForTorrent(client);
   await client.removeCategory('swag');
 });
 it('should add torrent with savePath', async () => {
@@ -109,6 +103,7 @@ it('should add torrent with savePath', async () => {
     savepath: path,
     paused: 'true',
   });
+  await waitForTorrent(client);
   const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
   expect(torrentData.savePath).includes('/downloads/linux');
 });
@@ -119,6 +114,7 @@ it('should add torrent with autoTMM enabled, ignoring savepath', async () => {
     useAutoTMM: 'true',
     paused: 'true',
   });
+  await waitForTorrent(client);
   const torrentData = await client.getTorrent('e84213a794f3ccd890382a54a64ca68b7e925433');
   expect(torrentData.savePath).toEqual(expect.stringMatching(/downloads/i));
 });
