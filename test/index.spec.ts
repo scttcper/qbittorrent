@@ -10,7 +10,8 @@ import { QBittorrent } from '../src/index.js';
 const baseUrl = 'http://localhost:8080';
 const torrentName = 'ubuntu-18.04.1-desktop-amd64.iso';
 const __dirname = new URL('.', import.meta.url).pathname;
-const torrentFile = path.join(__dirname, '/ubuntu-18.04.1-desktop-amd64.iso.torrent');
+const torrentFilePath = path.join(__dirname, 'ubuntu-18.04.1-desktop-amd64.iso.torrent');
+const torrentFileBuffer = readFileSync(torrentFilePath);
 const username = 'admin';
 const password = 'adminadmin';
 const magnet =
@@ -31,7 +32,7 @@ async function waitForTorrent(client: QBittorrent) {
  * @returns torrent hash id
  */
 async function setupTorrent(client: QBittorrent): Promise<string> {
-  await client.addTorrent(fs.readFileSync(torrentFile));
+  await client.addTorrent(torrentFileBuffer);
   await waitForTorrent(client);
   const torrents = await client.listTorrents();
   return torrents[0].hash;
@@ -59,7 +60,7 @@ it('should logout', async () => {
 });
 it('should add torrent from string', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  const res = await client.addTorrent(fs.readFileSync(torrentFile).toString('base64'));
+  const res = await client.addTorrent(torrentFileBuffer.toString('base64'));
   expect(res).toBe(true);
   await waitForTorrent(client);
   const torrents = await client.listTorrents();
@@ -67,7 +68,7 @@ it('should add torrent from string', async () => {
 });
 it('should add torrent from buffer', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  const res = await client.addTorrent(fs.readFileSync(torrentFile));
+  const res = await client.addTorrent(torrentFileBuffer);
   expect(res).toBe(true);
   await waitForTorrent(client);
   const torrents = await client.listTorrents();
@@ -75,7 +76,7 @@ it('should add torrent from buffer', async () => {
 });
 it('should add torrent with label', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  const res = await client.addTorrent(fs.readFileSync(torrentFile), {
+  const res = await client.addTorrent(torrentFileBuffer, {
     category: 'swag',
   });
   expect(res).toBe(true);
@@ -86,7 +87,7 @@ it('should add torrent with label', async () => {
 });
 it('should add normalized torrent with label', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  const res = await client.normalizedAddTorrent(fs.readFileSync(torrentFile), {
+  const res = await client.normalizedAddTorrent(torrentFileBuffer, {
     label: 'swag',
     startPaused: true,
   });
@@ -99,7 +100,7 @@ it('should add normalized torrent with label', async () => {
 it('should add torrent with savePath', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const path = '/downloads/linux/';
-  await client.addTorrent(fs.readFileSync(torrentFile), {
+  await client.addTorrent(torrentFileBuffer, {
     savepath: path,
     paused: 'true',
   });
@@ -109,7 +110,7 @@ it('should add torrent with savePath', async () => {
 });
 it('should add torrent with autoTMM enabled, ignoring savepath', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  await client.addTorrent(fs.readFileSync(torrentFile), {
+  await client.addTorrent(torrentFileBuffer, {
     savepath: '/downlods/linux',
     useAutoTMM: 'true',
     paused: 'true',

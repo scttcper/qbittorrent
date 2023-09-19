@@ -1,4 +1,4 @@
-# qBittorrent [![npm](https://badgen.net/npm/v/@ctrl/qbittorrent)](https://www.npmjs.com/package/@ctrl/qbittorrent) [![CircleCI](https://badgen.net/circleci/github/scttcper/qbittorrent)](https://circleci.com/gh/scttcper/qbittorrent) [![coverage](https://badgen.net/codecov/c/github/scttcper/qbittorrent)](https://codecov.io/gh/scttcper/qbittorrent)
+# qBittorrent [![npm](https://badgen.net/npm/v/@ctrl/qbittorrent)](https://www.npmjs.com/package/@ctrl/qbittorrent) [![coverage](https://badgen.net/codecov/c/github/scttcper/qbittorrent)](https://codecov.io/gh/scttcper/qbittorrent)
 
 > TypeScript api wrapper for [qBittorrent](https://www.qbittorrent.org/) using [got](https://github.com/sindresorhus/got)
 
