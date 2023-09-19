@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import fs from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import pWaitFor from 'p-wait-for';
