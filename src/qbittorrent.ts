@@ -282,10 +282,11 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-location}
    */
   async setTorrentLocation(hashes: string | string[] | 'all', location: string): Promise<boolean> {
-    await this.request('/torrents/setLocation', 'POST', undefined, undefined, {
+    const data = {
       location,
       hashes: normalizeHashes(hashes),
-    });
+    };
+    await this.request('/torrents/setLocation', 'POST', undefined, objToUrlSearchParams(data));
     return true;
   }
 
