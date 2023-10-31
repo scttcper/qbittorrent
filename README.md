@@ -1,6 +1,6 @@
 # qBittorrent [![npm](https://badgen.net/npm/v/@ctrl/qbittorrent)](https://www.npmjs.com/package/@ctrl/qbittorrent) [![coverage](https://badgen.net/codecov/c/github/scttcper/qbittorrent)](https://codecov.io/gh/scttcper/qbittorrent)
 
-> TypeScript api wrapper for [qBittorrent](https://www.qbittorrent.org/) using [got](https://github.com/sindresorhus/got)
+> TypeScript api wrapper for [qBittorrent](https://www.qbittorrent.org/) using [ofetch](https://github.com/unjs/ofetch)
 
 ### Install
 
