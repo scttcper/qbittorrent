@@ -210,10 +210,10 @@ it('should reannounceTorrent', async () => {
   const torrentId = await setupTorrent(client);
   expect(await client.reannounceTorrent(torrentId)).toBeTruthy();
 });
-it.skip('should set torrent location', async () => {
+it('should set torrent location', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
-  const res = await client.setTorrentLocation(torrentId, '/downloads/linux');
+  const res = await client.setTorrentLocation(torrentId, '/tmp');
   expect(res).toBe(true);
 });
 it.skip('should rename file within torrent', async () => {
