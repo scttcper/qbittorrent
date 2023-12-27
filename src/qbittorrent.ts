@@ -760,7 +760,7 @@ export class QBittorrent implements TorrentClient {
 
     this._sid = cookie.SID;
     // Not sure if it might be lowercase
-    const expires = cookie.Expires ?? cookie.expires;
+    const expires = cookie.Expires ?? cookie.expires ?? cookie['Max-Age'];
     // Default expiration is expected to be 1 hour
     this._exp = expires ? new Date(expires) : new Date(Date.now() + 3600000);
     return true;
