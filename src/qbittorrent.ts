@@ -1,6 +1,6 @@
+import { parse as cookieParse } from 'cookie';
 import { FormData } from 'node-fetch-native';
 import { ofetch } from 'ofetch';
-import { Cookie } from 'tough-cookie';
 import { joinURL } from 'ufo';
 
 import { magnetDecode } from '@ctrl/magnet-link';
@@ -746,20 +746,23 @@ export class QBittorrent implements TorrentClient {
       redirect: 'manual',
       retry: false,
       timeout: this.config.timeout,
-      // ...(this.config.agent ? { agent: this.config.agent } : {}),
+      ...(this.config.agent ? { agent: this.config.agent } : {}),
     });
 
     if (!res.headers.get('set-cookie')?.length) {
       throw new Error('Cookie not found. Auth Failed.');
     }
 
-    const cookie = Cookie.parse(res.headers.get('set-cookie'));
-    if (!cookie || cookie.key !== 'SID') {
+    const cookie = cookieParse(res.headers.get('set-cookie'));
+    if (!cookie.SID) {
       throw new Error('Invalid cookie');
     }
 
-    this._sid = cookie.value;
-    this._exp = cookie.expiryDate();
+    this._sid = cookie.SID;
+    // Not sure if it might be lowercase
+    const expires = cookie.Expires ?? cookie.expires;
+    // Default expiration is expected to be 1 hour
+    this._exp = expires ? new Date(expires) : new Date(Date.now() + 3600000);
     return true;
   }
 

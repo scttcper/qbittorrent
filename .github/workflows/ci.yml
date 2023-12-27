@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
@@ -19,12 +19,12 @@ jobs:
         run: npm ci
       - name: start qbittorrent
         run: |
-            mkdir -p ~/bin && source ~/.profile
-            wget -qO ~/bin/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-4.5.5_v2.0.9/x86_64-qbittorrent-nox
-            chmod 700 ~/bin/qbittorrent-nox
-            qbittorrent-nox -d
-            sudo mkdir /downloads
-            mkdir ~/downloads
+          mkdir -p ~/bin && source ~/.profile
+          wget -qO ~/bin/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-4.5.5_v2.0.9/x86_64-qbittorrent-nox
+          chmod 700 ~/bin/qbittorrent-nox
+          qbittorrent-nox -d
+          sudo mkdir /downloads
+          mkdir ~/downloads
       - name: lint
         run: npm run lint
       - name: test
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
