@@ -59,6 +59,7 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
       state = NormalizedTorrentState.error;
       stateMessage = 'The download is missing files';
       break;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     default:
       break;
   }

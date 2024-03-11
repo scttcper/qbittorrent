@@ -2,6 +2,7 @@ import { parse as cookieParse } from 'cookie';
 import { FormData } from 'node-fetch-native';
 import { ofetch } from 'ofetch';
 import { joinURL } from 'ufo';
+import { base64ToUint8Array, isUint8Array, stringToUint8Array } from 'uint8array-extras';
 
 import { magnetDecode } from '@ctrl/magnet-link';
 import type {
@@ -502,7 +503,7 @@ export class QBittorrent implements TorrentClient {
   }
 
   async addTorrent(
-    torrent: string | Buffer,
+    torrent: string | Uint8Array,
     options: Partial<AddTorrentOptions> = {},
   ): Promise<boolean> {
     const form = new FormData();
@@ -514,7 +515,7 @@ export class QBittorrent implements TorrentClient {
 
     const type = { type: 'application/x-bittorrent' };
     if (typeof torrent === 'string') {
-      form.set('file', new File([Buffer.from(torrent, 'base64')], 'file.torrent', type));
+      form.set('file', new File([base64ToUint8Array(torrent)], 'file.torrent', type));
     } else {
       const file = new File([torrent], options.filename ?? 'torrent', type);
       form.set('file', file);
@@ -550,7 +551,7 @@ export class QBittorrent implements TorrentClient {
   }
 
   async normalizedAddTorrent(
-    torrent: string | Buffer,
+    torrent: string | Uint8Array,
     options: Partial<NormalizedAddTorrentOptions> = {},
   ): Promise<NormalizedTorrent> {
     const torrentOptions: Partial<AddTorrentOptions> = {};
@@ -572,8 +573,8 @@ export class QBittorrent implements TorrentClient {
 
       await this.addMagnet(torrent, torrentOptions);
     } else {
-      if (!Buffer.isBuffer(torrent)) {
-        torrent = Buffer.from(torrent);
+      if (!isUint8Array(torrent)) {
+        torrent = stringToUint8Array(torrent);
       }
 
       torrentHash = await hash(torrent);
