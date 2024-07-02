@@ -808,6 +808,7 @@ export class QBittorrent implements TorrentClient {
       retry: 0,
       timeout: this.config.timeout,
       responseType: json ? 'json' : ('text' as 'json'),
+      // @ts-expect-error for some reason agent is not in the type
       agent: this.config.agent,
     });
 
