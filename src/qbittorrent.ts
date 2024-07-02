@@ -743,7 +743,7 @@ export class QBittorrent implements TorrentClient {
       body: new URLSearchParams({
         username: this.config.username ?? '',
         password: this.config.password ?? '',
-      }),
+      }).toString(),
       redirect: 'manual',
       retry: false,
       timeout: this.config.timeout,
