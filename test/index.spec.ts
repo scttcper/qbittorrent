@@ -353,6 +353,7 @@ it('should set categories to torrent', async () => {
 it('should get application version', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const version = await client.getAppVersion();
+  // biome-ignore lint/nursery/noConsole:
   console.log('App version', version);
   expect(version).toBeTruthy();
   expect(typeof version).toBe('string');
@@ -360,6 +361,7 @@ it('should get application version', async () => {
 it('should get api version', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const version = await client.getApiVersion();
+  // biome-ignore lint/nursery/noConsole:
   console.log('API version', version);
   expect(version).toBeTruthy();
   expect(typeof version).toBe('string');

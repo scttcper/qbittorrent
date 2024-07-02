@@ -32,8 +32,8 @@ jspm_packages
 !.vscode/settings.json
 
 # build
-build
-docs
-dist
+build/
+docs/
+dist/
 yarn.lock
 .DS_Store
