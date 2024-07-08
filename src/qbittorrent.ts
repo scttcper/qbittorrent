@@ -58,6 +58,20 @@ export class QBittorrent implements TorrentClient {
   }
 
   /**
+  * Get default path for saving torrents
+  */
+  async getDefaultSavePath(): Promise<string> {
+    return this.request<string>(
+      '/app/defaultSavePath', 
+      'GET',
+      undefined,
+      undefined,
+      undefined,
+      false,
+    );
+  }
+  
+  /**
    * @deprecated
    */
   async version(): Promise<string> {

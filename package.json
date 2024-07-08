@@ -9,18 +9,13 @@
   "type": "module",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
-  "files": [
-    "dist/src"
-  ],
+  "files": ["dist/src"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
     "provenance": true
   },
-  "keywords": [
-    "typescript",
-    "qbittorrent"
-  ],
+  "keywords": ["typescript", "qbittorrent"],
   "scripts": {
     "lint": "pnpm run '/^(lint:biome|lint:eslint)$/'",
     "lint:biome": "biome check .",
@@ -33,7 +28,9 @@
     "build:docs": "typedoc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./junit.xml"
+    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./junit.xml",
+    "test:container:start": "sh scripts/start_container.sh",
+    "test:container:stop": "sh scripts/stop_container.sh"
   },
   "dependencies": {
     "@ctrl/magnet-link": "^4.0.2",
@@ -59,9 +56,7 @@
     "vitest": "1.6.0"
   },
   "release": {
-    "branches": [
-      "master"
-    ]
+    "branches": ["master"]
   },
   "engines": {
     "node": ">=18"

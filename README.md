@@ -27,8 +27,8 @@ async function main() {
 
 ### API
 
-Docs: https://qbittorrent.vercel.app  
-qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)  
+Docs: https://qbittorrent.vercel.app
+qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
 ### Normalized API
 
@@ -102,8 +102,8 @@ console.log(result);
 
 All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client.
 
-deluge - https://github.com/scttcper/deluge  
-transmission - https://github.com/scttcper/transmission  
+deluge - https://github.com/scttcper/deluge
+transmission - https://github.com/scttcper/transmission
 utorrent - https://github.com/scttcper/utorrent
 
 ### Start a test docker container
@@ -120,4 +120,15 @@ docker run -d \
   -p 6881:6881/udp \
   --restart unless-stopped \
   lscr.io/linuxserver/qbittorrent:latest
+```
+
+* Or use the npm script
+
+```bash
+npm run test:container:start
+```
+
+
+```bash
+npm run test:container:stop
 ```
