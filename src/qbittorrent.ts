@@ -93,6 +93,21 @@ export class QBittorrent implements TorrentClient {
   }
 
   /**
+   * Get default save path
+   */
+  async getDefaultSavePath(): Promise<string> {
+    const res = await this.request<string>(
+      '/app/defaultSavePath',
+      'GET',
+      undefined,
+      undefined,
+      undefined,
+      false,
+    );
+    return res;
+  }
+
+  /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-build-info}
    */
   async getBuildInfo(): Promise<BuildInfo> {

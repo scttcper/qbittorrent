@@ -380,3 +380,9 @@ it('should set torrent name', async () => {
   const torrentData = await client.getTorrent(torrentId);
   expect(torrentData.name).toBe(name);
 });
+it('should be able to get the default save path', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const p = await client.getDefaultSavePath();
+  expect(p).not.toBeUndefined();
+  expect(p).toBe('/downloads');
+});
