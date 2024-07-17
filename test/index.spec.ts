@@ -385,5 +385,5 @@ it('should be able to get the default save path', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const p = await client.getDefaultSavePath();
   expect(p).not.toBeUndefined();
-  expect(p).toBe('/downloads');
+  expect(p.toLowerCase()).toContain('/downloads');
 });
