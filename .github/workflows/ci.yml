@@ -17,9 +17,9 @@ jobs:
 
       - name: start qbittorrent
         run: |
-          sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
-          sudo apt update
-          sudo apt install qbittorrent
+          sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable \
+          sudo apt update \
+          sudo apt install qbittorrent \
           qbittorrent-nox -d
 
       - name: lint
