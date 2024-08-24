@@ -17,8 +17,10 @@ jobs:
 
       - name: start qbittorrent
         run: |
-          wget https://github.com/jesec/rtorrent/releases/latest/download/rtorrent-linux-amd64.deb
-          sudo dpkg -i rtorrent-linux-amd64.deb
+          sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
+          sudo apt update
+          sudo apt install qbittorrent
+          qbittorrent-nox -d
 
       - name: lint
         run: pnpm run lint
