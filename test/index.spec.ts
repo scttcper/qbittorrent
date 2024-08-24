@@ -4,7 +4,7 @@ import path from 'node:path';
 import pWaitFor from 'p-wait-for';
 import { afterEach, expect, it } from 'vitest';
 
-import { QBittorrent } from '../src/index.js';
+import { QBittorrent, TorrentFilePriority } from '../src/index.js';
 
 const baseUrl = 'http://localhost:8080';
 const torrentName = 'ubuntu-18.04.1-desktop-amd64.iso';
@@ -215,23 +215,22 @@ it('should set torrent location', async () => {
   const res = await client.setTorrentLocation(torrentId, '/tmp');
   expect(res).toBe(true);
 });
-it.skip('should rename file within torrent', async () => {
+it('should rename file within torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
-  await pWaitFor(
-    async () => {
-      await client.renameFile(torrentId, 0, 'ubuntu');
-      const torrentFiles = await client.torrentFiles(torrentId);
-      return torrentFiles[0].name === 'ubuntu';
-    },
-    { timeout: 10000 },
-  );
-
-  const res = await client.renameFile(torrentId, 0, 'ubuntu');
-  const torrentFiles = await client.torrentFiles(torrentId);
-
-  expect(res).toBe(true);
+  let torrentFiles = await client.torrentFiles(torrentId);
+  expect(await client.renameFile(torrentId, torrentFiles[0].name, 'ubuntu')).toBe(true);
+  torrentFiles = await client.torrentFiles(torrentId);
   expect(torrentFiles[0].name).toBe('ubuntu');
+});
+it('should set torrent priority', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  let torrentFiles = await client.torrentFiles(torrentId);
+  expect(torrentFiles[0].priority).toBe(TorrentFilePriority.NormalPriority);
+  expect(await client.setFilePriority(torrentId, '0', TorrentFilePriority.MaxPriority)).toBe(true);
+  torrentFiles = await client.torrentFiles(torrentId);
+  expect(torrentFiles[0].priority).toBe(TorrentFilePriority.MaxPriority);
 });
 it('should recheck torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
