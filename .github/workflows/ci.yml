@@ -17,10 +17,12 @@ jobs:
 
       - name: start qbittorrent
         run: |
-          sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
+          sudo add-apt-repository ppa:ubuntuhandbook1/qbittorrent
           sudo apt update
           sudo apt install qbittorrent
           qbittorrent-nox -d
+          sudo mkdir /downloads
+          mkdir ~/downloads
 
       - name: lint
         run: pnpm run lint
