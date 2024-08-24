@@ -819,10 +819,11 @@ export class QBittorrent implements TorrentClient {
       },
       body,
       params,
-      // allow proxy agent
       retry: 0,
       timeout: this.config.timeout,
+      // casting to json to avoid type error
       responseType: json ? 'json' : ('text' as 'json'),
+      // allow proxy agent
       // @ts-expect-error for some reason agent is not in the type
       agent: this.config.agent,
     });
