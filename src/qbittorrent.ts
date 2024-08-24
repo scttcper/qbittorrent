@@ -267,13 +267,20 @@ export class QBittorrent implements TorrentClient {
     hash: string,
     fileIds: string | string[],
     priority: TorrentFilePriority,
-  ): Promise<TorrentFile[]> {
-    const res = await this.request<TorrentFile[]>('/torrents/filePrio', 'GET', {
-      hash,
-      id: normalizeHashes(fileIds),
-      priority,
-    });
-    return res;
+  ): Promise<boolean> {
+    await this.request<TorrentFile[]>(
+      '/torrents/filePrio',
+      'POST',
+      undefined,
+      objToUrlSearchParams({
+        hash,
+        id: normalizeHashes(fileIds),
+        priority: priority.toString(),
+      }),
+      undefined,
+      false,
+    );
+    return true;
   }
 
   /**
@@ -495,7 +502,14 @@ export class QBittorrent implements TorrentClient {
       hashes: normalizeHashes(hashes),
       deleteFiles,
     };
-    await this.request('/torrents/delete', 'POST', undefined, objToUrlSearchParams(data));
+    await this.request(
+      '/torrents/delete',
+      'POST',
+      undefined,
+      objToUrlSearchParams(data),
+      undefined,
+      false,
+    );
     return true;
   }
 
@@ -601,16 +615,22 @@ export class QBittorrent implements TorrentClient {
 
   /**
    * @param hash Hash for desired torrent
-   * @param id id of the file to be renamed
-   * @param name new name to be assigned to the file
+   * @param oldPath id of the file to be renamed
+   * @param newPath new name to be assigned to the file
    */
-  async renameFile(hash: string, id: number, name: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('hash', hash);
-    form.append('id', id.toString());
-    form.append('name', name);
-
-    await this.request<string>('/torrents/renameFile', 'POST', undefined, undefined, form, false);
+  async renameFile(hash: string, oldPath: string, newPath: string): Promise<boolean> {
+    await this.request<string>(
+      '/torrents/renameFile',
+      'POST',
+      undefined,
+      objToUrlSearchParams({
+        hash,
+        oldPath,
+        newPath,
+      }),
+      undefined,
+      false,
+    );
 
     return true;
   }
@@ -619,12 +639,18 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#rename-folder}
    */
   async renameFolder(hash: string, oldPath: string, newPath: string): Promise<boolean> {
-    const form = new FormData();
-    form.append('hash', hash);
-    form.append('oldPath', oldPath);
-    form.append('newPath', newPath);
-
-    await this.request<string>('/torrents/renameFolder', 'POST', undefined, undefined, form, false);
+    await this.request<string>(
+      '/torrents/renameFolder',
+      'POST',
+      undefined,
+      objToUrlSearchParams({
+        hash,
+        oldPath,
+        newPath,
+      }),
+      undefined,
+      false,
+    );
 
     return true;
   }
@@ -800,8 +826,8 @@ export class QBittorrent implements TorrentClient {
     method: 'GET' | 'POST',
     params?: Record<string, string | number>,
     body?: URLSearchParams | FormData,
-    headers: any = {},
-    json = true,
+    headers: Record<string, string> = {},
+    isJson = true,
   ): Promise<T> {
     if (!this._sid || !this._exp || this._exp.getTime() < new Date().getTime()) {
       const authed = await this.login();
@@ -822,7 +848,7 @@ export class QBittorrent implements TorrentClient {
       retry: 0,
       timeout: this.config.timeout,
       // casting to json to avoid type error
-      responseType: json ? 'json' : ('text' as 'json'),
+      responseType: isJson ? 'json' : ('text' as 'json'),
       // allow proxy agent
       // @ts-expect-error for some reason agent is not in the type
       agent: this.config.agent,
