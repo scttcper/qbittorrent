@@ -496,6 +496,7 @@ export class QBittorrent implements TorrentClient {
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#delete-torrents}
+   * @param deleteFiles (default: false) remove files from disk
    */
   async removeTorrent(hashes: string | string[] | 'all', deleteFiles = false): Promise<boolean> {
     const data = {
