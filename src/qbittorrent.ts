@@ -607,7 +607,7 @@ export class QBittorrent implements TorrentClient {
         torrent = stringToUint8Array(torrent);
       }
 
-      torrentHash = await hash(torrent);
+      torrentHash = hash(torrent);
       await this.addTorrent(torrent, torrentOptions);
     }
 
