@@ -562,6 +562,10 @@ export interface AddTorrentOptions {
    */
   category: string;
   /**
+   * Tags for the torrent, split by ','
+   */
+  tags: string;
+  /**
    * Skip hash checking. Possible values are true, false (default)
    */
   skip_checking: TrueFalseStr;
@@ -615,6 +619,10 @@ export interface AddMagnetOptions {
    * Category for the torrent
    */
   category: string;
+  /**
+   * Tags for the torrent, split by ','
+   */
+  tags: string;
   /**
    * Skip hash checking. Possible values are true, false (default)
    */
