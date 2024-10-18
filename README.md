@@ -20,7 +20,7 @@ const client = new QBittorrent({
 });
 
 async function main() {
-  const res = await qbittorrent.getAllData();
+  const res = await client.getAllData();
   console.log(res);
 }
 ```
