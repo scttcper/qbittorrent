@@ -1,6 +1,9 @@
-import { NormalizedTorrent, TorrentState as NormalizedTorrentState } from '@ctrl/shared-torrent';
+import {
+  type NormalizedTorrent,
+  TorrentState as NormalizedTorrentState,
+} from '@ctrl/shared-torrent';
 
-import { Torrent, TorrentState } from './types.js';
+import { type Torrent, TorrentState } from './types.js';
 
 export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
   let state = NormalizedTorrentState.unknown;
