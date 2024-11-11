@@ -789,7 +789,7 @@ export class QBittorrent implements TorrentClient {
       redirect: 'manual',
       retry: false,
       timeout: this.config.timeout,
-      ...(this.config.agent ? { agent: this.config.agent } : {}),
+      dispatcher: this.config.dispatcher,
     });
 
     if (!res.headers.get('set-cookie')?.length) {
@@ -851,8 +851,7 @@ export class QBittorrent implements TorrentClient {
       // casting to json to avoid type error
       responseType: isJson ? 'json' : ('text' as 'json'),
       // allow proxy agent
-      // @ts-expect-error for some reason agent is not in the type
-      agent: this.config.agent,
+      dispatcher: this.config.dispatcher,
     });
 
     return res;
