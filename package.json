@@ -27,7 +27,7 @@
     "lint:eslint": "eslint .",
     "lint:fix": "pnpm run '/^(lint:biome|lint:eslint):fix$/'",
     "lint:eslint:fix": "eslint . --fix",
-    "lint:biome:fix": "biome check . --apply",
+    "lint:biome:fix": "biome check . --write",
     "prepare": "npm run build",
     "build": "tsc",
     "build:docs": "typedoc",
