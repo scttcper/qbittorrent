@@ -485,6 +485,24 @@ export class QBittorrent implements TorrentClient {
     return true;
   }
 
+    /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
+   */
+  async startTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+    const data = { hashes: normalizeHashes(hashes) };
+    await this.request('/torrents/start', 'POST', undefined, objToUrlSearchParams(data));
+    return true;
+  }
+
+  /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
+   */
+  async stopTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+    const data = { hashes: normalizeHashes(hashes) };
+    await this.request('/torrents/stop', 'POST', undefined, objToUrlSearchParams(data));
+    return true;
+  }
+
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
