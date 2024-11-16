@@ -572,7 +572,9 @@ export interface AddTorrentOptions {
   /**
    * Add torrents in the paused state. Possible values are true, false (default)
    */
-  paused: TrueFalseStr;
+  paused?: TrueFalseStr;
+  stopped?: TrueFalseStr;
+
   /**
    * Control filesystem structure for content (added in Web API v2.7)
    * Migrating from rootFolder example rootFolder ? 'Original' :  'NoSubfolder'
@@ -630,7 +632,8 @@ export interface AddMagnetOptions {
   /**
    * Add torrents in the paused state. Possible values are true, false (default)
    */
-  paused: TrueFalseStr;
+  paused?: TrueFalseStr;
+  stopped?: TrueFalseStr;
   /**
    * Create the root folder. Possible values are true, false, unset (default)
    */
