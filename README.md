@@ -98,6 +98,15 @@ const result = await client.normalizedAddTorrent(fs.readFileSync(torrentFile), {
 console.log(result);
 ```
 
+##### export and create from state
+
+If you're shutting down the server often (serverless?) you can export the state
+
+```ts
+const state = client.exportState()
+const client = QBittorrent.createFromState(config, state);
+```
+
 ### See Also
 
 All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client.

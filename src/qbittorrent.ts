@@ -1,6 +1,7 @@
 import { parse as cookieParse } from 'cookie';
 import { FormData } from 'node-fetch-native';
 import { ofetch } from 'ofetch';
+import type { Jsonify } from 'type-fest';
 import { joinURL } from 'ufo';
 import { base64ToUint8Array, isUint8Array, stringToUint8Array } from 'uint8array-extras';
 
@@ -11,7 +12,8 @@ import type {
   Label,
   NormalizedTorrent,
   TorrentClient,
-  TorrentSettings,
+  TorrentClientConfig,
+  TorrentClientState,
 } from '@ctrl/shared-torrent';
 import { hash } from '@ctrl/torrent-file';
 
@@ -33,7 +35,24 @@ import type {
   WebSeed,
 } from './types.js';
 
-const defaults: TorrentSettings = {
+interface QBittorrentState extends TorrentClientState {
+  auth?: {
+    /**
+     * auth cookie
+     */
+    sid: string;
+    /**
+     * cookie expiration
+     */
+    expires: Date;
+  };
+  version?: {
+    version: string;
+    isVersion5OrHigher: boolean;
+  };
+}
+
+const defaults: TorrentClientConfig = {
   baseUrl: 'http://localhost:9091/',
   path: '/api/v2',
   username: '',
@@ -42,24 +61,33 @@ const defaults: TorrentSettings = {
 };
 
 export class QBittorrent implements TorrentClient {
-  config: TorrentSettings;
+  /**
+   * Create a new QBittorrent client from a state
+   */
+  static createFromState(
+    config: Readonly<TorrentClientConfig>,
+    state: Readonly<Jsonify<QBittorrentState>>,
+  ): QBittorrent {
+    const client = new QBittorrent(config);
+    client.state = {
+      ...state,
+      auth: state.auth ? { ...state.auth, expires: new Date(state.auth.expires) } : undefined,
+    };
+    return client;
+  }
 
-  /**
-   * auth cookie
-   */
-  private _sid?: string;
-  /**
-   * cookie expiration
-   */
-  private _exp?: Date;
-  /**
-   * Version Check
-   */
-  private _version?: string;
-  private _isVersion5OrHigher: boolean = false;
+  config: TorrentClientConfig;
+  state: QBittorrentState = {};
 
-  constructor(options: Partial<TorrentSettings> = {}) {
+  constructor(options: Partial<TorrentClientConfig> = {}) {
     this.config = { ...defaults, ...options };
+  }
+
+  /**
+   * Export the state of the client as JSON
+   */
+  exportState(): Jsonify<QBittorrentState> {
+    return JSON.parse(JSON.stringify(this.state));
   }
 
   /**
@@ -83,15 +111,6 @@ export class QBittorrent implements TorrentClient {
       false,
     );
     return res;
-  }
-
-  private async checkVersion(): Promise<void> {
-    if (!this._version) {
-      this._version = await this.getAppVersion();
-      // Remove potential 'v' prefix and any extra info after version number
-      const cleanVersion = this._version.replace(/^v/, '').split('-')[0];
-      this._isVersion5OrHigher = cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0');
-    }
   }
 
   async getApiVersion(): Promise<string> {
@@ -240,7 +259,7 @@ export class QBittorrent implements TorrentClient {
             count: 1,
           };
         } else {
-          labels[torrentData.label].count += 1;
+          labels[torrentData.label]!.count += 1;
         }
       }
     }
@@ -494,18 +513,19 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#pause-torrents}
    */
   async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = this._isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
+    const endpoint = this.state.version?.isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
   }
 
-
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
   async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = this._isVersion5OrHigher ? '/torrents/start' : '/torrents/resume';
+    const endpoint = this.state.version?.isVersion5OrHigher
+      ? '/torrents/start'
+      : '/torrents/resume';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
@@ -570,8 +590,8 @@ export class QBittorrent implements TorrentClient {
 
     if (options) {
       // Handle version-specific paused/stopped parameter
-      if (this._isVersion5OrHigher && 'paused' in options) {
-        form.append('stopped', options.paused);
+      if (this.state.version?.isVersion5OrHigher && 'paused' in options) {
+        form.append('stopped', options.paused!);
         delete options.paused;
       }
 
@@ -689,8 +709,8 @@ export class QBittorrent implements TorrentClient {
 
     if (options) {
       // Handle version-specific paused/stopped parameter
-       if (this._isVersion5OrHigher && 'paused' in options) {
-        form.append('stopped', options.paused);
+      if (this.state.version?.isVersion5OrHigher && 'paused' in options) {
+        form.append('stopped', options.paused!);
         delete options.paused;
       }
 
@@ -804,7 +824,7 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#login}
    */
   async login(): Promise<boolean> {
-    const url = joinURL(this.config.baseUrl, this.config.path, '/auth/login');
+    const url = joinURL(this.config.baseUrl, this.config.path ?? '', '/auth/login');
 
     const res = await ofetch.raw(url, {
       method: 'POST',
@@ -825,22 +845,21 @@ export class QBittorrent implements TorrentClient {
       throw new Error('Cookie not found. Auth Failed.');
     }
 
-    const cookie = cookieParse(res.headers.get('set-cookie'));
+    const cookie = cookieParse(res.headers.get('set-cookie') ?? '');
     if (!cookie.SID) {
       throw new Error('Invalid cookie');
     }
 
-    this._sid = cookie.SID;
-    // Not sure if it might be lowercase
     const expires = cookie.Expires ?? cookie.expires;
-    // Assumed to be in seconds
     const maxAge = cookie['Max-Age'] ?? cookie['max-age'];
-    this._exp = expires
-      ? new Date(expires)
-      : maxAge
-        ? new Date(Number(maxAge) * 1000)
-        : // Default expiration 1 hour
-          new Date(Date.now() + 3600000);
+    this.state.auth = {
+      sid: cookie.SID,
+      expires: expires
+        ? new Date(expires)
+        : maxAge
+          ? new Date(Number(maxAge) * 1000)
+          : new Date(Date.now() + 3600000),
+    };
 
     // Check version after successful login
     await this.checkVersion();
@@ -849,8 +868,7 @@ export class QBittorrent implements TorrentClient {
   }
 
   logout(): boolean {
-    this._sid = undefined;
-    this._exp = undefined;
+    delete this.state.auth;
     return true;
   }
 
@@ -863,18 +881,22 @@ export class QBittorrent implements TorrentClient {
     headers: Record<string, string> = {},
     isJson = true,
   ): Promise<T> {
-    if (!this._sid || !this._exp || this._exp.getTime() < new Date().getTime()) {
+    if (
+      !this.state.auth?.sid ||
+      !this.state.auth.expires ||
+      this.state.auth.expires.getTime() < new Date().getTime()
+    ) {
       const authed = await this.login();
       if (!authed) {
         throw new Error('Auth Failed');
       }
     }
 
-    const url = joinURL(this.config.baseUrl, this.config.path, path);
+    const url = joinURL(this.config.baseUrl, this.config.path ?? '', path);
     const res = await ofetch<T>(url, {
       method,
       headers: {
-        Cookie: `SID=${this._sid ?? ''}`,
+        Cookie: `SID=${this.state.auth!.sid ?? ''}`,
         ...headers,
       },
       body,
@@ -888,6 +910,18 @@ export class QBittorrent implements TorrentClient {
     });
 
     return res;
+  }
+
+  private async checkVersion(): Promise<void> {
+    if (!this.state.version?.version) {
+      const newVersion = await this.getAppVersion();
+      // Remove potential 'v' prefix and any extra info after version number
+      const cleanVersion = newVersion.replace(/^v/, '').split('-')[0]!;
+      this.state.version = {
+        version: newVersion,
+        isVersion5OrHigher: cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0'),
+      };
+    }
   }
 }
 
@@ -911,6 +945,6 @@ function objToUrlSearchParams(obj: Record<string, string | boolean>): URLSearchP
 
   return params;
 }
-function isGreater(a:string, b: string) {
+function isGreater(a: string, b: string) {
   return a.localeCompare(b, undefined, { numeric: true }) === 1;
-};
+}
