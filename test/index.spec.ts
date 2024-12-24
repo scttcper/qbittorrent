@@ -34,7 +34,7 @@ async function setupTorrent(client: QBittorrent): Promise<string> {
   await client.addTorrent(torrentFileBuffer);
   await waitForTorrent(client);
   const torrents = await client.listTorrents();
-  return torrents[0].hash;
+  return torrents[0]!.hash;
 }
 
 afterEach(async () => {
@@ -82,7 +82,7 @@ it('should add torrent with label', async () => {
   await waitForTorrent(client);
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
-  expect(torrents[0].category).toBe('swag');
+  expect(torrents[0]!.category).toBe('swag');
 });
 it('should add normalized torrent with label', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -191,7 +191,7 @@ it('should add/remove torrent tag', async () => {
   expect(res).toBe(true);
   await client.addTorrentTags(torrentId, '4k');
   const torrent = await client.getTorrent(torrentId);
-  expect(torrent.tags.sort()).toEqual(['4k', 'movie']);
+  expect(torrent.tags!.sort()).toEqual(['4k', 'movie']);
   const res2 = await client.removeTorrentTags(torrentId, 'movie');
   expect(res2).toBe(true);
   await client.removeTorrentTags(torrentId, '4k');
@@ -219,18 +219,18 @@ it('should rename file within torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   let torrentFiles = await client.torrentFiles(torrentId);
-  expect(await client.renameFile(torrentId, torrentFiles[0].name, 'ubuntu')).toBe(true);
+  expect(await client.renameFile(torrentId, torrentFiles[0]!.name, 'ubuntu')).toBe(true);
   torrentFiles = await client.torrentFiles(torrentId);
-  expect(torrentFiles[0].name).toBe('ubuntu');
+  expect(torrentFiles[0]!.name).toBe('ubuntu');
 });
 it('should set torrent priority', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
   let torrentFiles = await client.torrentFiles(torrentId);
-  expect(torrentFiles[0].priority).toBe(TorrentFilePriority.NormalPriority);
+  expect(torrentFiles[0]!.priority).toBe(TorrentFilePriority.NormalPriority);
   expect(await client.setFilePriority(torrentId, '0', TorrentFilePriority.MaxPriority)).toBe(true);
   torrentFiles = await client.torrentFiles(torrentId);
-  expect(torrentFiles[0].priority).toBe(TorrentFilePriority.MaxPriority);
+  expect(torrentFiles[0]!.priority).toBe(TorrentFilePriority.MaxPriority);
 });
 it('should recheck torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -247,7 +247,7 @@ it('should return normalized torrent data', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   await setupTorrent(client);
   const res = await client.getAllData();
-  const torrent = res.torrents[0];
+  const torrent = res.torrents[0]!;
   expect(torrent.connectedPeers).toBe(0);
   expect(torrent.connectedSeeds).toBe(0);
   expect(torrent.downloadSpeed).toBe(0);
