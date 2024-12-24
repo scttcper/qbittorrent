@@ -383,3 +383,13 @@ it('should be able to get the default save path', async () => {
   expect(p).not.toBeUndefined();
   expect(p.toLowerCase()).toContain('/downloads');
 });
+
+it('should be able to export and create from state', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  await client.login();
+  const state = client.exportState();
+  const client2 = QBittorrent.createFromState(client.config, state);
+  expect(client2).toBeDefined();
+  expect(client2.state.auth?.sid).toBeDefined();
+  expect(client2.state.auth?.expires).toBeInstanceOf(Date);
+});

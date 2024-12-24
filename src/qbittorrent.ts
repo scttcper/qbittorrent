@@ -1,6 +1,7 @@
 import { parse as cookieParse } from 'cookie';
 import { FormData } from 'node-fetch-native';
 import { ofetch } from 'ofetch';
+import type { Jsonify } from 'type-fest';
 import { joinURL } from 'ufo';
 import { base64ToUint8Array, isUint8Array, stringToUint8Array } from 'uint8array-extras';
 
@@ -60,9 +61,15 @@ const defaults: TorrentClientConfig = {
 };
 
 export class QBittorrent implements TorrentClient {
-  static createFromState(config: TorrentClientConfig, state: QBittorrentState): QBittorrent {
+  static createFromState(
+    config: Readonly<TorrentClientConfig>,
+    state: Readonly<Jsonify<QBittorrentState>>,
+  ): QBittorrent {
     const client = new QBittorrent(config);
-    client.state = state;
+    client.state = {
+      ...state,
+      auth: state.auth ? { ...state.auth, expires: new Date(state.auth.expires) } : undefined,
+    };
     return client;
   }
 
@@ -73,8 +80,8 @@ export class QBittorrent implements TorrentClient {
     this.config = { ...defaults, ...options };
   }
 
-  exportState(): QBittorrentState {
-    return this.state;
+  exportState(): Jsonify<QBittorrentState> {
+    return JSON.parse(JSON.stringify(this.state));
   }
 
   /**
