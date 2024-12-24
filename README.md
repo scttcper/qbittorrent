@@ -103,8 +103,8 @@ console.log(result);
 If you're shutting down the server often (serverless?) you can export the state
 
 ```ts
-const state = JSON.stringify(client.exportState());
-const client = QBittorrent.createFromState(config, JSON.parse(state));
+const state = client.exportState()
+const client = QBittorrent.createFromState(config, state);
 ```
 
 ### See Also

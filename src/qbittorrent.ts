@@ -61,6 +61,9 @@ const defaults: TorrentClientConfig = {
 };
 
 export class QBittorrent implements TorrentClient {
+  /**
+   * Create a new QBittorrent client from a state
+   */
   static createFromState(
     config: Readonly<TorrentClientConfig>,
     state: Readonly<Jsonify<QBittorrentState>>,
@@ -80,6 +83,9 @@ export class QBittorrent implements TorrentClient {
     this.config = { ...defaults, ...options };
   }
 
+  /**
+   * Export the state of the client as JSON
+   */
   exportState(): Jsonify<QBittorrentState> {
     return JSON.parse(JSON.stringify(this.state));
   }
