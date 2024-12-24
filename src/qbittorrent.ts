@@ -52,6 +52,11 @@ export class QBittorrent implements TorrentClient {
    * cookie expiration
    */
   private _exp?: Date;
+  /**
+   * Version Check
+   */
+  private _version?: string;
+  private _isVersion5OrHigher: boolean = false;
 
   constructor(options: Partial<TorrentSettings> = {}) {
     this.config = { ...defaults, ...options };
@@ -78,6 +83,15 @@ export class QBittorrent implements TorrentClient {
       false,
     );
     return res;
+  }
+
+  private async checkVersion(): Promise<void> {
+    if (!this._version) {
+      this._version = await this.getAppVersion();
+      // Remove potential 'v' prefix and any extra info after version number
+      const cleanVersion = this._version.replace(/^v/, '').split('-')[0];
+      this._isVersion5OrHigher = cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0');
+    }
   }
 
   async getApiVersion(): Promise<string> {
@@ -480,17 +494,20 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#pause-torrents}
    */
   async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+    const endpoint = this._isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
     const data = { hashes: normalizeHashes(hashes) };
-    await this.request('/torrents/pause', 'POST', undefined, objToUrlSearchParams(data));
+    await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
   }
+
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
   async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+    const endpoint = this._isVersion5OrHigher ? '/torrents/start' : '/torrents/resume';
     const data = { hashes: normalizeHashes(hashes) };
-    await this.request('/torrents/resume', 'POST', undefined, objToUrlSearchParams(data));
+    await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
   }
 
@@ -552,6 +569,12 @@ export class QBittorrent implements TorrentClient {
     }
 
     if (options) {
+      // Handle version-specific paused/stopped parameter
+      if (this._isVersion5OrHigher && 'paused' in options) {
+        form.append('stopped', options.paused);
+        delete options.paused;
+      }
+
       // disable savepath when autoTMM is defined
       if (options.useAutoTMM === 'true') {
         options.savepath = '';
@@ -665,6 +688,12 @@ export class QBittorrent implements TorrentClient {
     form.append('urls', urls);
 
     if (options) {
+      // Handle version-specific paused/stopped parameter
+       if (this._isVersion5OrHigher && 'paused' in options) {
+        form.append('stopped', options.paused);
+        delete options.paused;
+      }
+
       // disable savepath when autoTMM is defined
       if (options.useAutoTMM === 'true') {
         options.savepath = '';
@@ -812,6 +841,10 @@ export class QBittorrent implements TorrentClient {
         ? new Date(Number(maxAge) * 1000)
         : // Default expiration 1 hour
           new Date(Date.now() + 3600000);
+
+    // Check version after successful login
+    await this.checkVersion();
+
     return true;
   }
 
@@ -878,3 +911,6 @@ function objToUrlSearchParams(obj: Record<string, string | boolean>): URLSearchP
 
   return params;
 }
+function isGreater(a:string, b: string) {
+  return a.localeCompare(b, undefined, { numeric: true }) === 1;
+};
