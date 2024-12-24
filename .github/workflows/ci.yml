@@ -17,6 +17,15 @@ jobs:
 
       - name: start qbittorrent
         run: |
+          mkdir -p ~/.config/qBittorrent/
+          cat > ~/.config/qBittorrent/qBittorrent.conf << 'EOF'
+          [BitTorrent]
+          Session\QueueingSystemEnabled=false
+          [Meta]
+          MigrationVersion=6
+          [Preferences]
+          WebUI\Password_PBKDF2="@ByteArray(ARQ77eY1NUZaQsuDHbIMCA==:0WMRkYTUWVT9wVvdDtHAjU9b3b7uB8NR1Gur2hmQCvCDpm39Q+PsJRJPaCU51dEiz+dTzh8qbPsL8WkFljQYFQ==)"
+          EOF
           sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
           sudo apt update
           sudo apt install qbittorrent-nox
