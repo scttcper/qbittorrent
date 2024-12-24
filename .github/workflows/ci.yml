@@ -27,6 +27,8 @@ jobs:
       - name: lint
         run: pnpm run lint
 
+      - run: cat ~/.config/qBittorrent/qBittorrent.conf
+
       - name: test
         run: pnpm run test:ci
 
