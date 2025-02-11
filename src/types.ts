@@ -1297,3 +1297,12 @@ export interface TorrentPeer {
   up_speed?: number;
   uploaded?: number;
 }
+
+export interface DownloadSpeed {
+  [hash: string]: number
+}
+
+export interface UploadSpeed {
+  [hash: string]: number
+}
+
