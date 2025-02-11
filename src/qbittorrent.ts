@@ -22,6 +22,7 @@ import type {
   AddMagnetOptions,
   AddTorrentOptions,
   BuildInfo,
+  DownloadSpeed,
   Preferences,
   Torrent,
   TorrentCategories,
@@ -32,6 +33,7 @@ import type {
   TorrentPieceState,
   TorrentProperties,
   TorrentTrackers,
+  UploadSpeed,
   WebSeed,
 } from './types.js';
 
@@ -156,6 +158,65 @@ export class QBittorrent implements TorrentClient {
     }
 
     return normalizeTorrentData(torrentData);
+  }
+
+  /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-torrent-download-limit}
+   */
+  async getTorrentDownloadLimit(hash: string | string[]): Promise<DownloadSpeed> {
+    const downloadLimit = await this.request<DownloadSpeed>(
+      '/torrents/downloadLimit',
+      'POST',
+      undefined,
+      objToUrlSearchParams({
+        hashes: normalizeHashes(hash),
+      }),
+      undefined,
+    );
+    return downloadLimit;
+  }
+
+  /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-download-limit}
+   */
+  async setTorrentDownloadLimit(hash: string | string[], limitBytesPerSecond: number): Promise<boolean> {
+    const data = {
+      limit: limitBytesPerSecond.toString(),
+      hashes: normalizeHashes(hash),
+    };
+
+    await this.request('/torrents/setDownloadLimit', 'POST', undefined, objToUrlSearchParams(data));
+    return true;
+  }
+
+
+  /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-torrent-upload-limit}
+   */
+  async getTorrentUploadLimit(hash: string | string[]): Promise<UploadSpeed> {
+    const UploadLimit = await this.request<UploadSpeed>(
+      '/torrents/uploadLimit',
+      'POST',
+      undefined,
+      objToUrlSearchParams({
+        hashes: normalizeHashes(hash),
+      }),
+      undefined,
+    );
+    return UploadLimit;
+  }
+
+  /**
+   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-upload-limit}
+   */
+  async setTorrentUploadLimit(hash: string | string[], limitBytesPerSecond: number): Promise<boolean> {
+    const data = {
+      limit: limitBytesPerSecond.toString(),
+      hashes: normalizeHashes(hash),
+    };
+
+    await this.request('/torrents/setUploadLimit', 'POST', undefined, objToUrlSearchParams(data));
+    return true;
   }
 
   /**
