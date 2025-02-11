@@ -1298,11 +1298,6 @@ export interface TorrentPeer {
   uploaded?: number;
 }
 
-export interface DownloadSpeed {
-  [hash: string]: number
-}
+export type DownloadSpeed = Record<string, number>;
 
-export interface UploadSpeed {
-  [hash: string]: number
-}
-
+export type UploadSpeed = Record<string, number>;

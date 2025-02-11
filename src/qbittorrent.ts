@@ -179,7 +179,10 @@ export class QBittorrent implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-download-limit}
    */
-  async setTorrentDownloadLimit(hash: string | string[], limitBytesPerSecond: number): Promise<boolean> {
+  async setTorrentDownloadLimit(
+    hash: string | string[],
+    limitBytesPerSecond: number,
+  ): Promise<boolean> {
     const data = {
       limit: limitBytesPerSecond.toString(),
       hashes: normalizeHashes(hash),
@@ -188,7 +191,6 @@ export class QBittorrent implements TorrentClient {
     await this.request('/torrents/setDownloadLimit', 'POST', undefined, objToUrlSearchParams(data));
     return true;
   }
-
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-torrent-upload-limit}
@@ -209,7 +211,10 @@ export class QBittorrent implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#set-torrent-upload-limit}
    */
-  async setTorrentUploadLimit(hash: string | string[], limitBytesPerSecond: number): Promise<boolean> {
+  async setTorrentUploadLimit(
+    hash: string | string[],
+    limitBytesPerSecond: number,
+  ): Promise<boolean> {
     const data = {
       limit: limitBytesPerSecond.toString(),
       hashes: normalizeHashes(hash),
