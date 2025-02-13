@@ -8,10 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:mantic
-      options: --privileged  # needed for qbittorrent service
+    runs-on: ubuntu-24.10
     steps:
       - uses: actions/checkout@v4
 
