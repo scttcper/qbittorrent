@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:mantic
+      options: --privileged  # needed for qbittorrent service
     steps:
       - uses: actions/checkout@v4
 
@@ -27,9 +30,8 @@ jobs:
           [Preferences]
           WebUI\Password_PBKDF2="@ByteArray(ARQ77eY1NUZaQsuDHbIMCA==:0WMRkYTUWVT9wVvdDtHAjU9b3b7uB8NR1Gur2hmQCvCDpm39Q+PsJRJPaCU51dEiz+dTzh8qbPsL8WkFljQYFQ==)"
           EOF
-          sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
-          sudo apt update
-          sudo apt install qbittorrent-nox
+          apt-get update
+          apt-get install -y qbittorrent-nox=5.0.3.99~202501190948-8438-6a5ea93c9~ubuntu24.10.1
           qbittorrent-nox -d
           sudo mkdir /downloads
           mkdir ~/downloads
@@ -48,6 +50,8 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:mantic
     if: github.ref_name == 'master'
     permissions:
       contents: write # to be able to publish a GitHub release
