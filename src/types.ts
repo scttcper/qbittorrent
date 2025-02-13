@@ -236,6 +236,10 @@ export enum TorrentState {
    */
   Downloading = 'downloading',
   /**
+   * Torrent has been stopped while downloading
+   */
+  StoppedDL = 'stoppedDL',
+  /**
    * Torrent is being downloaded, but no connection were made
    */
   StalledDL = 'stalledDL',
