@@ -201,10 +201,12 @@ export enum TorrentState {
   Error = 'error',
   /**
    * Torrent is paused and has finished downloading
+   * ``pausedUP`` was renamed to ``stoppedUP`` in Web API v2.11.0
    */
   PausedUP = 'pausedUP',
   /**
    * Torrent is paused and has NOT finished downloading
+   * ``pausedDL`` was renamed to ``stoppedDL`` in Web API v2.11.0
    */
   PausedDL = 'pausedDL',
   /**
@@ -239,6 +241,10 @@ export enum TorrentState {
    * Torrent has been stopped while downloading
    */
   StoppedDL = 'stoppedDL',
+  /**
+   * Torrent has been stopped while downloading
+   */
+  StoppedUP = 'stoppedUP',
   /**
    * Torrent is being downloaded, but no connection were made
    */

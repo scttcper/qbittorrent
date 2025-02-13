@@ -20,6 +20,7 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
       stateMessage = 'qBittorrent is reporting an error';
       break;
     case TorrentState.PausedDL:
+    case TorrentState.StoppedDL:
       state = NormalizedTorrentState.paused;
       break;
     case TorrentState.QueuedDL: // queuing is enabled and torrent is queued for download
@@ -41,7 +42,8 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
       state = NormalizedTorrentState.warning;
       stateMessage = 'The download is stalled with no connection';
       break;
-    case TorrentState.PausedUP: // torrent is paused and has finished downloading:
+    case TorrentState.StoppedUP: // torrent is paused and has finished downloading
+    case TorrentState.PausedUP: // torrent is paused and has finished downloading
     case TorrentState.Uploading: // torrent is being seeded and data is being transferred
     case TorrentState.StalledUP: // torrent is being seeded, but no connection were made
     case TorrentState.QueuedUP: // queuing is enabled and torrent is queued for upload
