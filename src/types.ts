@@ -38,7 +38,6 @@ export type TorrentFilters =
   | 'checking'
   | 'moving'
   | 'errored';
-  
 
 export interface Torrent {
   /**
