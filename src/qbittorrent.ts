@@ -265,7 +265,7 @@ export class QBittorrent implements TorrentClient {
     reverse,
     tag,
     limit,
-    Private,
+    isPrivate,
     include_trackers,
   }: {
     hashes?: string | string[];
@@ -278,7 +278,11 @@ export class QBittorrent implements TorrentClient {
     offset?: number;
     limit?: number;
     reverse?: boolean;
-    Private?: boolean;
+    /**
+     * Maps to `private` query parameter.
+     * Renamed to avoid conflict with `private` keyword.
+     */
+    isPrivate?: boolean;
     include_trackers?: boolean;
   } = {}): Promise<Torrent[]> {
     const params: Record<string, string> = {};
@@ -321,8 +325,8 @@ export class QBittorrent implements TorrentClient {
       params.reverse = JSON.stringify(reverse);
     }
 
-    if (Private) {
-      params.Private = JSON.stringify(Private);
+    if (isPrivate) {
+      params.private = JSON.stringify(isPrivate);
     }
 
     if (include_trackers) {
