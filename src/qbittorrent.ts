@@ -329,7 +329,7 @@ export class QBittorrent implements TorrentClient {
       params.include_trackers = JSON.stringify(include_trackers);
     }
 
-    const res = await this.request<Torrent[]>("/torrents/info", "GET", params);
+    const res = await this.request<Torrent[]>('/torrents/info', 'GET', params);
     return res;
   }
 
