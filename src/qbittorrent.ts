@@ -256,7 +256,6 @@ export class QBittorrent implements TorrentClient {
    */
   async listTorrents({
     hashes,
-    torrent_hashes,
     filter,
     category,
     sort,
@@ -268,7 +267,6 @@ export class QBittorrent implements TorrentClient {
     includeTrackers,
   }: {
     hashes?: string | string[];
-    torrent_hashes?: string | string[];
     filter?: TorrentFilters;
     sort?: string;
     tag?: string;
@@ -286,9 +284,6 @@ export class QBittorrent implements TorrentClient {
     const params: Record<string, string> = {};
     if (hashes) {
       params.hashes = normalizeHashes(hashes);
-    }
-    if (torrent_hashes) {
-      params.torrent_hashes = normalizeHashes(torrent_hashes);
     }
 
     if (filter) {
