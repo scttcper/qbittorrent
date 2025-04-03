@@ -24,14 +24,21 @@ export interface BuildInfo {
 export type TorrentFilters =
   | 'all'
   | 'downloading'
+  | 'seeding'
   | 'completed'
   | 'paused'
+  | 'stopped'
   | 'active'
   | 'inactive'
   | 'resumed'
+  | 'running'
   | 'stalled'
   | 'stalled_uploading'
-  | 'stalled_downloading';
+  | 'stalled_downloading'
+  | 'checking'
+  | 'moving'
+  | 'errored';
+  
 
 export interface Torrent {
   /**
