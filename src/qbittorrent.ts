@@ -258,7 +258,6 @@ export class QBittorrent implements TorrentClient {
     hashes,
     torrent_hashes,
     filter,
-    status_filter,
     category,
     sort,
     offset,
@@ -271,7 +270,6 @@ export class QBittorrent implements TorrentClient {
     hashes?: string | string[];
     torrent_hashes?: string | string[];
     filter?: TorrentFilters;
-    status_filter?: TorrentFilters;
     sort?: string;
     tag?: string;
     category?: string;
@@ -295,10 +293,6 @@ export class QBittorrent implements TorrentClient {
 
     if (filter) {
       params.filter = filter;
-    }
-
-    if (status_filter) {
-      params.status_filter = status_filter;
     }
 
     if (category !== undefined) {
@@ -330,7 +324,7 @@ export class QBittorrent implements TorrentClient {
     }
 
     if (include_trackers) {
-      params.include_trackers = JSON.stringify(include_trackers);
+      params.includeTrackers = JSON.stringify(include_trackers);
     }
 
     const res = await this.request<Torrent[]>('/torrents/info', 'GET', params);
