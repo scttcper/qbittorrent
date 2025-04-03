@@ -265,7 +265,7 @@ export class QBittorrent implements TorrentClient {
     tag,
     limit,
     isPrivate,
-    include_trackers,
+    includeTrackers,
   }: {
     hashes?: string | string[];
     torrent_hashes?: string | string[];
@@ -281,7 +281,7 @@ export class QBittorrent implements TorrentClient {
      * Renamed to avoid conflict with `private` keyword.
      */
     isPrivate?: boolean;
-    include_trackers?: boolean;
+    includeTrackers?: boolean;
   } = {}): Promise<Torrent[]> {
     const params: Record<string, string> = {};
     if (hashes) {
@@ -323,8 +323,8 @@ export class QBittorrent implements TorrentClient {
       params.private = JSON.stringify(isPrivate);
     }
 
-    if (include_trackers) {
-      params.includeTrackers = JSON.stringify(include_trackers);
+    if (includeTrackers) {
+      params.includeTrackers = JSON.stringify(includeTrackers);
     }
 
     const res = await this.request<Torrent[]>('/torrents/info', 'GET', params);
