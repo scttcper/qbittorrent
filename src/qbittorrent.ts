@@ -256,28 +256,45 @@ export class QBittorrent implements TorrentClient {
    */
   async listTorrents({
     hashes,
+    torrent_hashes,
     filter,
+    status_filter,
     category,
     sort,
     offset,
     reverse,
     tag,
+    limit,
+    Private,
+    include_trackers,
   }: {
     hashes?: string | string[];
+    torrent_hashes?: string | string[];
     filter?: TorrentFilters;
+    status_filter?: TorrentFilters;
     sort?: string;
     tag?: string;
     category?: string;
     offset?: number;
+    limit?: number;
     reverse?: boolean;
+    Private?: boolean;
+    include_trackers?: boolean;
   } = {}): Promise<Torrent[]> {
     const params: Record<string, string> = {};
     if (hashes) {
       params.hashes = normalizeHashes(hashes);
     }
+    if (torrent_hashes) {
+      params.torrent_hashes = normalizeHashes(torrent_hashes);
+    }
 
     if (filter) {
       params.filter = filter;
+    }
+
+    if (status_filter) {
+      params.status_filter = status_filter;
     }
 
     if (category !== undefined) {
@@ -292,6 +309,10 @@ export class QBittorrent implements TorrentClient {
       params.offset = `${offset}`;
     }
 
+    if (limit !== undefined) {
+      params.limit = `${limit}`;
+    }
+
     if (sort) {
       params.sort = sort;
     }
@@ -300,7 +321,15 @@ export class QBittorrent implements TorrentClient {
       params.reverse = JSON.stringify(reverse);
     }
 
-    const res = await this.request<Torrent[]>('/torrents/info', 'GET', params);
+    if (Private) {
+      params.Private = JSON.stringify(Private);
+    }
+
+    if (include_trackers) {
+      params.include_trackers = JSON.stringify(include_trackers);
+    }
+
+    const res = await this.request<Torrent[]>("/torrents/info", "GET", params);
     return res;
   }
 
