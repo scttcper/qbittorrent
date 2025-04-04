@@ -1022,7 +1022,7 @@ export class QBittorrent implements TorrentClient {
       /* 
       This won't cause any recursive function calling of this.request method
       because now auth is deleted and inside this next call,
-      auth will throw error if failed.
+      'Auth Failed' error will be thrown if auth failed.
       If auth not failed above and request failed again with "Forbidden" response 
       and this IF statement reached again
       then recursive function calling can happen 
