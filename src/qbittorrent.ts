@@ -1020,10 +1020,10 @@ export class QBittorrent implements TorrentClient {
     if (errored && typeof res.includes === "function" && res.includes("Forbidden")) {
       delete this.state.auth;
       /* 
-      this won't cause any recursive function calling of this.request method
+      This won't cause any recursive function calling of this.request method
       because now auth is deleted and inside this next call,
       auth will throw error if failed.
-      if auth not failed above and request failed again with "Forbidden" response 
+      If auth not failed above and request failed again with "Forbidden" response 
       and this IF statement reached again
       then recursive function calling can happen 
       but this is highly unlikely.
