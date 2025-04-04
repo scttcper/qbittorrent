@@ -50,7 +50,9 @@ interface QBittorrentState extends TorrentClientState {
   };
   version?: {
     version: string;
-    isVersion5OrHigher: boolean;
+    versionNum: number,
+    apiVersion: string;
+    apiVersionNum: number;
   };
 }
 
@@ -73,7 +75,7 @@ export class QBittorrent implements TorrentClient {
     const client = new QBittorrent(config);
     client.state = {
       ...state,
-      auth: state.auth ? { ...state.auth, expires: new Date(state.auth.expires) } : undefined,
+      auth: state.auth ? { ...state.auth, expires: new Date(state.auth.expires) } : undefined, 
     };
     return client;
   }
@@ -280,13 +282,27 @@ export class QBittorrent implements TorrentClient {
      */
     isPrivate?: boolean;
     includeTrackers?: boolean;
-  } = {}): Promise<Torrent[]> {
+    } = {}): Promise<Torrent[]> {
+
     const params: Record<string, string> = {};
+
     if (hashes) {
       params.hashes = normalizeHashes(hashes);
     }
-
     if (filter) {
+      if (await this.isApiVersionOrUp(2.11)) {
+        if (filter === "paused") {
+          filter = "stopped"
+        } else if (filter === "resumed") {
+          filter = "running"
+        }
+      } else {
+        if (filter === "stopped") {
+          filter = "paused"
+        } else if (filter === "running") {
+          filter = "resumed"
+        }
+      }
       params.filter = filter;
     }
 
@@ -319,7 +335,7 @@ export class QBittorrent implements TorrentClient {
     }
 
     if (includeTrackers) {
-      params.include_trackers = JSON.stringify(includeTrackers);
+      params.includeTrackers = JSON.stringify(includeTrackers);
     }
 
     const res = await this.request<Torrent[]>('/torrents/info', 'GET', params);
@@ -601,7 +617,7 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#pause-torrents}
    */
   async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = this.state.version?.isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
+    const endpoint = '/torrents/' + (await this.isApiVersionOrUp(2.11)) ? 'stop' : 'pause';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
@@ -611,9 +627,7 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
   async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = this.state.version?.isVersion5OrHigher
-      ? '/torrents/start'
-      : '/torrents/resume';
+    const endpoint = '/torrents/' + (await this.isApiVersionOrUp(2.11)) ? 'start' : 'resume';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
@@ -678,7 +692,7 @@ export class QBittorrent implements TorrentClient {
 
     if (options) {
       // Handle version-specific paused/stopped parameter
-      if (this.state.version?.isVersion5OrHigher && 'paused' in options) {
+      if ((await this.isVersionOrUp(5)) && 'paused' in options) {
         form.append('stopped', options.paused!);
         delete options.paused;
       }
@@ -797,7 +811,7 @@ export class QBittorrent implements TorrentClient {
 
     if (options) {
       // Handle version-specific paused/stopped parameter
-      if (this.state.version?.isVersion5OrHigher && 'paused' in options) {
+      if ((await this.isVersionOrUp(5)) && 'paused' in options) {
         form.append('stopped', options.paused!);
         delete options.paused;
       }
@@ -950,8 +964,8 @@ export class QBittorrent implements TorrentClient {
     };
 
     // Check version after successful login
-    await this.checkVersion();
-
+    // Not needed here anymore because its called just before verifying app version
+    // await this.checkVersion();
     return true;
   }
 
@@ -1000,14 +1014,30 @@ export class QBittorrent implements TorrentClient {
     return res;
   }
 
+  private async isVersionOrUp(neededVersion: number): Promise<boolean> {
+    if (!this.state.version) {
+      await this.checkVersion()
+    }
+    // '|| 0' needed here to remove 'Object is possibly 'undefined'' error in editor
+    return (this.state.version?.versionNum || 0) >= neededVersion
+  }
+
+  private async isApiVersionOrUp(neededVersion: number): Promise<boolean> {
+    if (!this.state.version) {
+      await this.checkVersion()
+    }
+    return (this.state.version?.apiVersionNum || 0) >= neededVersion
+  }
+
   private async checkVersion(): Promise<void> {
     if (!this.state.version?.version) {
-      const newVersion = await this.getAppVersion();
-      // Remove potential 'v' prefix and any extra info after version number
-      const cleanVersion = newVersion.replace(/^v/, '').split('-')[0]!;
+      const version = await this.getAppVersion();
+      const apiVersion = await this.getApiVersion();
       this.state.version = {
-        version: newVersion,
-        isVersion5OrHigher: cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0'),
+        version,
+        apiVersion,
+        versionNum: parseFloat((version.match(/[\d\.]+/) || ['0'])[0]),
+        apiVersionNum: parseFloat((apiVersion.match(/[\d\.]+/) || ['0'])[0]),
       };
     }
   }
@@ -1032,7 +1062,4 @@ function objToUrlSearchParams(obj: Record<string, string | boolean>): URLSearchP
   }
 
   return params;
-}
-function isGreater(a: string, b: string) {
-  return a.localeCompare(b, undefined, { numeric: true }) === 1;
 }
