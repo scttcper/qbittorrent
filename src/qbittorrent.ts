@@ -1015,17 +1015,13 @@ export class QBittorrent implements TorrentClient {
   }
 
   private async isVersionOrUp(neededVersion: number): Promise<boolean> {
-    if (!this.state.version) {
-      await this.checkVersion()
-    }
+    await this.checkVersion()
     // '|| 0' needed here to remove 'Object is possibly 'undefined'' error in editor
     return (this.state.version?.versionNum || 0) >= neededVersion
   }
 
   private async isApiVersionOrUp(neededVersion: number): Promise<boolean> {
-    if (!this.state.version) {
-      await this.checkVersion()
-    }
+    await this.checkVersion()
     return (this.state.version?.apiVersionNum || 0) >= neededVersion
   }
 
