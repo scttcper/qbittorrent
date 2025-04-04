@@ -7,8 +7,5 @@
       "quickfix.biome": "explicit",
       "source.fixAll.eslint": "explicit"
     }
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
   }
 }
