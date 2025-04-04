@@ -995,6 +995,9 @@ export class QBittorrent implements TorrentClient {
     }
 
     const url = joinURL(this.config.baseUrl, this.config.path ?? '', path);
+
+    let errored = false
+
     const res = await ofetch<T>(url, {
       method,
       headers: {
@@ -1009,9 +1012,27 @@ export class QBittorrent implements TorrentClient {
       responseType: isJson ? 'json' : ('text' as 'json'),
       // allow proxy agent
       dispatcher: this.config.dispatcher,
+    }).catch(err => {
+      errored = true
+      return err.data
     });
+    
+    if (errored && typeof res.includes === "function" && res.includes("Forbidden")) {
+      delete this.state.auth;
+      /* 
+      this won't cause any recursive function calling of this.request method
+      because now auth is deleted and inside this next call,
+      auth will throw error if failed.
+      if auth not failed above and request failed again with "Forbidden" response 
+      and this IF statement reached again
+      then recursive function calling can happen 
+      but this is highly unlikely.
 
-    return res;
+      */
+      return await this.request(path, method, params, body, headers, isJson)
+    }
+
+    return res
   }
 
   private async isVersionOrUp(neededVersion: number): Promise<boolean> {
