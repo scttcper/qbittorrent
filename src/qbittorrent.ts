@@ -617,7 +617,7 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#pause-torrents}
    */
   async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = '/torrents/' + (await this.isApiVersionOrUp(2.11)) ? 'stop' : 'pause';
+    const endpoint = '/torrents/' + ((await this.isApiVersionOrUp(2.11)) ? 'stop' : 'pause');
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
@@ -627,7 +627,7 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
   async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = '/torrents/' + (await this.isApiVersionOrUp(2.11)) ? 'start' : 'resume';
+    const endpoint = '/torrents/' + ((await this.isApiVersionOrUp(2.11)) ? 'start' : 'resume');
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
