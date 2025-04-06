@@ -12,8 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # https://github.com/wyvox/action-setup-pnpm
       - uses: wyvox/action-setup-pnpm@v3
-        with: { node-version: 22, pnpm-version: 10 }
+        with: { node-version: 22 }
 
       - name: start qbittorrent
         # creates a default config with password adminadmin
@@ -60,7 +61,7 @@ jobs:
           fetch-depth: 0
 
       - uses: wyvox/action-setup-pnpm@v3
-        with: { node-version: 22, pnpm-version: 10 }
+        with: { node-version: 22 }
 
       - name: release
         run: npx semantic-release
