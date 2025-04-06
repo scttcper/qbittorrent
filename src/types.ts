@@ -1418,167 +1418,167 @@ export interface Preferences {
    */
   i2p_outbound_length: number;
   /**
-   * 
+   * I2P outbound quantity
    */
   i2p_outbound_quantity: number;
   /**
-   * 
+   * I2P port
    */
   i2p_port: number;
   /**
-   * 
+   * Support internationalized domain name (IDN)
    */
   idn_support_enabled: boolean;
   /**
-   * 
+   * Ignore SSL errors
    */
   ignore_ssl_errors: boolean;
   /**
-   * 
+   * Enable Mark-of-the-Web (MOTW) for downloaded files (require macOS or Windows)
    */
   mark_of_the_web: boolean;
   /**
-   * 
+   * Max active checking torrents
    */
   max_active_checking_torrents: number;
   /**
-   * 
+   * Max concurrent HTTP announces
    */
   max_concurrent_http_announces: number;
   /**
-   * 
+   * Max inactive seeding time enabled
    */
   max_inactive_seeding_time: number;
   /**
-   * 
+   * When inactive seeding time reaches
    */
   max_inactive_seeding_time_enabled: boolean;
   /**
-   * 
+   * Physical memory (RAM) usage limit. This option is less effective on Linux
    */
   memory_working_set_limit: number;
   /**
-   * 
+   * Merge trackers to existing torrent
    */
   merge_trackers: boolean;
   /**
-   * 
+   * Type of service (ToS) for connections to peers
    */
   peer_tos: number;
   /**
-   * 
+   * Peer turnover disconnect percentage
    */
   peer_turnover: number;
   /**
-   * 
+   * Peer turnover threshold percentage
    */
   peer_turnover_cutoff: number;
   /**
-   * 
+   * Peer turnover disconnect interval
    */
   peer_turnover_interval: number;
   /**
-   * 
+   * Log performance warnings
    */
   performance_warning: boolean;
   /**
-   * 
+   * Use proxy for BitTorrent purposes. Otherwise, the proxy server is only used for tracker connections
    */
   proxy_bittorrent: boolean;
   /**
-   * 
+   * Perform hostname lookup via proxy
    */
   proxy_hostname_lookup: boolean;
   /**
-   * 
+   * Use proxy for general purposes. Search engine, software updates or anything else will use proxy
    */
   proxy_misc: boolean;
   /**
-   * 
+   * Use proxy for RSS purposes. RSS feeds will use proxy
    */
   proxy_rss: boolean;
   /**
-   * 
+   * Python executable path (may require restart). Auto detect if empty
    */
   python_executable_path: string;
   /**
-   * 
+   * Reannounce to all trackers when IP or port changed
    */
   reannounce_when_address_changed: boolean;
   /**
-   * 
+   * Refresh interval. It controls the internal state update interval which in turn will affect UI updates
    */
   refresh_interval: number;
   /**
-   * 
+   * Maximum outstanding requests to a single peer
    */
   request_queue_size: number;
   /**
-   * 
+   * Resume data storage type (requires restart)
    */
   resume_data_storage_type: string;
   /**
-   * 
+   * Same host request delay
    */
   rss_fetch_delay: number;
   /**
-   * 
+   * Socket receive buffer size [0: system default]
    */
   socket_receive_buffer_size: number;
   /**
-   * 
+   * Socket send buffer size [0: system default]
    */
   socket_send_buffer_size: number;
   /**
-   * 
+   * Enable ssl
    */
   ssl_enabled: boolean;
   /**
-   * 
+   * Ssl listen port
    */
   ssl_listen_port: number;
   /**
-   * 
+   * Ssrf mitigation
    */
   ssrf_mitigation: boolean;
   /**
-   * 
+   * Torrent content layout
    */
   torrent_content_layout: string;
   /**
-   * 
+   * Torrent content removing mode
    */
   torrent_content_remove_option: string;
   /**
-   * 
+   * .torrent file size limit
    */
   torrent_file_size_limit: number;
   /**
-   * 
+   * Torrent stop condition
    */
   torrent_stop_condition: string;
   /**
-   * 
+   * Use Category paths in Manual Mode. Resolve relative Save Path against appropriate Category path instead of Default one
    */
   use_category_paths_in_manual_mode: boolean;
   /**
-   * 
+   * Use Subcategories
    */
   use_subcategories: boolean;
   /**
-   * 
+   * Keep unselected files in ".unwanted" folder
    */
   use_unwanted_folder: boolean;
   /**
-   * 
+   * Validate HTTPS tracker certificate
    */
   validate_https_tracker_certificate: boolean;
   /**
-   * 
+   * Trusted proxies list. Specify reverse proxy IPs (or subnets, e.g. 0.0.0.0/24) in order to use forwarded client address (X-Forwarded-For header). Use ';' to split multiple entries.
    */
   web_ui_reverse_proxies_list: string;
   /**
-   * 
+   * Enable reverse proxy support
    */
   web_ui_reverse_proxy_enabled: boolean;
 }
