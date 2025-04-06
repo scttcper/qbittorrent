@@ -1285,6 +1285,302 @@ export interface Preferences {
    * μTP-TCP mixed mode algorithm (see list of possible values below)
    */
   utp_tcp_mixed_mode: number;
+  /**
+   * The torrent will be added to download list in a stopped state
+   */
+  add_stopped_enabled: boolean;
+  /**
+   * Add to top of queue
+   */
+  add_to_top_of_queue: boolean;
+  /**
+   * Customize application instance. It appends the text to the window title to help distinguish qBittorent instances
+   */
+  app_instance_name: string;
+  /**
+   * Run on torrent added
+   */
+  autorun_on_torrent_added_enabled: boolean;
+  /**
+   * Program to autorun on torrent added
+   */
+  autorun_on_torrent_added_program: string;
+  /**
+   * Bdecode depth limit
+   */
+  bdecode_depth_limit: number;
+  /**
+   * Bdecode token limit
+   */
+  bdecode_token_limit: number;
+  /**
+   * Disallow connection to peers on privileged ports
+   */
+  block_peers_on_privileged_ports: boolean;
+  /**
+   * Outgoing connections per second
+   */
+  connection_speed: number;
+  /**
+   * Current interface name
+   */
+  current_interface_name: string;
+  /**
+   * Delete torrent content files
+   */
+  delete_torrent_content_files: boolean;
+  /**
+   * DHT bootstrap nodes
+   */
+  dht_bootstrap_nodes: string;
+  /**
+   * Disk IO read mode
+   */
+  disk_io_read_mode: number;
+  /**
+   * Disk IO type (requires restart) 
+   */
+  disk_io_type: number;
+  /**
+   * Disk IO write mode
+   */
+  disk_io_write_mode: number;
+  /**
+   * Disk queue size
+   */
+  disk_queue_size: number;
+  /**
+   * Enable port forwarding for embedded tracker
+   */
+  embedded_tracker_port_forwarding: boolean;
+  /**
+   * Excluded file names
+   */
+  excluded_file_names: string;
+  /**
+   * Enable excluded file names
+   */
+  excluded_file_names_enabled: boolean;
+  /**
+   * File log age
+   */
+  file_log_age: number;
+  /**
+   * File log age type
+   */
+  file_log_age_type: number;
+  /**
+   * Enable file log backup
+   */
+  file_log_backup_enabled: boolean;
+  /**
+   * Delete backup logs older than
+   */
+  file_log_delete_old: boolean;
+  /**
+   * Enable log files
+   */
+  file_log_enabled: boolean;
+  /**
+   * File log max size in kilobytes
+   */
+  file_log_max_size: number;
+  /**
+   * File log path
+   */
+  file_log_path: string;
+  /**
+   * Hashing threads
+   */
+  hashing_threads: number;
+  /**
+   * I2P host address
+   */
+  i2p_address: string;
+  /**
+   * Enable I2P
+   */
+  i2p_enabled: boolean;
+  /**
+   * I2P inbound length
+   */
+  i2p_inbound_length: number;
+  /**
+   * I2P inbound quantity
+   */
+  i2p_inbound_quantity: number;
+  /**
+   * I2P mixed mode. If "mixed mode" is enabled, I2P torrents are allowed to also get peers from other sources than the tracker, and connect to regular IPs, not providing any anonymization. This may be useful if the user is not interested in the anonymization of I2P, but still wants to be able to connect to I2P peers.
+   */
+  i2p_mixed_mode: boolean;
+  /**
+   * I2P outbound length
+   */
+  i2p_outbound_length: number;
+  /**
+   * 
+   */
+  i2p_outbound_quantity: number;
+  /**
+   * 
+   */
+  i2p_port: number;
+  /**
+   * 
+   */
+  idn_support_enabled: boolean;
+  /**
+   * 
+   */
+  ignore_ssl_errors: boolean;
+  /**
+   * 
+   */
+  mark_of_the_web: boolean;
+  /**
+   * 
+   */
+  max_active_checking_torrents: number;
+  /**
+   * 
+   */
+  max_concurrent_http_announces: number;
+  /**
+   * 
+   */
+  max_inactive_seeding_time: number;
+  /**
+   * 
+   */
+  max_inactive_seeding_time_enabled: boolean;
+  /**
+   * 
+   */
+  memory_working_set_limit: number;
+  /**
+   * 
+   */
+  merge_trackers: boolean;
+  /**
+   * 
+   */
+  peer_tos: number;
+  /**
+   * 
+   */
+  peer_turnover: number;
+  /**
+   * 
+   */
+  peer_turnover_cutoff: number;
+  /**
+   * 
+   */
+  peer_turnover_interval: number;
+  /**
+   * 
+   */
+  performance_warning: boolean;
+  /**
+   * 
+   */
+  proxy_bittorrent: boolean;
+  /**
+   * 
+   */
+  proxy_hostname_lookup: boolean;
+  /**
+   * 
+   */
+  proxy_misc: boolean;
+  /**
+   * 
+   */
+  proxy_rss: boolean;
+  /**
+   * 
+   */
+  python_executable_path: string;
+  /**
+   * 
+   */
+  reannounce_when_address_changed: boolean;
+  /**
+   * 
+   */
+  refresh_interval: number;
+  /**
+   * 
+   */
+  request_queue_size: number;
+  /**
+   * 
+   */
+  resume_data_storage_type: string;
+  /**
+   * 
+   */
+  rss_fetch_delay: number;
+  /**
+   * 
+   */
+  socket_receive_buffer_size: number;
+  /**
+   * 
+   */
+  socket_send_buffer_size: number;
+  /**
+   * 
+   */
+  ssl_enabled: boolean;
+  /**
+   * 
+   */
+  ssl_listen_port: number;
+  /**
+   * 
+   */
+  ssrf_mitigation: boolean;
+  /**
+   * 
+   */
+  torrent_content_layout: string;
+  /**
+   * 
+   */
+  torrent_content_remove_option: string;
+  /**
+   * 
+   */
+  torrent_file_size_limit: number;
+  /**
+   * 
+   */
+  torrent_stop_condition: string;
+  /**
+   * 
+   */
+  use_category_paths_in_manual_mode: boolean;
+  /**
+   * 
+   */
+  use_subcategories: boolean;
+  /**
+   * 
+   */
+  use_unwanted_folder: boolean;
+  /**
+   * 
+   */
+  validate_https_tracker_certificate: boolean;
+  /**
+   * 
+   */
+  web_ui_reverse_proxies_list: string;
+  /**
+   * 
+   */
+  web_ui_reverse_proxy_enabled: boolean;
 }
 
 export interface TorrentPeersResponse {
