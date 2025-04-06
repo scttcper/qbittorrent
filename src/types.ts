@@ -1166,7 +1166,7 @@ export interface Preferences {
    */
   max_seeding_time: number;
   /**
-   * TODO
+   * IP address reported to trackers (requires restart)
    */
   announce_ip: string;
   /**
