@@ -48,9 +48,6 @@ importers:
       '@sindresorhus/tsconfig':
         specifier: 7.0.0
         version: 7.0.0
-      '@types/cookie':
-        specifier: 1.0.0
-        version: 1.0.0
       '@types/node':
         specifier: 22.14.1
         version: 22.14.1
@@ -551,10 +548,6 @@ packages:
   '@sindresorhus/tsconfig@7.0.0':
     resolution: {integrity: sha512-i5K04hLAP44Af16zmDjG07E1NHuDgCM07SJAT4gY0LZSRrWYzwt4qkLem6TIbIVh0k51RkN2bF+lP+lM5eC9fw==}
     engines: {node: '>=18'}
-
-  '@types/cookie@1.0.0':
-    resolution: {integrity: sha512-mGFXbkDQJ6kAXByHS7QAggRXgols0mAdP4MuXgloGY1tXokvzaFFM4SMqWvf7AH0oafI7zlFJwoGWzmhDqTZ9w==}
-    deprecated: This is a stub types definition. cookie provides its own type definitions, so you do not need this installed.
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
@@ -2200,10 +2193,6 @@ snapshots:
   '@shikijs/vscode-textmate@10.0.2': {}
 
   '@sindresorhus/tsconfig@7.0.0': {}
-
-  '@types/cookie@1.0.0':
-    dependencies:
-      cookie: 1.0.2
 
   '@types/estree@1.0.7': {}
 
