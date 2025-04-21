@@ -21,16 +21,26 @@ export interface BuildInfo {
   bitness: string;
 }
 
+/**
+ * @deprecated Replaced by 'running' in qBittorrent v5.
+ */
+type TorrentFilterResumed = 'resumed';
+
+/**
+ * @deprecated Replaced by 'stopped' in qBittorrent v5.
+ */
+type TorrentFilterPaused = 'paused';
+
 export type TorrentFilters =
   | 'all'
   | 'downloading'
   | 'seeding'
   | 'completed'
-  | 'paused'
+  | TorrentFilterPaused
   | 'stopped'
   | 'active'
   | 'inactive'
-  | 'resumed'
+  | TorrentFilterResumed
   | 'running'
   | 'stalled'
   | 'stalled_uploading'

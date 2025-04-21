@@ -287,6 +287,19 @@ export class QBittorrent implements TorrentClient {
     }
 
     if (filter) {
+      if (this.state.version?.isVersion5OrHigher) {
+        if (filter === 'paused') {
+          filter = 'stopped';
+        } else if (filter === 'resumed') {
+          filter = 'running';
+        }
+      } else if (filter === 'stopped') {
+        // For versions < 5
+        filter = 'paused';
+      } else if (filter === 'running') {
+        // For versions < 5
+        filter = 'resumed';
+      }
       params.filter = filter;
     }
 
@@ -600,7 +613,7 @@ export class QBittorrent implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#pause-torrents}
    */
-  async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+  async stopTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
     const endpoint = this.state.version?.isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
@@ -608,15 +621,29 @@ export class QBittorrent implements TorrentClient {
   }
 
   /**
+   * @deprecated Alias for {@link stopTorrent}.
+   */
+  async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+    return this.stopTorrent(hashes);
+  }
+
+  /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
-  async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+  async startTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
     const endpoint = this.state.version?.isVersion5OrHigher
       ? '/torrents/start'
       : '/torrents/resume';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
+  }
+
+  /**
+   * @deprecated Alias for {@link startTorrent}.
+   */
+  async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
+    return this.startTorrent(hashes);
   }
 
   /**
