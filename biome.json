@@ -1,8 +1,0 @@
-{
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "files": {
-    "ignoreUnknown": true,
-    "includes": ["**", "!**/dist/**/*", "!**/public/**/*", "!**/package.json"]
-  },
-  "extends": ["./node_modules/@ctrl/eslint-config-biome/biome.json"]
-}

@@ -685,7 +685,7 @@ export class QBittorrent implements TorrentClient {
   }
 
   async addTorrent(
-    torrent: string | Uint8Array,
+    torrent: string | Uint8Array<ArrayBuffer>,
     options: Partial<AddTorrentOptions> = {},
   ): Promise<boolean> {
     const form = new FormData();
@@ -739,7 +739,7 @@ export class QBittorrent implements TorrentClient {
   }
 
   async normalizedAddTorrent(
-    torrent: string | Uint8Array,
+    torrent: string | Uint8Array<ArrayBuffer>,
     options: Partial<NormalizedAddTorrentOptions> = {},
   ): Promise<NormalizedTorrent> {
     const torrentOptions: Partial<AddTorrentOptions> = {};

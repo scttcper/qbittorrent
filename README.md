@@ -28,7 +28,7 @@ async function main() {
 ### API
 
 Docs: https://qbittorrent.vercel.app  
-qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)  
+qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
 ### Normalized API
 
@@ -103,7 +103,7 @@ console.log(result);
 If you're shutting down the server often (serverless?) you can export the state
 
 ```ts
-const state = client.exportState()
+const state = client.exportState();
 const client = QBittorrent.createFromState(config, state);
 ```
 
