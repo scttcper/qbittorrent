@@ -4,7 +4,10 @@
   "description": "TypeScript api wrapper for qbittorrent using ofetch",
   "author": "Scott Cooper <scttcper@gmail.com>",
   "license": "MIT",
-  "repository": "scttcper/qbittorrent",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scttcper/qbittorrent.git"
+  },
   "homepage": "https://qbittorrent.vercel.app",
   "type": "module",
   "main": "./dist/src/index.js",
