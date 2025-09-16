@@ -23,6 +23,9 @@ jobs:
       - uses: wyvox/action-setup-pnpm@v3
         with: { node-version: 24 }
 
+      - name: upgrade npm
+        run: npm install -g npm@latest
+
       - name: release
         run: npx semantic-release
         env:
