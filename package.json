@@ -37,7 +37,7 @@
   "dependencies": {
     "@ctrl/magnet-link": "^4.2.0",
     "@ctrl/shared-torrent": "^6.5.0",
-    "@ctrl/torrent-file": "^4.2.0",
+    "@ctrl/torrent-file": "^4.4.0",
     "cookie": "^1.0.2",
     "node-fetch-native": "^1.6.7",
     "ofetch": "^1.4.1",
@@ -46,10 +46,10 @@
     "uint8array-extras": "^1.5.0"
   },
   "devDependencies": {
-    "@ctrl/oxlint-config": "1.2.6",
+    "@ctrl/oxlint-config": "1.2.7",
     "@sindresorhus/tsconfig": "8.0.1",
     "@trivago/prettier-plugin-sort-imports": "5.2.2",
-    "@types/node": "24.6.1",
+    "@types/node": "24.6.2",
     "@vitest/coverage-v8": "3.2.4",
     "oxlint": "1.19.0",
     "p-wait-for": "6.0.0",
@@ -66,7 +66,7 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.18.0",
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all",
