@@ -403,6 +403,5 @@ it('should list torrents', async () => {
   expect(typeof torrent.auto_tmm).toBe('boolean');
   expect(typeof torrent.availability).toBe('number');
   expect(typeof torrent.force_start).toBe('boolean');
-  expect(typeof torrent.reannounce).toBe('number');
   expect(typeof torrent.seeding_time).toBe('number');
 });

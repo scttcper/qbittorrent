@@ -229,8 +229,9 @@ export interface Torrent {
   isPrivate?: boolean;
   /**
    * Time until the next tracker reannounce
+   * Added in qBittorrent WebUI API v2.9.3 (qb v5.0.0)
    */
-  reannounce: number;
+  reannounce?: number;
   /**
    * Torrent elapsed time while complete (seconds)
    * Added in qBittorrent WebUI API v2.8.1
