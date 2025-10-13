@@ -202,6 +202,41 @@ export interface Torrent {
    * Comma-concatenated tag list of the torrent e.g. - "abc, 123"
    */
   tags: string;
+  /**
+   * Absolute path of torrent content (root path for multifile torrents,
+   * absolute file path for singlefile torrents)
+   * Added in qBittorrent WebUI API v2.6.1
+   */
+  content_path: string;
+  /**
+   * Whether this torrent is managed by Automatic Torrent Management
+   */
+  auto_tmm: boolean;
+  /**
+   * Percentage of file pieces currently available
+   * Added in qBittorrent WebUI API v2.2.0
+   */
+  availability: number;
+  /**
+   * True if force start is enabled for this torrent
+   */
+  force_start: boolean;
+  /**
+   * True if torrent is from a private tracker
+   * Added in qBittorrent v5.0.0
+   * Might be able to make not optional once qb v5 is more widely used
+   */
+  isPrivate?: boolean;
+  /**
+   * Time until the next tracker reannounce
+   * Added in qBittorrent WebUI API v2.9.3 (qb v5.0.0)
+   */
+  reannounce?: number;
+  /**
+   * Torrent elapsed time while complete (seconds)
+   * Added in qBittorrent WebUI API v2.8.1
+   */
+  seeding_time: number;
 }
 
 export type TorrentCategories = Record<string, Category>;

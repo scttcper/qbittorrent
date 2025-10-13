@@ -393,3 +393,15 @@ it('should be able to export and create from state', async () => {
   expect(client2.state.auth?.sid).toBeDefined();
   expect(client2.state.auth?.expires).toBeInstanceOf(Date);
 });
+
+it('should list torrents', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  await setupTorrent(client);
+  const torrents = await client.listTorrents();
+  const torrent = torrents[0]!;
+  expect(torrent.content_path).toContain('/');
+  expect(typeof torrent.auto_tmm).toBe('boolean');
+  expect(typeof torrent.availability).toBe('number');
+  expect(typeof torrent.force_start).toBe('boolean');
+  expect(typeof torrent.seeding_time).toBe('number');
+});
