@@ -27,14 +27,16 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     }
     case TorrentState.QueuedDL: // queuing is enabled and torrent is queued for download
     case TorrentState.CheckingDL: // same as checkingUP, but torrent has NOT finished downloading
-    case TorrentState.CheckingUP: { // torrent has finished downloading and is being checked. Set when `recheck torrent on completion` is enabled. In the event the check fails we shouldn't treat it as completed.
+    case TorrentState.CheckingUP: {
+      // Torrent has finished downloading and is being checked. Set when `recheck torrent on completion` is enabled. In the event the check fails we shouldn't treat it as completed.
       state = NormalizedTorrentState.queued;
       break;
     }
     case TorrentState.MetaDL: // Metadl could be an error if DHT is not enabled
     case TorrentState.ForcedDL: // torrent is being downloaded, and was forced started
     case TorrentState.ForcedMetaDL: // torrent metadata is being forcibly downloaded
-    case TorrentState.Downloading: { // torrent is being downloaded and data is being transferred
+    case TorrentState.Downloading: {
+      // Torrent is being downloaded and data is being transferred
       state = NormalizedTorrentState.downloading;
       break;
     }
@@ -53,7 +55,8 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     case TorrentState.Uploading: // torrent is being seeded and data is being transferred
     case TorrentState.StalledUP: // torrent is being seeded, but no connection were made
     case TorrentState.QueuedUP: // queuing is enabled and torrent is queued for upload
-    case TorrentState.ForcedUP: { // torrent has finished downloading and is being forcibly seeded
+    case TorrentState.ForcedUP: {
+      // Torrent has finished downloading and is being forcibly seeded
       // state = 'completed';
       state = NormalizedTorrentState.seeding;
       eta = 0; // qBittorrent sends eta=8640000 for completed torrents
