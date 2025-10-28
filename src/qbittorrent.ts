@@ -152,7 +152,7 @@ export class QBittorrent implements TorrentClient {
 
   async getTorrent(hash: string): Promise<NormalizedTorrent> {
     const torrentsResponse = await this.listTorrents({ hashes: hash });
-    const torrentData = torrentsResponse[0];
+    const [torrentData] = torrentsResponse;
     if (!torrentData) {
       throw new Error('Torrent not found');
     }
@@ -171,7 +171,6 @@ export class QBittorrent implements TorrentClient {
       objToUrlSearchParams({
         hashes: normalizeHashes(hash),
       }),
-      undefined,
     );
     return downloadLimit;
   }
@@ -203,7 +202,6 @@ export class QBittorrent implements TorrentClient {
       objToUrlSearchParams({
         hashes: normalizeHashes(hash),
       }),
-      undefined,
     );
     return UploadLimit;
   }
@@ -973,7 +971,7 @@ export class QBittorrent implements TorrentClient {
         ? new Date(expires)
         : maxAge
           ? new Date(Number(maxAge) * 1000)
-          : new Date(Date.now() + 3600000),
+          : new Date(Date.now() + 3_600_000),
     };
 
     // Check version after successful login
@@ -999,7 +997,7 @@ export class QBittorrent implements TorrentClient {
     if (
       !this.state.auth?.sid ||
       !this.state.auth.expires ||
-      this.state.auth.expires.getTime() < new Date().getTime()
+      this.state.auth.expires.getTime() < Date.now()
     ) {
       const authed = await this.login();
       if (!authed) {

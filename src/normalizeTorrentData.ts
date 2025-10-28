@@ -15,58 +15,69 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
    * https://github.com/Radarr/Radarr/blob/develop/src/NzbDrone.Core/Download/Clients/QBittorrent/QBittorrent.cs#L242
    */
   switch (torrent.state) {
-    case TorrentState.Error:
+    case TorrentState.Error: {
       state = NormalizedTorrentState.warning;
       stateMessage = 'qBittorrent is reporting an error';
       break;
+    }
     case TorrentState.PausedDL:
-    case TorrentState.StoppedDL:
+    case TorrentState.StoppedDL: {
       state = NormalizedTorrentState.paused;
       break;
+    }
     case TorrentState.QueuedDL: // queuing is enabled and torrent is queued for download
     case TorrentState.CheckingDL: // same as checkingUP, but torrent has NOT finished downloading
-    case TorrentState.CheckingUP: // torrent has finished downloading and is being checked. Set when `recheck torrent on completion` is enabled. In the event the check fails we shouldn't treat it as completed.
+    case TorrentState.CheckingUP: { // torrent has finished downloading and is being checked. Set when `recheck torrent on completion` is enabled. In the event the check fails we shouldn't treat it as completed.
       state = NormalizedTorrentState.queued;
       break;
+    }
     case TorrentState.MetaDL: // Metadl could be an error if DHT is not enabled
     case TorrentState.ForcedDL: // torrent is being downloaded, and was forced started
     case TorrentState.ForcedMetaDL: // torrent metadata is being forcibly downloaded
-    case TorrentState.Downloading: // torrent is being downloaded and data is being transferred
+    case TorrentState.Downloading: { // torrent is being downloaded and data is being transferred
       state = NormalizedTorrentState.downloading;
       break;
-    case TorrentState.Allocating:
+    }
+    case TorrentState.Allocating: {
       // state = 'stalledDL';
       state = NormalizedTorrentState.queued;
       break;
-    case TorrentState.StalledDL:
+    }
+    case TorrentState.StalledDL: {
       state = NormalizedTorrentState.warning;
       stateMessage = 'The download is stalled with no connection';
       break;
+    }
     case TorrentState.StoppedUP: // torrent is paused and has finished downloading
     case TorrentState.PausedUP: // torrent is paused and has finished downloading
     case TorrentState.Uploading: // torrent is being seeded and data is being transferred
     case TorrentState.StalledUP: // torrent is being seeded, but no connection were made
     case TorrentState.QueuedUP: // queuing is enabled and torrent is queued for upload
-    case TorrentState.ForcedUP: // torrent has finished downloading and is being forcibly seeded
+    case TorrentState.ForcedUP: { // torrent has finished downloading and is being forcibly seeded
       // state = 'completed';
       state = NormalizedTorrentState.seeding;
       eta = 0; // qBittorrent sends eta=8640000 for completed torrents
       break;
+    }
     case TorrentState.Moving: // torrent is being moved from a folder
     case TorrentState.QueuedForChecking:
-    case TorrentState.CheckingResumeData:
+    case TorrentState.CheckingResumeData: {
       state = NormalizedTorrentState.checking;
       break;
-    case TorrentState.Unknown:
+    }
+    case TorrentState.Unknown: {
       state = NormalizedTorrentState.error;
       break;
-    case TorrentState.MissingFiles:
+    }
+    case TorrentState.MissingFiles: {
       state = NormalizedTorrentState.error;
       stateMessage = 'The download is missing files';
       break;
+    }
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-    default:
+    default: {
       break;
+    }
   }
 
   const isCompleted = torrent.progress === 1;

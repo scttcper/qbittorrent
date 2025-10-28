@@ -22,7 +22,7 @@ async function waitForTorrent(client: QBittorrent) {
       const torrents = await client.listTorrents();
       return Object.keys(torrents).length === 1;
     },
-    { timeout: 10000 },
+    { timeout: 10_000 },
   );
 }
 
@@ -251,7 +251,7 @@ it('should return normalized torrent data', async () => {
   expect(torrent.connectedPeers).toBe(0);
   expect(torrent.connectedSeeds).toBe(0);
   expect(torrent.downloadSpeed).toBe(0);
-  expect(torrent.eta).toBe(8640000);
+  expect(torrent.eta).toBe(8_640_000);
   expect(torrent.isCompleted).toBe(false);
   expect(torrent.label).toBe('');
   expect(torrent.name).toBe(torrentName);
@@ -277,7 +277,7 @@ it.skip('should add normalized torrent from magnet', async () => {
   expect(torrent.connectedPeers).toBe(0);
   expect(torrent.connectedSeeds).toBe(0);
   expect(torrent.downloadSpeed).toBe(0);
-  expect(torrent.eta).toBe(8640000);
+  expect(torrent.eta).toBe(8_640_000);
   expect(torrent.isCompleted).toBe(false);
   expect(torrent.label).toBe('');
   expect(torrent.name).toBe('Ubuntu 11 10 Alternate Amd64 Iso');
