@@ -1,6 +1,6 @@
 {
   "name": "@ctrl/qbittorrent",
-  "version": "9.10.0",
+  "version": "9.11.0",
   "description": "TypeScript api wrapper for qbittorrent using ofetch",
   "author": "Scott Cooper <scttcper@gmail.com>",
   "license": "MIT",
