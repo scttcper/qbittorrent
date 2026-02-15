@@ -46,7 +46,7 @@
     "uint8array-extras": "^1.5.0"
   },
   "devDependencies": {
-    "@ctrl/oxlint-config": "1.3.3",
+    "@ctrl/oxlint-config": "1.4.0",
     "@sindresorhus/tsconfig": "8.1.0",
     "@types/node": "25.2.3",
     "oxfmt": "0.32.0",

@@ -37,8 +37,8 @@ importers:
         version: 1.5.0
     devDependencies:
       '@ctrl/oxlint-config':
-        specifier: 1.3.3
-        version: 1.3.3
+        specifier: 1.4.0
+        version: 1.4.0
       '@sindresorhus/tsconfig':
         specifier: 8.1.0
         version: 8.1.0
@@ -70,8 +70,8 @@ packages:
     resolution: {integrity: sha512-4pa9hnMWmgoGl+5HJ/B9d5ugIr105AGD3rsTSlE8pTR7d2+xrEhLPCKRp/Y6k/k9Fo6DaJ1FRgwRxdi60vmxtg==}
     engines: {node: '>=18'}
 
-  '@ctrl/oxlint-config@1.3.3':
-    resolution: {integrity: sha512-rH3VdmHBGm5F6uojudd9+2Aac7qWLwATNKapUp1UVEnbVuuHrzgf7eTl736aPgHLv4KSFPt1FbYg6b0FRbwpwA==}
+  '@ctrl/oxlint-config@1.4.0':
+    resolution: {integrity: sha512-p2GPxj4OR0Jh+l8Ted4mxEAk54YImu5wPpRCdrbhoi9Vd1qnqgZFFZ7yBWG8TEWxF0RQgkmzmQGJInmFVTeCLg==}
     engines: {node: '>=20'}
 
   '@ctrl/shared-torrent@6.5.0':
@@ -989,7 +989,7 @@ snapshots:
       rfc4648: 1.5.4
       uint8array-extras: 1.5.0
 
-  '@ctrl/oxlint-config@1.3.3': {}
+  '@ctrl/oxlint-config@1.4.0': {}
 
   '@ctrl/shared-torrent@6.5.0(ofetch@1.5.1)':
     dependencies:
