@@ -1,10 +1,3 @@
-import { parse as cookieParse } from 'cookie';
-import { FormData } from 'node-fetch-native';
-import { ofetch } from 'ofetch';
-import type { Jsonify } from 'type-fest';
-import { joinURL } from 'ufo';
-import { base64ToUint8Array, isUint8Array, stringToUint8Array } from 'uint8array-extras';
-
 import { magnetDecode } from '@ctrl/magnet-link';
 import type {
   AddTorrentOptions as NormalizedAddTorrentOptions,
@@ -16,6 +9,12 @@ import type {
   TorrentClientState,
 } from '@ctrl/shared-torrent';
 import { hash } from '@ctrl/torrent-file';
+import { parse as cookieParse } from 'cookie';
+import { FormData } from 'node-fetch-native';
+import { ofetch } from 'ofetch';
+import type { Jsonify } from 'type-fest';
+import { joinURL } from 'ufo';
+import { base64ToUint8Array, isUint8Array, stringToUint8Array } from 'uint8array-extras';
 
 import { normalizeTorrentData } from './normalizeTorrentData.js';
 import type {

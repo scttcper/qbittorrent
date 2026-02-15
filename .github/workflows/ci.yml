@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # https://github.com/actions/checkout
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # https://github.com/wyvox/action-setup-pnpm
       - uses: wyvox/action-setup-pnpm@v3
@@ -42,8 +42,3 @@ jobs:
 
       - name: test
         run: pnpm run test:ci
-
-      - name: coverage
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
