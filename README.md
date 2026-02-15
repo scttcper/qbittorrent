@@ -1,4 +1,4 @@
-# qBittorrent [![npm](https://badgen.net/npm/v/@ctrl/qbittorrent)](https://www.npmjs.com/package/@ctrl/qbittorrent) [![coverage](https://badgen.net/codecov/c/github/scttcper/qbittorrent)](https://codecov.io/gh/scttcper/qbittorrent)
+# qBittorrent [![npm](https://badgen.net/npm/v/@ctrl/qbittorrent)](https://www.npmjs.com/package/@ctrl/qbittorrent)
 
 > TypeScript api wrapper for [qBittorrent](https://www.qbittorrent.org/) using [ofetch](https://github.com/unjs/ofetch)
 
@@ -27,7 +27,7 @@ async function main() {
 
 ### API
 
-Docs: https://qbittorrent.vercel.app  
+Docs: https://qbittorrent.ep.workers.dev  
 qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
 ### Normalized API
