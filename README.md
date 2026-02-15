@@ -27,7 +27,7 @@ async function main() {
 
 ### API
 
-Docs: https://qbittorrent.vercel.app  
+Docs: https://qbittorrent.ep.workers.dev  
 qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
 ### Normalized API
