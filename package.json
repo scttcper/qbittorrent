@@ -31,13 +31,12 @@
     "build": "tsc",
     "build:docs": "typedoc",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile=./junit.xml"
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@ctrl/magnet-link": "^4.2.0",
-    "@ctrl/shared-torrent": "^6.5.0",
-    "@ctrl/torrent-file": "^4.4.0",
+    "@ctrl/magnet-link": "^4.3.0",
+    "@ctrl/shared-torrent": "^6.5.1",
+    "@ctrl/torrent-file": "^4.5.0",
     "cookie": "^1.1.1",
     "node-fetch-native": "^1.6.7",
     "ofetch": "^1.5.1",
@@ -49,8 +48,8 @@
     "@ctrl/oxlint-config": "1.4.0",
     "@sindresorhus/tsconfig": "8.1.0",
     "@types/node": "25.2.3",
-    "oxfmt": "0.32.0",
-    "oxlint": "1.47.0",
+    "oxfmt": "0.33.0",
+    "oxlint": "1.48.0",
     "p-wait-for": "6.0.0",
     "typedoc": "0.28.17",
     "typescript": "5.9.3",
