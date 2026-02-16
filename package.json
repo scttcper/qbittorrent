@@ -2,28 +2,28 @@
   "name": "@ctrl/qbittorrent",
   "version": "0.0.0-placeholder",
   "description": "TypeScript api wrapper for qbittorrent using ofetch",
-  "author": "Scott Cooper <scttcper@gmail.com>",
+  "keywords": [
+    "qbittorrent",
+    "typescript"
+  ],
+  "homepage": "https://qbittorrent.ep.workers.dev",
   "license": "MIT",
+  "author": "Scott Cooper <scttcper@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/scttcper/qbittorrent.git"
   },
-  "homepage": "https://qbittorrent.ep.workers.dev",
-  "type": "module",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
   "files": [
     "dist/src"
   ],
+  "type": "module",
   "sideEffects": false,
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "publishConfig": {
     "access": "public",
     "provenance": true
   },
-  "keywords": [
-    "typescript",
-    "qbittorrent"
-  ],
   "scripts": {
     "lint": "oxfmt --check && oxlint .",
     "lint:fix": "oxfmt && oxlint . --fix",
