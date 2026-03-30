@@ -32,7 +32,7 @@ qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-
 
 ### Normalized API
 
-These functions have been normalized between torrent clients to easily support switching between multiple torrent clients. See [below](#see-also) for alternative supported torrent clients
+These functions are normalized through [@ctrl/shared-torrent](https://github.com/scttcper/shared-torrent) to make switching between multiple torrent clients easier. See [below](#see-also) for alternative supported torrent clients.
 
 ##### getAllData
 
@@ -111,9 +111,11 @@ const client = QBittorrent.createFromState(config, state);
 
 All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client.
 
-deluge - https://github.com/scttcper/deluge  
-transmission - https://github.com/scttcper/transmission  
-utorrent - https://github.com/scttcper/utorrent
+- shared types - [@ctrl/shared-torrent](https://github.com/scttcper/shared-torrent)  
+- deluge - [@ctrl/deluge](https://github.com/scttcper/deluge)  
+- transmission - [@ctrl/transmission](https://github.com/scttcper/transmission)  
+- utorrent - [@ctrl/utorrent](https://github.com/scttcper/utorrent)  
+- rtorrent - [@ctrl/rtorrent](https://github.com/scttcper/rtorrent)
 
 ### Start a test docker container
 
