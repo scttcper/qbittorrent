@@ -118,9 +118,9 @@ it('should add normalized torrent with label', async () => {
 });
 it('should add torrent with savePath', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  const path = '/downloads/linux/';
+  const savePath = '/downloads/linux/';
   await client.addTorrent(torrentFileBuffer, {
-    savepath: path,
+    savepath: savePath,
     paused: 'true',
   });
   await waitForTorrent(client);

@@ -8,7 +8,7 @@ import type {
   TorrentClientConfig,
   TorrentClientState,
 } from '@ctrl/shared-torrent';
-import { hash } from '@ctrl/torrent-file';
+import { hash as torrentFileHash } from '@ctrl/torrent-file';
 import { parse as cookieParse } from 'cookie';
 import { FormData } from 'node-fetch-native';
 import { ofetch } from 'ofetch';
@@ -1035,7 +1035,7 @@ export class QBittorrent implements TorrentClient {
         torrent = stringToUint8Array(torrent);
       }
 
-      torrentHash = hash(torrent);
+      torrentHash = torrentFileHash(torrent);
       await this.addTorrent(torrent, torrentOptions);
     }
 
