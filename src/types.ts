@@ -18,7 +18,232 @@ export interface BuildInfo {
   /**
    * Application bitness (e.g. 64-bit)
    */
-  bitness: string;
+  bitness: number;
+}
+
+export interface ProcessInfo {
+  /**
+   * Process launch time as UTC epoch seconds
+   * Added in qBittorrent WebUI API v2.15.1
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2151}
+   */
+  launch_time: number;
+}
+
+export interface RotateApiKeyResponse {
+  /**
+   * Generated WebAPI API key.
+   * Added in qBittorrent WebUI API v2.14.1
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2141}
+   */
+  apiKey: string;
+}
+
+export interface Cookie {
+  /**
+   * Cookie name
+   */
+  name: string;
+  /**
+   * Cookie domain
+   */
+  domain: string;
+  /**
+   * Cookie path
+   */
+  path: string;
+  /**
+   * Cookie value
+   */
+  value: string;
+  /**
+   * Cookie expiration time as UTC epoch seconds
+   */
+  expirationDate: number;
+}
+
+export type Cookies = Cookie[];
+
+/**
+ * Data stored by qBittorrent's WebUI client data API.
+ * Added in qBittorrent WebUI API v2.13.1
+ * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2131}
+ */
+export type ClientData = Record<string, unknown>;
+
+/**
+ * Visibility filter for /app/getDirectoryContent.
+ * qBittorrent accepts `all`, `dirs`, and `files`.
+ */
+export type DirectoryContentMode = 'all' | 'dirs' | 'files';
+
+export interface DirectoryContentOptions {
+  mode?: DirectoryContentMode;
+  /**
+   * Include filesystem metadata in /app/getDirectoryContent response.
+   * Added in qBittorrent WebUI API v2.11.8
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2118}
+   */
+  withMetadata?: boolean;
+}
+
+export interface DirectoryContentMetadata {
+  /**
+   * File or directory name
+   */
+  name: string;
+  /**
+   * Entry type returned by qBittorrent, e.g. file or directory
+   */
+  type: string;
+  /**
+   * File size in bytes
+   */
+  size: number;
+  /**
+   * Creation time as UTC epoch seconds
+   */
+  creation_date: number;
+  /**
+   * Last access time as UTC epoch seconds
+   */
+  last_access_date: number;
+  /**
+   * Last modification time as UTC epoch seconds
+   */
+  last_modification_date: number;
+}
+
+export type DirectoryContent = string[] | DirectoryContentMetadata[];
+
+export interface AddTorrentResponse {
+  /**
+   * Number of torrents successfully added.
+   * Added in qBittorrent WebUI API v2.14.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2140}
+   */
+  success_count: number;
+  /**
+   * Number of torrents queued for asynchronous metadata fetching.
+   * Added in qBittorrent WebUI API v2.14.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2140}
+   */
+  pending_count: number;
+  /**
+   * Number of torrents that failed to add.
+   * Added in qBittorrent WebUI API v2.14.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2140}
+   */
+  failure_count: number;
+  /**
+   * Torrent IDs for successfully added torrents.
+   * Added in qBittorrent WebUI API v2.14.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2140}
+   */
+  added_torrent_ids: string[];
+}
+
+export interface TorrentMetadataFile {
+  /**
+   * File path inside the torrent
+   */
+  path: string;
+  /**
+   * File size in bytes
+   */
+  length: number;
+}
+
+export interface TorrentMetadataInfo {
+  /**
+   * Torrent file list
+   */
+  files: TorrentMetadataFile[];
+  /**
+   * Total torrent size in bytes
+   */
+  length: number;
+  /**
+   * Torrent name
+   */
+  name: string;
+  /**
+   * Torrent piece length in bytes
+   */
+  piece_length: number;
+  /**
+   * Number of pieces in the torrent
+   */
+  pieces_num: number;
+  /**
+   * True if this is a private torrent
+   */
+  private: boolean;
+}
+
+export interface TorrentMetadataTracker {
+  /**
+   * Tracker URL
+   */
+  url: string;
+  /**
+   * Tracker tier
+   */
+  tier: number;
+}
+
+export interface TorrentMetadata {
+  /**
+   * Torrent comment
+   */
+  comment: string;
+  /**
+   * Torrent creator
+   */
+  created_by: string;
+  /**
+   * Torrent creation date as UTC epoch seconds
+   */
+  creation_date: number;
+  /**
+   * Torrent ID
+   */
+  hash: string;
+  /**
+   * v1 info hash, or empty string for v2-only torrents
+   */
+  infohash_v1: string;
+  /**
+   * v2 info hash, or empty string for v1-only torrents
+   */
+  infohash_v2: string;
+  /**
+   * Torrent metadata
+   */
+  info: TorrentMetadataInfo;
+  /**
+   * Torrent trackers
+   */
+  trackers: TorrentMetadataTracker[];
+  /**
+   * Torrent web seed URLs
+   */
+  webseeds: string[];
+}
+
+export interface TorrentMetadataRequest {
+  /**
+   * Torrent ID, if available while metadata is still being fetched
+   */
+  hash?: string;
+  /**
+   * v1 info hash, if available while metadata is still being fetched
+   */
+  infohash_v1?: string;
+  /**
+   * v2 info hash, if available while metadata is still being fetched
+   */
+  infohash_v2?: string;
 }
 
 /**
@@ -222,6 +447,11 @@ export interface Torrent {
    */
   force_start: boolean;
   /**
+   * Torrent creation datetime in seconds
+   * Added in qBittorrent v5.2.0
+   */
+  created_on?: number;
+  /**
    * True if torrent is from a private tracker
    * Added in qBittorrent v5.0.0
    * Might be able to make not optional once qb v5 is more widely used
@@ -237,12 +467,72 @@ export interface Torrent {
    * Added in qBittorrent WebUI API v2.8.1
    */
   seeding_time: number;
+  /**
+   * Included when `includeFiles` is passed to /torrents/info
+   * Added in qBittorrent WebUI API v2.11.8
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2118}
+   */
+  files?: TorrentFile[];
+  /**
+   * True when at least one tracker has a warning
+   * Added in qBittorrent WebUI API v2.11.7
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2117}
+   */
+  has_tracker_warning?: boolean;
+  /**
+   * True when at least one tracker has an error
+   * Added in qBittorrent WebUI API v2.11.7
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2117}
+   */
+  has_tracker_error?: boolean;
+  /**
+   * True when the torrent has a non-tracker announce error
+   * Added in qBittorrent WebUI API v2.11.7
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2117}
+   */
+  has_other_announce_error?: boolean;
+  /**
+   * Share limit action for this torrent
+   * Added in qBittorrent WebUI API v2.12.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
+   */
+  share_limit_action?: string;
 }
 
 export type TorrentCategories = Record<string, Category>;
 interface Category {
   name: string;
   savePath: string;
+  /**
+   * Category download path. Added in qBittorrent WebUI API v2.12.1
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2121}
+   */
+  download_path?: string | null;
+  /**
+   * Category share ratio limit. Added in qBittorrent WebUI API v2.12.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
+   */
+  ratio_limit?: number;
+  /**
+   * Category seeding time limit. Added in qBittorrent WebUI API v2.12.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
+   */
+  seeding_time_limit?: number;
+  /**
+   * Category inactive seeding time limit. Added in qBittorrent WebUI API v2.15.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2150}
+   */
+  inactive_seeding_time_limit?: number;
+  /**
+   * Category share limit action. Added in qBittorrent WebUI API v2.12.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
+   */
+  share_limit_action?: string;
+  /**
+   * Category share limit mode. Added in qBittorrent WebUI API v2.12.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
+   */
+  share_limits_mode?: string;
 }
 
 export enum TorrentState {
@@ -504,9 +794,74 @@ export interface TorrentTrackers {
    */
   num_downloaded: number;
   /**
+   * Seconds until next announce
+   * Added in qBittorrent WebUI API v2.13.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2130}
+   */
+  next_announce?: number;
+  /**
+   * Minimum seconds until next announce
+   * Added in qBittorrent WebUI API v2.13.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2130}
+   */
+  min_announce?: number;
+  /**
+   * Tracker endpoint announce statistics
+   * Added in qBittorrent WebUI API v2.13.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2130}
+   */
+  endpoints?: TorrentTrackerEndpoint[];
+  /**
    * Tracker message (there is no way of knowing what this message is - it's up to tracker admins)
    */
   msg: string;
+}
+
+export interface TorrentTrackerEndpoint {
+  /**
+   * Tracker endpoint name
+   */
+  name: string;
+  /**
+   * True if this endpoint is currently announcing
+   */
+  updating: boolean;
+  /**
+   * Tracker endpoint status. See TorrentTrackerStatus.
+   */
+  status: TorrentTrackerStatus;
+  /**
+   * Tracker endpoint message
+   */
+  msg: string;
+  /**
+   * BitTorrent protocol version used by this endpoint
+   */
+  bt_version: string;
+  /**
+   * Number of peers reported by this endpoint
+   */
+  num_peers: number;
+  /**
+   * Number of seeds reported by this endpoint
+   */
+  num_seeds: number;
+  /**
+   * Number of leeches reported by this endpoint
+   */
+  num_leeches: number;
+  /**
+   * Number of completed downloads reported by this endpoint
+   */
+  num_downloaded: number;
+  /**
+   * Seconds until next announce
+   */
+  next_announce: number;
+  /**
+   * Minimum seconds until next announce
+   */
+  min_announce: number;
 }
 
 export enum TorrentTrackerStatus {
@@ -530,6 +885,14 @@ export enum TorrentTrackerStatus {
    * Tracker has been contacted, but it is not working (or doesn't send proper replies)
    */
   Errored = 4,
+  /**
+   * Tracker error
+   */
+  TrackerError = 5,
+  /**
+   * Tracker is unreachable
+   */
+  Unreachable = 6,
 }
 
 export interface WebSeed {
@@ -604,6 +967,8 @@ export enum TorrentPieceState {
   Downloaded = 2,
 }
 
+export type TorrentPieceAvailability = number[];
+
 type TrueFalseStr = 'true' | 'false';
 
 export interface AddTorrentOptions {
@@ -673,6 +1038,12 @@ export interface AddTorrentOptions {
    * Prioritize download first last piece. Possible values are true, false (default)
    */
   firstLastPiecePrio: TrueFalseStr;
+  /**
+   * File priorities when adding a single torrent from previously fetched or parsed metadata.
+   * Added in qBittorrent WebUI API v2.11.9
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2119}
+   */
+  filePriorities: string | TorrentFilePriority[];
 }
 
 export interface AddMagnetOptions {
@@ -723,6 +1094,18 @@ export interface AddMagnetOptions {
    * Prioritize download first last piece. Possible values are true, false (default)
    */
   firstLastPiecePrio: TrueFalseStr;
+  /**
+   * Search plugin used to download the torrent.
+   * Added to /torrents/add in qBittorrent WebUI API v2.13.1
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2131}
+   */
+  downloader: string;
+  /**
+   * File priorities when adding a single torrent from previously fetched or parsed metadata.
+   * Added in qBittorrent WebUI API v2.11.9
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2119}
+   */
+  filePriorities: string | TorrentFilePriority[];
 }
 
 export interface Preferences {
@@ -1295,6 +1678,12 @@ export interface Preferences {
    */
   resolve_peer_countries: boolean;
   /**
+   * True resolves peer host names
+   * Added in qBittorrent WebUI API v2.15.1
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2151}
+   */
+  resolve_peer_host_names?: boolean;
+  /**
    * Save resume data interval in min
    */
   save_resume_data_interval: number;
@@ -1330,6 +1719,11 @@ export interface Preferences {
    * μTP-TCP mixed mode algorithm (see list of possible values below)
    */
   utp_tcp_mixed_mode: number;
+  /**
+   * Hostname resolver cache expiry interval in seconds
+   * Added in qBittorrent v5.2.0
+   */
+  hostname_cache_ttl?: number;
 }
 
 export interface TorrentPeersResponse {
@@ -1351,6 +1745,18 @@ export interface TorrentPeer {
   files?: string;
   flags?: string;
   flags_desc?: string;
+  /**
+   * Resolved peer host name
+   * Added in qBittorrent WebUI API v2.15.1
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2151}
+   */
+  host_name?: string;
+  /**
+   * I2P destination for I2P peers. When present, `ip` and `port` are omitted.
+   * Added in qBittorrent WebUI API v2.13.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2130}
+   */
+  i2p_dest?: string;
   ip?: string;
   port?: number;
   progress?: number;
@@ -1362,3 +1768,35 @@ export interface TorrentPeer {
 export type DownloadSpeed = Record<string, number>;
 
 export type UploadSpeed = Record<string, number>;
+
+export interface SyncMainData {
+  /**
+   * Response ID
+   */
+  rid: number;
+  /**
+   * True when the response contains full data instead of a delta update
+   */
+  full_update: boolean;
+  /**
+   * Torrent updates keyed by torrent hash
+   */
+  torrents?: Record<string, Partial<Torrent>>;
+  /**
+   * Hashes for torrents removed since the previous response ID
+   */
+  torrents_removed?: string[];
+  categories?: TorrentCategories;
+  categories_removed?: string[];
+  tags?: string[];
+  tags_removed?: string[];
+  server_state?: Record<string, unknown>;
+  /**
+   * Tracker URLs grouped by tracker status
+   * Added in qBittorrent WebUI API v2.13.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2130}
+   */
+  trackers?: Record<string, string[]>;
+  trackers_removed?: string[];
+  [key: string]: unknown;
+}
