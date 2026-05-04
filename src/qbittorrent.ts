@@ -1376,7 +1376,7 @@ function assertAddTorrentSucceeded(response: string): void {
   }
 
   const result = parseAddTorrentResponse(response);
-  if (result && result.success_count === 0 && result.pending_count === 0) {
+  if (result && result.failure_count > 0) {
     throw new Error('Failed to add torrent');
   }
 }
