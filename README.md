@@ -111,10 +111,10 @@ const client = QBittorrent.createFromState(config, state);
 
 All of the following npm modules provide the same normalized functions along with supporting the unique apis for each client.
 
-- shared types - [@ctrl/shared-torrent](https://github.com/scttcper/shared-torrent)  
-- deluge - [@ctrl/deluge](https://github.com/scttcper/deluge)  
-- transmission - [@ctrl/transmission](https://github.com/scttcper/transmission)  
-- utorrent - [@ctrl/utorrent](https://github.com/scttcper/utorrent)  
+- shared types - [@ctrl/shared-torrent](https://github.com/scttcper/shared-torrent)
+- deluge - [@ctrl/deluge](https://github.com/scttcper/deluge)
+- transmission - [@ctrl/transmission](https://github.com/scttcper/transmission)
+- utorrent - [@ctrl/utorrent](https://github.com/scttcper/utorrent)
 - rtorrent - [@ctrl/rtorrent](https://github.com/scttcper/rtorrent)
 
 ### Start a test docker container
@@ -132,3 +132,30 @@ docker run -d \
   --restart unless-stopped \
   lscr.io/linuxserver/qbittorrent:latest
 ```
+
+### Start a test docker container for qBittorrent alpha
+
+Use the official alpha image when testing against the newest WebAPI changes. The
+linuxserver `latest` image can lag behind the latest qBittorrent release.
+
+```
+mkdir -p /tmp/qbittorrent-alpha/config /tmp/qbittorrent-alpha/downloads
+
+docker run -d \
+  --name=qbittorrent-alpha \
+  -e QBT_LEGAL_NOTICE=confirm \
+  -e QBT_WEBUI_PORT=8080 \
+  -e QBT_TORRENTING_PORT=6881 \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -p 8080:8080 \
+  -p 6881:6881 \
+  -p 6881:6881/udp \
+  -v /tmp/qbittorrent-alpha/config:/config \
+  -v /tmp/qbittorrent-alpha/downloads:/downloads \
+  qbittorrentofficial/qbittorrent-nox:alpha
+```
+
+The alpha image prints a temporary WebUI password in `docker logs
+qbittorrent-alpha`. Set the WebUI password to `adminadmin` before running the
+integration tests.

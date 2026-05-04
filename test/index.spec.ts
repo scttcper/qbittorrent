@@ -15,6 +15,22 @@ const username = 'admin';
 const password = 'adminadmin';
 const magnet =
   'magnet:?xt=urn:btih:B0B81206633C42874173D22E564D293DAEFC45E2&dn=Ubuntu+11+10+Alternate+Amd64+Iso&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.open-internet.nl%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.si%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Fdenis.stalker.upeer.me%3A6969%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce';
+let apiVersionPromise: Promise<string> | undefined;
+
+function getTestApiVersion(): Promise<string> {
+  apiVersionPromise ??= new QBittorrent({ baseUrl, username, password }).getApiVersion();
+  return apiVersionPromise;
+}
+
+async function skipIfUnsupported(minVersion: string, feature: string): Promise<boolean> {
+  const apiVersion = await getTestApiVersion();
+  if (isVersionGreaterOrEqual(apiVersion, minVersion)) {
+    return false;
+  }
+
+  console.log(`Skipping ${feature}: WebAPI ${apiVersion} < ${minVersion}`);
+  return true;
+}
 
 async function waitForTorrent(client: QBittorrent) {
   await pWaitFor(
@@ -35,6 +51,10 @@ async function setupTorrent(client: QBittorrent): Promise<string> {
   await waitForTorrent(client);
   const torrents = await client.listTorrents();
   return torrents[0]!.hash;
+}
+
+function isVersionGreaterOrEqual(version: string, minVersion: string): boolean {
+  return version.localeCompare(minVersion, undefined, { numeric: true }) >= 0;
 }
 
 afterEach(async () => {
@@ -184,6 +204,58 @@ it('should get torrent piece hashes', async () => {
   const res = await client.torrentPieceHashes(torrentId);
   expect(res.length).toBe(3726);
 });
+it('should get torrent piece availability', async () => {
+  if (await skipIfUnsupported('2.15.1', 'torrent piece availability')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  const res = await client.torrentPieceAvailability(torrentId);
+  expect(res.length).toBe(3726);
+  expect(res.every(piece => typeof piece === 'number')).toBe(true);
+});
+it('should fetch torrent metadata', async () => {
+  if (await skipIfUnsupported('2.11.9', 'fetch torrent metadata')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  const metadata = await client.fetchTorrentMetadata(torrentId);
+  expect(metadata.hash).toBe(torrentId);
+  expect('info' in metadata ? metadata.info.name : undefined).toBe(torrentName);
+});
+it('should parse and save torrent metadata', async () => {
+  if (await skipIfUnsupported('2.11.9', 'parse and save torrent metadata')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const [metadata] = await client.parseTorrentMetadata(torrentFileBuffer, 'ubuntu.torrent');
+  expect(metadata!.hash).toBe('e84213a794f3ccd890382a54a64ca68b7e925433');
+  expect(metadata!.info.files[0]!.path).toBe('ubuntu-18.04.1-desktop-amd64.iso');
+
+  const torrent = await client.saveTorrentMetadata(metadata!.hash);
+  expect(torrent.byteLength).toBeGreaterThan(0);
+});
+it('should add torrent from parsed metadata with file priorities', async () => {
+  if (await skipIfUnsupported('2.11.9', 'add torrent from parsed metadata')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const [metadata] = await client.parseTorrentMetadata(torrentFileBuffer, 'ubuntu.torrent');
+  const res = await client.addMagnet(metadata!.hash, {
+    filePriorities: [TorrentFilePriority.Skip],
+    stopped: 'true',
+  });
+  expect(res).toBe(true);
+  await waitForTorrent(client);
+
+  const files = await client.torrentFiles(metadata!.hash);
+  expect(files[0]!.priority).toBe(TorrentFilePriority.Skip);
+});
 it('should add/remove torrent tag', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
@@ -220,7 +292,10 @@ it('should rename file within torrent', async () => {
   const torrentId = await setupTorrent(client);
   let torrentFiles = await client.torrentFiles(torrentId);
   expect(await client.renameFile(torrentId, torrentFiles[0]!.name, 'ubuntu')).toBe(true);
-  torrentFiles = await client.torrentFiles(torrentId);
+  await pWaitFor(async () => {
+    torrentFiles = await client.torrentFiles(torrentId);
+    return torrentFiles[0]?.name === 'ubuntu';
+  });
   expect(torrentFiles[0]!.name).toBe('ubuntu');
 });
 it('should set torrent priority', async () => {
@@ -313,14 +388,15 @@ it('should set preferences', async () => {
 });
 it('should get / create / edit / remove category', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
+  await client.removeCategory('movie');
   let categories = await client.getCategories();
   expect(categories.movie).toBe(undefined);
   await client.createCategory('movie', '/data');
   categories = await client.getCategories();
-  expect(categories.movie).toEqual({ name: 'movie', savePath: '/data' });
+  expect(categories.movie).toMatchObject({ name: 'movie', savePath: '/data' });
   await client.editCategory('movie', '/swag');
   categories = await client.getCategories();
-  expect(categories.movie).toEqual({ name: 'movie', savePath: '/swag' });
+  expect(categories.movie).toMatchObject({ name: 'movie', savePath: '/swag' });
   await client.removeCategory('movie');
   categories = await client.getCategories();
   expect(categories.movie).toBe(undefined);
@@ -367,6 +443,97 @@ it('should get build info', async () => {
   const buildInfo = await client.getBuildInfo();
   expect(buildInfo.libtorrent).toBeTruthy();
   expect(typeof buildInfo.libtorrent).toBe('string');
+});
+it('should get process info', async () => {
+  if (await skipIfUnsupported('2.15.1', 'process info')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const processInfo = await client.getProcessInfo();
+  expect(processInfo.launch_time).toBeGreaterThan(0);
+});
+it('should get directory content metadata', async () => {
+  if (await skipIfUnsupported('2.11.8', 'directory content metadata')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const content = await client.getDirectoryContent('/downloads', { withMetadata: true });
+  expect(Array.isArray(content)).toBe(true);
+});
+it('should list torrents with included files', async () => {
+  if (await skipIfUnsupported('2.11.8', 'torrent list included files')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  await setupTorrent(client);
+  const torrents = await client.listTorrents({ includeFiles: true });
+  expect(torrents[0]!.files?.map(file => file.name)).includes('ubuntu-18.04.1-desktop-amd64.iso');
+});
+it('should set torrent comment', async () => {
+  if (await skipIfUnsupported('2.12.1', 'torrent comments')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  expect(await client.setTorrentComment(torrentId, 'important comment')).toBe(true);
+  const properties = await client.torrentProperties(torrentId);
+  expect(properties.comment).toBe('important comment');
+});
+it('should get sync main data', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const data = await client.getSyncMainData();
+  expect(data.full_update).toBe(true);
+  expect(data.rid).toBeGreaterThan(0);
+});
+it('should store and load client data', async () => {
+  if (await skipIfUnsupported('2.13.1', 'client data')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  await client.storeClientData({ test_value: 'stored' });
+  const data = await client.loadClientData(['test_value']);
+  expect(data.test_value).toBe('stored');
+});
+it('should get and set cookies', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  await client.setCookies([
+    {
+      name: 'test_cookie',
+      domain: 'example.com',
+      path: '/',
+      value: 'stored',
+      expirationDate: Math.floor(Date.now() / 1000) + 3600,
+    },
+  ]);
+  const cookies = await client.getCookies();
+  expect(cookies).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        name: 'test_cookie',
+        value: 'stored',
+      }),
+    ]),
+  );
+});
+it('should authenticate with api key', async () => {
+  if (await skipIfUnsupported('2.14.1', 'api key auth')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const apiKey = await client.rotateApiKey();
+  expect(apiKey).toMatch(/^qbt_/);
+
+  const apiKeyClient = new QBittorrent({ baseUrl, apiKey });
+  const version = await apiKeyClient.getAppVersion();
+  expect(version).toBeTruthy();
+
+  await client.deleteApiKey();
 });
 it('should set torrent name', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
