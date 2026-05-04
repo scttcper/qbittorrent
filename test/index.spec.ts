@@ -500,6 +500,10 @@ it('should store and load client data', async () => {
   expect(data.test_value).toBe('stored');
 });
 it('should get and set cookies', async () => {
+  if (await skipIfUnsupported('2.11.3', 'cookies')) {
+    return;
+  }
+
   const client = new QBittorrent({ baseUrl, username, password });
   await client.setCookies([
     {
