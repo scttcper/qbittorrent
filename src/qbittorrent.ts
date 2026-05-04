@@ -576,13 +576,13 @@ export class QBittorrent implements TorrentClient {
       form.set('file', new File([torrent], filename, type));
     }
 
-    const res = await this.request<TorrentMetadata[]>(
+    const res = await this.request<TorrentMetadata | TorrentMetadata[]>(
       '/torrents/parseMetadata',
       'POST',
       undefined,
       form,
     );
-    return res;
+    return Array.isArray(res) ? res : [res];
   }
 
   /**
