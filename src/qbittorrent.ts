@@ -1367,12 +1367,7 @@ function normalizeHashes(hashes: string | string[]): string {
 
 function getAuthCookieName(setCookieHeader: string): string | undefined {
   const [cookiePair] = setCookieHeader.split(';', 1);
-  const cookieName = cookiePair?.split('=', 1)[0];
-  if (cookieName === 'SID' || /^QBT_SID(?:_\d+)?$/.test(cookieName ?? '')) {
-    return cookieName;
-  }
-
-  return undefined;
+  return cookiePair?.split('=', 1)[0];
 }
 
 function assertAddTorrentSucceeded(response: string): void {
