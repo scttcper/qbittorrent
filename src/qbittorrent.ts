@@ -485,6 +485,7 @@ export class QBittorrent implements TorrentClient {
       }
     }
 
+    results.labels = Object.values(labels);
     return results;
   }
 

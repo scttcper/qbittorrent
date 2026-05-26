@@ -103,6 +103,8 @@ it('should add torrent with label', async () => {
   const torrents = await client.listTorrents();
   expect(torrents.length).toBe(1);
   expect(torrents[0]!.category).toBe('swag');
+  const allData = await client.getAllData();
+  expect(allData.labels).toEqual([{ id: 'swag', name: 'swag', count: 1 }]);
 });
 it('should add normalized torrent with label', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
