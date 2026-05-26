@@ -6,20 +6,22 @@ import type {
   NormalizedTorrent,
   TorrentClient,
   TorrentClientConfig,
-  TorrentClientState,
 } from '@ctrl/shared-torrent';
 import { hash as torrentFileHash } from '@ctrl/torrent-file';
-import { parse as cookieParse } from 'cookie';
 import { FormData } from 'node-fetch-native';
-import { ofetch } from 'ofetch';
 import type { Jsonify } from 'type-fest';
-import { joinURL } from 'ufo';
 import { base64ToUint8Array, isUint8Array, stringToUint8Array } from 'uint8array-extras';
 
+import { buildAddTorrentForm } from './addTorrentForm.js';
 import { normalizeTorrentData } from './normalizeTorrentData.js';
+import { QBittorrentSession, type QBittorrentState } from './qbittorrentSession.js';
+import {
+  assertAddTorrentSucceeded,
+  normalizeHashes,
+  objToUrlSearchParams,
+} from './requestUtils.js';
 import type {
   AddMagnetOptions,
-  AddTorrentResponse,
   AddTorrentOptions,
   BuildInfo,
   ClientData,
@@ -48,27 +50,6 @@ import type {
   WebSeed,
 } from './types.js';
 
-interface QBittorrentState extends TorrentClientState {
-  auth?: {
-    /**
-     * auth cookie
-     */
-    sid: string;
-    /**
-     * auth cookie name
-     */
-    cookieName?: string;
-    /**
-     * cookie expiration
-     */
-    expires: Date;
-  };
-  version?: {
-    version: string;
-    isVersion5OrHigher: boolean;
-  };
-}
-
 export interface QBittorrentConfig extends TorrentClientConfig {
   /**
    * qBittorrent WebAPI key. Added in qBittorrent v5.2.0.
@@ -78,15 +59,7 @@ export interface QBittorrentConfig extends TorrentClientConfig {
   apiKey?: string;
 }
 
-const defaults: QBittorrentConfig = {
-  baseUrl: 'http://localhost:9091/',
-  path: '/api/v2',
-  username: '',
-  password: '',
-  timeout: 5000,
-};
-
-export class QBittorrent implements TorrentClient {
+export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * Create a new QBittorrent client from a state
    */
@@ -102,18 +75,8 @@ export class QBittorrent implements TorrentClient {
     return client;
   }
 
-  config: QBittorrentConfig;
-  state: QBittorrentState = {};
-
   constructor(options: Partial<QBittorrentConfig> = {}) {
-    this.config = { ...defaults, ...options };
-  }
-
-  /**
-   * Export the state of the client as JSON
-   */
-  exportState(): Jsonify<QBittorrentState> {
-    return JSON.parse(JSON.stringify(this.state));
+    super(options);
   }
 
   /**
@@ -592,19 +555,7 @@ export class QBittorrent implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2119}
    */
   async saveTorrentMetadata(source: string): Promise<Uint8Array<ArrayBuffer>> {
-    await this.ensureAuthenticated('/torrents/saveMetadata');
-
-    const url = joinURL(this.config.baseUrl, this.config.path ?? '', '/torrents/saveMetadata');
-    const res = await ofetch<ArrayBuffer>(url, {
-      method: 'GET',
-      headers: this.authHeaders(),
-      params: { source },
-      retry: 0,
-      timeout: this.config.timeout,
-      responseType: 'arrayBuffer' as 'json',
-      dispatcher: this.config.dispatcher,
-    });
-
+    const res = await this.requestArrayBuffer('/torrents/saveMetadata', { source });
     return new Uint8Array(res);
   }
 
@@ -1179,266 +1130,4 @@ export class QBittorrent implements TorrentClient {
     const res = await this.request<TorrentPeersResponse>('/sync/torrentPeers', 'GET', params);
     return res;
   }
-
-  /**
-   * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#login}
-   */
-  async login(): Promise<boolean> {
-    if (this.config.apiKey) {
-      await this.checkVersion();
-      return true;
-    }
-
-    const url = joinURL(this.config.baseUrl, this.config.path ?? '', '/auth/login');
-
-    const res = await ofetch.raw(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        username: this.config.username ?? '',
-        password: this.config.password ?? '',
-      }).toString(),
-      redirect: 'manual',
-      retry: false,
-      timeout: this.config.timeout,
-      dispatcher: this.config.dispatcher,
-    });
-
-    if (!res.headers.get('set-cookie')?.length) {
-      throw new Error('Cookie not found. Auth Failed.');
-    }
-
-    const cookieHeader = res.headers.get('set-cookie') ?? '';
-    const cookieName = getAuthCookieName(cookieHeader);
-    const cookie = cookieParse(cookieHeader);
-    const sid = cookieName ? cookie[cookieName] : undefined;
-    if (!sid) {
-      throw new Error('Invalid cookie');
-    }
-
-    const expires = cookie.Expires ?? cookie.expires;
-    const maxAge = cookie['Max-Age'] ?? cookie['max-age'];
-    this.state.auth = {
-      sid,
-      cookieName,
-      expires: expires
-        ? new Date(expires)
-        : maxAge
-          ? new Date(Date.now() + Number(maxAge) * 1000)
-          : new Date(Date.now() + 3_600_000),
-    };
-
-    // Check version after successful login
-    await this.checkVersion();
-
-    return true;
-  }
-
-  logout(): boolean {
-    delete this.state.auth;
-    return true;
-  }
-
-  // eslint-disable-next-line max-params
-  async request<T>(
-    path: string,
-    method: 'GET' | 'POST',
-    params?: Record<string, string | number>,
-    body?: URLSearchParams | FormData,
-    headers: Record<string, string> = {},
-    isJson = true,
-  ): Promise<T> {
-    await this.ensureAuthenticated(path);
-
-    const url = joinURL(this.config.baseUrl, this.config.path ?? '', path);
-    const res = await ofetch<T>(url, {
-      method,
-      headers: {
-        ...this.authHeaders(),
-        ...headers,
-      },
-      body,
-      params,
-      retry: 0,
-      timeout: this.config.timeout,
-      // casting to json to avoid type error
-      responseType: isJson ? 'json' : ('text' as 'json'),
-      // allow proxy agent
-      dispatcher: this.config.dispatcher,
-    });
-
-    return res;
-  }
-
-  private async ensureAuthenticated(path: string): Promise<void> {
-    if (this.config.apiKey) {
-      if (!this.state.version?.version && path !== '/app/version') {
-        await this.checkVersion();
-      }
-    } else if (
-      !this.state.auth?.sid ||
-      !this.state.auth.expires ||
-      this.state.auth.expires.getTime() < Date.now()
-    ) {
-      const authed = await this.login();
-      if (!authed) {
-        throw new Error('Auth Failed');
-      }
-    }
-  }
-
-  private authHeaders(): Record<string, string> {
-    if (this.config.apiKey) {
-      return { Authorization: `Bearer ${this.config.apiKey}` };
-    }
-
-    return { Cookie: `${this.state.auth!.cookieName ?? 'SID'}=${this.state.auth!.sid ?? ''}` };
-  }
-
-  private async checkVersion(): Promise<void> {
-    if (!this.state.version?.version) {
-      const newVersion = await this.getAppVersion();
-      // Remove potential 'v' prefix and any extra info after version number
-      const cleanVersion = newVersion.replace(/^v/, '').split('-')[0]!;
-      this.state.version = {
-        version: newVersion,
-        isVersion5OrHigher: cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0'),
-      };
-    }
-  }
-}
-
-/**
- * Normalizes hashes
- * @returns hashes as string seperated by `|`
- */
-function normalizeHashes(hashes: string | string[]): string {
-  if (Array.isArray(hashes)) {
-    return hashes.join('|');
-  }
-
-  return hashes;
-}
-
-type AddTorrentFormSource =
-  | {
-      type: 'torrent';
-      torrent: string | Uint8Array<ArrayBuffer>;
-    }
-  | {
-      type: 'magnet';
-      urls: string;
-    };
-
-type AddTorrentFormOptions = Partial<AddTorrentOptions> | Partial<AddMagnetOptions>;
-type AddTorrentFormFields = Partial<AddTorrentOptions & AddMagnetOptions>;
-
-function buildAddTorrentForm({
-  source,
-  options,
-  isVersion5OrHigher,
-}: {
-  source: AddTorrentFormSource;
-  options: AddTorrentFormOptions;
-  isVersion5OrHigher: boolean;
-}): FormData {
-  const form = new FormData();
-  const { filename, fields } = normalizeAddTorrentFormOptions(options, isVersion5OrHigher);
-
-  if (source.type === 'magnet') {
-    form.append('urls', source.urls);
-  } else {
-    const type = { type: 'application/x-bittorrent' };
-    const fileName = filename ?? (typeof source.torrent === 'string' ? 'file.torrent' : 'torrent');
-    const file =
-      typeof source.torrent === 'string'
-        ? new File([base64ToUint8Array(source.torrent)], fileName, type)
-        : new File([source.torrent], fileName, type);
-    form.set('file', file);
-  }
-
-  for (const [key, value] of Object.entries(fields)) {
-    if (value !== undefined) {
-      form.append(key, `${value}`);
-    }
-  }
-
-  return form;
-}
-
-function normalizeAddTorrentFormOptions(
-  options: AddTorrentFormOptions,
-  isVersion5OrHigher: boolean,
-): {
-  filename?: string;
-  fields: AddTorrentFormFields;
-} {
-  const fields: AddTorrentFormFields = { ...options };
-
-  // filename is only used for the uploaded File object, not sent as a form field.
-  const { filename } = fields;
-  delete fields.filename;
-
-  // qBittorrent v5 renamed the add-torrent paused option to stopped.
-  if (isVersion5OrHigher && 'paused' in fields) {
-    fields.stopped = fields.paused;
-    delete fields.paused;
-  }
-
-  // Automatic Torrent Management ignores savepath.
-  if (fields.useAutoTMM === 'true') {
-    fields.savepath = '';
-  } else {
-    fields.useAutoTMM = 'false';
-  }
-
-  return { filename, fields };
-}
-
-function getAuthCookieName(setCookieHeader: string): string | undefined {
-  const [cookiePair] = setCookieHeader.split(';', 1);
-  return cookiePair?.split('=', 1)[0];
-}
-
-function assertAddTorrentSucceeded(response: string): void {
-  if (response === 'Fails.') {
-    throw new Error('Failed to add torrent');
-  }
-
-  const result = parseAddTorrentResponse(response);
-  if (result && result.failure_count > 0) {
-    throw new Error('Failed to add torrent');
-  }
-}
-
-function parseAddTorrentResponse(response: string): AddTorrentResponse | undefined {
-  try {
-    const parsed = JSON.parse(response) as Partial<AddTorrentResponse>;
-    if (
-      typeof parsed.success_count === 'number' &&
-      typeof parsed.pending_count === 'number' &&
-      typeof parsed.failure_count === 'number' &&
-      Array.isArray(parsed.added_torrent_ids)
-    ) {
-      return parsed as AddTorrentResponse;
-    }
-  } catch {
-    return undefined;
-  }
-
-  return undefined;
-}
-
-function objToUrlSearchParams(obj: Record<string, string | number | boolean>): URLSearchParams {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(obj)) {
-    params.append(key, value.toString());
-  }
-
-  return params;
-}
-function isGreater(a: string, b: string) {
-  return a.localeCompare(b, undefined, { numeric: true }) === 1;
 }
