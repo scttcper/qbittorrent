@@ -960,39 +960,11 @@ export class QBittorrent implements TorrentClient {
     torrent: string | Uint8Array<ArrayBuffer>,
     options: Partial<AddTorrentOptions> = {},
   ): Promise<boolean> {
-    const form = new FormData();
-
-    // remove options.filename, not used in form
-    if (options.filename) {
-      delete options.filename;
-    }
-
-    const type = { type: 'application/x-bittorrent' };
-    if (typeof torrent === 'string') {
-      form.set('file', new File([base64ToUint8Array(torrent)], 'file.torrent', type));
-    } else {
-      const file = new File([torrent], options.filename ?? 'torrent', type);
-      form.set('file', file);
-    }
-
-    if (options) {
-      // Handle version-specific paused/stopped parameter
-      if (this.state.version?.isVersion5OrHigher && 'paused' in options) {
-        form.append('stopped', options.paused!);
-        delete options.paused;
-      }
-
-      // disable savepath when autoTMM is defined
-      if (options.useAutoTMM === 'true') {
-        options.savepath = '';
-      } else {
-        options.useAutoTMM = 'false';
-      }
-
-      for (const [key, value] of Object.entries(options)) {
-        form.append(key, `${value}`);
-      }
-    }
+    const form = buildAddTorrentForm({
+      source: { type: 'torrent', torrent },
+      options,
+      isVersion5OrHigher: this.state.version?.isVersion5OrHigher ?? false,
+    });
 
     const res = await this.request<string>(
       '/torrents/add',
@@ -1089,27 +1061,11 @@ export class QBittorrent implements TorrentClient {
    * @param options
    */
   async addMagnet(urls: string, options: Partial<AddMagnetOptions> = {}): Promise<boolean> {
-    const form = new FormData();
-    form.append('urls', urls);
-
-    if (options) {
-      // Handle version-specific paused/stopped parameter
-      if (this.state.version?.isVersion5OrHigher && 'paused' in options) {
-        form.append('stopped', options.paused!);
-        delete options.paused;
-      }
-
-      // disable savepath when autoTMM is defined
-      if (options.useAutoTMM === 'true') {
-        options.savepath = '';
-      } else {
-        options.useAutoTMM = 'false';
-      }
-
-      for (const [key, value] of Object.entries(options)) {
-        form.append(key, `${value}`);
-      }
-    }
+    const form = buildAddTorrentForm({
+      source: { type: 'magnet', urls },
+      options,
+      isVersion5OrHigher: this.state.version?.isVersion5OrHigher ?? false,
+    });
 
     const res = await this.request<string>(
       '/torrents/add',
@@ -1363,6 +1319,81 @@ function normalizeHashes(hashes: string | string[]): string {
   }
 
   return hashes;
+}
+
+type AddTorrentFormSource =
+  | {
+      type: 'torrent';
+      torrent: string | Uint8Array<ArrayBuffer>;
+    }
+  | {
+      type: 'magnet';
+      urls: string;
+    };
+
+type AddTorrentFormOptions = Partial<AddTorrentOptions> | Partial<AddMagnetOptions>;
+type AddTorrentFormFields = Partial<AddTorrentOptions & AddMagnetOptions>;
+
+function buildAddTorrentForm({
+  source,
+  options,
+  isVersion5OrHigher,
+}: {
+  source: AddTorrentFormSource;
+  options: AddTorrentFormOptions;
+  isVersion5OrHigher: boolean;
+}): FormData {
+  const form = new FormData();
+  const { filename, fields } = normalizeAddTorrentFormOptions(options, isVersion5OrHigher);
+
+  if (source.type === 'magnet') {
+    form.append('urls', source.urls);
+  } else {
+    const type = { type: 'application/x-bittorrent' };
+    const fileName = filename ?? (typeof source.torrent === 'string' ? 'file.torrent' : 'torrent');
+    const file =
+      typeof source.torrent === 'string'
+        ? new File([base64ToUint8Array(source.torrent)], fileName, type)
+        : new File([source.torrent], fileName, type);
+    form.set('file', file);
+  }
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) {
+      form.append(key, `${value}`);
+    }
+  }
+
+  return form;
+}
+
+function normalizeAddTorrentFormOptions(
+  options: AddTorrentFormOptions,
+  isVersion5OrHigher: boolean,
+): {
+  filename?: string;
+  fields: AddTorrentFormFields;
+} {
+  const fields: AddTorrentFormFields = { ...options };
+
+  // filename is only used for the uploaded File object, not sent as a form field.
+  const { filename } = fields;
+  delete fields.filename;
+
+  // qBittorrent v5 renamed the add-torrent paused option to stopped.
+  if (isVersion5OrHigher && 'paused' in fields) {
+    fields.stopped = fields.paused;
+    delete fields.paused;
+  }
+
+  // Automatic Torrent Management ignores savepath.
+  if (fields.useAutoTMM === 'true') {
+    fields.savepath = '';
+  } else {
+    fields.useAutoTMM = 'false';
+  }
+
+  return { filename, fields };
 }
 
 function getAuthCookieName(setCookieHeader: string): string | undefined {
