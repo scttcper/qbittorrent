@@ -10,9 +10,9 @@ import type {
 import { hash as torrentFileHash } from '@ctrl/torrent-file';
 import { FormData } from 'node-fetch-native';
 import type { Jsonify } from 'type-fest';
-import { base64ToUint8Array, isUint8Array, stringToUint8Array } from 'uint8array-extras';
+import { isUint8Array, stringToUint8Array } from 'uint8array-extras';
 
-import { buildAddTorrentForm } from './addTorrentForm.js';
+import { buildAddTorrentForm, createTorrentFile } from './addTorrentForm.js';
 import { normalizeTorrentData } from './normalizeTorrentData.js';
 import { QBittorrentSession, type QBittorrentState } from './qbittorrentSession.js';
 import {
@@ -533,12 +533,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     filename = 'metadata.torrent',
   ): Promise<TorrentMetadata[]> {
     const form = new FormData();
-    const type = { type: 'application/x-bittorrent' };
-    if (typeof torrent === 'string') {
-      form.set('file', new File([base64ToUint8Array(torrent)], filename, type));
-    } else {
-      form.set('file', new File([torrent], filename, type));
-    }
+    form.set('file', createTorrentFile(torrent, filename));
 
     const res = await this.request<TorrentMetadata | TorrentMetadata[]>(
       '/torrents/parseMetadata',

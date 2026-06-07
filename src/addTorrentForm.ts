@@ -31,13 +31,8 @@ export function buildAddTorrentForm({
   if (source.type === 'magnet') {
     form.append('urls', source.urls);
   } else {
-    const type = { type: 'application/x-bittorrent' };
     const fileName = filename ?? (typeof source.torrent === 'string' ? 'file.torrent' : 'torrent');
-    const file =
-      typeof source.torrent === 'string'
-        ? new File([base64ToUint8Array(source.torrent)], fileName, type)
-        : new File([source.torrent], fileName, type);
-    form.set('file', file);
+    form.set('file', createTorrentFile(source.torrent, fileName));
   }
 
   for (const [key, value] of Object.entries(fields)) {
@@ -47,6 +42,18 @@ export function buildAddTorrentForm({
   }
 
   return form;
+}
+
+export function createTorrentFile(
+  torrent: string | Uint8Array<ArrayBuffer>,
+  filename: string,
+): File {
+  const type = { type: 'application/x-bittorrent' };
+  if (typeof torrent === 'string') {
+    return new File([base64ToUint8Array(torrent)], filename, type);
+  }
+
+  return new File([torrent], filename, type);
 }
 
 function normalizeAddTorrentFormOptions(
