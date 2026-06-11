@@ -182,6 +182,9 @@ export class QBittorrentSession {
       return { Authorization: `Bearer ${this.config.apiKey}` };
     }
 
+    // qBittorrent 5.2+ accepts Basic auth on regular API requests. Keep the
+    // SID cookie for older versions, but send Basic too so stale/missing cookies
+    // still work for clients configured with username/password.
     const headers: Record<string, string> = {
       Cookie: `${this.state.auth!.cookieName ?? 'SID'}=${this.state.auth!.sid ?? ''}`,
     };
@@ -206,6 +209,8 @@ export class QBittorrentSession {
     try {
       return await this.requestOnce<T>(options);
     } catch (error) {
+      // API key auth is stateless and cannot use /auth/login, so only cookie
+      // auth gets a one-shot re-login when the server rejects the session.
       if (this.config.apiKey || !isAuthError(error)) {
         throw error;
       }

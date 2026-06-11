@@ -20,6 +20,9 @@ jobs:
 
       - name: start qbittorrent
         run: |
+          # The official image stores config under /config/qBittorrent/config.
+          # Use the alpha image so CI covers WebAPI 2.14.1+ auth behavior
+          # including Basic auth on API requests and API key endpoints.
           mkdir -p /tmp/qbittorrent/config/qBittorrent/config /tmp/qbittorrent/downloads
           cat > /tmp/qbittorrent/config/qBittorrent/config/qBittorrent.conf << 'EOF'
           [BitTorrent]
