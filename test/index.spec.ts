@@ -567,6 +567,28 @@ it('should be able to export and create from state', async () => {
   expect(client2.state.auth?.expires).toBeInstanceOf(Date);
 });
 
+it('should authenticate requests with basic auth when the session cookie is invalid', async () => {
+  const client = QBittorrent.createFromState(
+    { baseUrl, username, password },
+    {
+      auth: {
+        sid: 'invalid-session-id',
+        cookieName: 'QBT_SID_8080',
+        expires: new Date(Date.now() + 60_000).toISOString(),
+      },
+      version: {
+        version: 'v5.2.0',
+        isVersion5OrHigher: true,
+      },
+    },
+  );
+
+  const version = await client.getAppVersion();
+
+  expect(version).toBeTruthy();
+  expect(client.state.auth?.sid).toBe('invalid-session-id');
+});
+
 it('should list torrents', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   await setupTorrent(client);

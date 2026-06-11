@@ -19,23 +19,43 @@ jobs:
           node-version: 24
 
       - name: start qbittorrent
-        # creates a default config with password adminadmin
         run: |
-          mkdir -p ~/.config/qBittorrent/
-          cat > ~/.config/qBittorrent/qBittorrent.conf << 'EOF'
+          mkdir -p /tmp/qbittorrent/config/qBittorrent/config /tmp/qbittorrent/downloads
+          cat > /tmp/qbittorrent/config/qBittorrent/config/qBittorrent.conf << 'EOF'
           [BitTorrent]
+          Session\DefaultSavePath=/downloads
+          Session\Port=6881
           Session\QueueingSystemEnabled=false
+          Session\TempPath=/downloads/temp
+
           [Meta]
           MigrationVersion=6
+
           [Preferences]
           WebUI\Password_PBKDF2="@ByteArray(ARQ77eY1NUZaQsuDHbIMCA==:0WMRkYTUWVT9wVvdDtHAjU9b3b7uB8NR1Gur2hmQCvCDpm39Q+PsJRJPaCU51dEiz+dTzh8qbPsL8WkFljQYFQ==)"
+          WebUI\Port=8080
           EOF
-          sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
-          sudo apt update
-          sudo apt install qbittorrent-nox
-          qbittorrent-nox -d
-          sudo mkdir /downloads
-          mkdir ~/downloads
+          docker run -d \
+            --name qbittorrent \
+            -e QBT_LEGAL_NOTICE=confirm \
+            -e QBT_WEBUI_PORT=8080 \
+            -e QBT_TORRENTING_PORT=6881 \
+            -e PUID="$(id -u)" \
+            -e PGID="$(id -g)" \
+            -p 8080:8080 \
+            -p 6881:6881 \
+            -p 6881:6881/udp \
+            -v /tmp/qbittorrent/config:/config \
+            -v /tmp/qbittorrent/downloads:/downloads \
+            qbittorrentofficial/qbittorrent-nox:alpha
+          for i in {1..30}; do
+            if curl -fsS -u admin:adminadmin http://localhost:8080/api/v2/app/version; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs qbittorrent
+          exit 1
 
       - name: lint
         run: pnpm run lint
