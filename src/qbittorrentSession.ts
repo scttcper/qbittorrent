@@ -36,6 +36,15 @@ export interface QBittorrentConfig extends TorrentClientConfig {
   apiKey?: string;
 }
 
+type RequestOptions = {
+  path: string;
+  method: 'GET' | 'POST';
+  params?: Record<string, string | number>;
+  body?: URLSearchParams | FormData;
+  headers?: Record<string, string>;
+  responseType?: 'arrayBuffer' | 'json' | 'text';
+};
+
 const defaults: QBittorrentConfig = {
   baseUrl: 'http://localhost:9091/',
   path: '/api/v2',
@@ -129,46 +138,26 @@ export class QBittorrentSession {
     headers: Record<string, string> = {},
     isJson = true,
   ): Promise<T> {
-    await this.ensureAuthenticated(path);
-
-    const url = joinURL(this.config.baseUrl, this.config.path ?? '', path);
-    const res = await ofetch<T>(url, {
+    return this.requestWithAuth<T>({
+      path,
       method,
-      headers: {
-        ...this.authHeaders(),
-        ...headers,
-      },
-      body,
       params,
-      retry: 0,
-      timeout: this.config.timeout,
-      // casting to json to avoid type error
-      responseType: isJson ? 'json' : ('text' as 'json'),
-      // allow proxy agent
-      dispatcher: this.config.dispatcher,
+      body,
+      headers,
+      responseType: isJson ? 'json' : 'text',
     });
-
-    return res;
   }
 
   async requestArrayBuffer(
     path: string,
     params?: Record<string, string | number>,
   ): Promise<ArrayBuffer> {
-    await this.ensureAuthenticated(path);
-
-    const url = joinURL(this.config.baseUrl, this.config.path ?? '', path);
-    const res = await ofetch<ArrayBuffer>(url, {
+    return this.requestWithAuth<ArrayBuffer>({
+      path,
       method: 'GET',
-      headers: this.authHeaders(),
       params,
-      retry: 0,
-      timeout: this.config.timeout,
-      responseType: 'arrayBuffer' as 'json',
-      dispatcher: this.config.dispatcher,
+      responseType: 'arrayBuffer',
     });
-
-    return res;
   }
 
   protected async ensureAuthenticated(path: string): Promise<void> {
@@ -193,7 +182,68 @@ export class QBittorrentSession {
       return { Authorization: `Bearer ${this.config.apiKey}` };
     }
 
-    return { Cookie: `${this.state.auth!.cookieName ?? 'SID'}=${this.state.auth!.sid ?? ''}` };
+    // qBittorrent 5.2+ accepts Basic auth on regular API requests. Keep the
+    // SID cookie for older versions, but send Basic too so stale/missing cookies
+    // still work for clients configured with username/password.
+    const headers: Record<string, string> = {
+      Cookie: `${this.state.auth!.cookieName ?? 'SID'}=${this.state.auth!.sid ?? ''}`,
+    };
+    const basicAuth = this.basicAuthHeader();
+    if (basicAuth) {
+      headers.Authorization = basicAuth;
+    }
+
+    return headers;
+  }
+
+  protected basicAuthHeader(): string | undefined {
+    if (!this.config.username && !this.config.password) {
+      return undefined;
+    }
+
+    const credentials = Buffer.from(`${this.config.username ?? ''}:${this.config.password ?? ''}`);
+    return `Basic ${credentials.toString('base64')}`;
+  }
+
+  private async requestWithAuth<T>(options: RequestOptions): Promise<T> {
+    try {
+      return await this.requestOnce<T>(options);
+    } catch (error) {
+      // API key auth is stateless and cannot use /auth/login, so only cookie
+      // auth gets a one-shot re-login when the server rejects the session.
+      if (this.config.apiKey || !isAuthError(error)) {
+        throw error;
+      }
+
+      delete this.state.auth;
+      return this.requestOnce<T>(options);
+    }
+  }
+
+  private async requestOnce<T>({
+    path,
+    method,
+    params,
+    body,
+    headers = {},
+    responseType = 'json',
+  }: RequestOptions): Promise<T> {
+    await this.ensureAuthenticated(path);
+
+    const url = joinURL(this.config.baseUrl, this.config.path ?? '', path);
+    return ofetch<T>(url, {
+      method,
+      headers: {
+        ...this.authHeaders(),
+        ...headers,
+      },
+      body,
+      params,
+      retry: 0,
+      timeout: this.config.timeout,
+      responseType: responseType as 'json',
+      dispatcher: this.config.dispatcher,
+    });
   }
 
   private async checkVersion(): Promise<void> {
@@ -214,4 +264,14 @@ export class QBittorrentSession {
       };
     }
   }
+}
+
+function isAuthError(error: unknown): boolean {
+  const status =
+    typeof error === 'object' && error
+      ? ((error as { status?: unknown; statusCode?: unknown }).statusCode ??
+        (error as { status?: unknown; statusCode?: unknown }).status)
+      : undefined;
+
+  return status === 401 || status === 403;
 }
