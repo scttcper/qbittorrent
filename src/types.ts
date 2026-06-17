@@ -152,6 +152,12 @@ export interface TorrentMetadataFile {
    * File size in bytes
    */
   length: number;
+  /**
+   * File priority when excluded file names apply.
+   * Added in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2160}
+   */
+  priority?: TorrentFilePriority;
 }
 
 export interface TorrentMetadataInfo {
@@ -1195,8 +1201,18 @@ export interface Preferences {
   mail_notification_smtp: string;
   /**
    * True if smtp server requires SSL connection
+   * @deprecated Removed in qBittorrent WebUI API v2.16.0. Use
+   * `mail_notification_encryption_type` instead.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2160}
    */
-  mail_notification_ssl_enabled: boolean;
+  mail_notification_ssl_enabled?: boolean;
+  /**
+   * SMTP encryption type for e-mail notifications.
+   * Added in qBittorrent WebUI API v2.16.0, replacing
+   * `mail_notification_ssl_enabled`.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2160}
+   */
+  mail_notification_encryption_type?: string;
   /**
    * True if smtp server requires authentication
    */
@@ -1389,6 +1405,12 @@ export interface Preferences {
    * If true anonymous mode will be enabled; read more [here](https://github.com/qbittorrent/qBittorrent/wiki/Anonymous-Mode); this option is only available in qBittorent built against libtorrent version 0.16.X and higher
    */
   anonymous_mode: boolean;
+  /**
+   * Allow outgoing connections to peers while seeding.
+   * Added in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2160}
+   */
+  seeding_outgoing_connections?: boolean;
   /**
    * See list of possible values here below
    */
@@ -1740,6 +1762,12 @@ export interface TorrentPeer {
   connection?: string;
   country?: string;
   country_code?: string;
+  /**
+   * How much of this peer's current progress was provided by this client.
+   * Added in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/23989}
+   */
+  contribution?: number;
   dl_speed?: number;
   downloaded?: number;
   files?: string;
@@ -1769,6 +1797,115 @@ export type DownloadSpeed = Record<string, number>;
 
 export type UploadSpeed = Record<string, number>;
 
+export interface TransferSpeedLimits {
+  /**
+   * Global upload speed limit in bytes/second. `0` means unlimited.
+   */
+  up_limit: number;
+  /**
+   * Global download speed limit in bytes/second. `0` means unlimited.
+   */
+  dl_limit: number;
+  /**
+   * Alternative upload speed limit in bytes/second. `0` means unlimited.
+   */
+  alt_up_limit: number;
+  /**
+   * Alternative download speed limit in bytes/second. `0` means unlimited.
+   */
+  alt_dl_limit: number;
+}
+
+export interface RssAutoDownloadRule {
+  enabled?: boolean;
+  priority?: number;
+  useRegex?: boolean;
+  mustContain?: string;
+  mustNotContain?: string;
+  episodeFilter?: string;
+  affectedFeeds?: string[];
+  lastMatch?: string;
+  ignoreDays?: number;
+  smartFilter?: boolean;
+  previouslyMatchedEpisodes?: string[];
+  addPaused?: boolean | null;
+  contentLayout?: AddTorrentOptions['contentLayout'];
+  savePath?: string;
+  assignedCategory?: string;
+  torrentParams?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export type RssAutoDownloadRules = Record<string, RssAutoDownloadRule>;
+
+export interface TorrentCreatorAddTaskOptions {
+  comment?: string;
+  format?: 'v1' | 'v2' | 'hybrid';
+  /**
+   * Ignore dotfiles while creating the torrent.
+   * Added in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24346}
+   */
+  ignoreDotfiles?: boolean;
+  optimizeAlignment?: boolean;
+  paddedFileSizeLimit?: number;
+  pieceSize?: number;
+  private?: boolean;
+  source?: string;
+  startSeeding?: boolean;
+  torrentFilePath?: string;
+  trackers?: string | string[];
+  urlSeeds?: string | string[];
+}
+
+export interface TorrentCreatorAddTaskResponse {
+  taskID: string;
+}
+
+export type TorrentCreatorTaskStatusState = 'Queued' | 'Running' | 'Finished' | 'Failed';
+
+export interface TorrentCreatorTaskStatus {
+  taskID: string;
+  sourcePath: string;
+  pieceSize: number;
+  /**
+   * Whether dotfiles were ignored while creating the torrent.
+   * Added in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24346}
+   */
+  ignoreDotfiles?: boolean;
+  private: boolean;
+  /**
+   * Unix timestamp for when the task was added.
+   * Changed to a Unix timestamp in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24210}
+   */
+  timeAdded: number;
+  /**
+   * Unix timestamp for when the task started.
+   * Changed to a Unix timestamp in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24210}
+   */
+  timeStarted?: number;
+  /**
+   * Unix timestamp for when the task finished.
+   * Changed to a Unix timestamp in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24210}
+   */
+  timeFinished?: number;
+  status: TorrentCreatorTaskStatusState;
+  comment?: string;
+  errorMessage?: string;
+  format?: 'v1' | 'v2' | 'hybrid';
+  optimizeAlignment?: boolean;
+  paddedFileSizeLimit?: number;
+  progress?: number;
+  source?: string;
+  torrentFilePath?: string;
+  trackers?: string[];
+  urlSeeds?: string[];
+}
+
 export interface SyncMainData {
   /**
    * Response ID
@@ -1790,7 +1927,7 @@ export interface SyncMainData {
   categories_removed?: string[];
   tags?: string[];
   tags_removed?: string[];
-  server_state?: Record<string, unknown>;
+  server_state?: SyncServerState;
   /**
    * Tracker URLs grouped by tracker status
    * Added in qBittorrent WebUI API v2.13.0
@@ -1798,5 +1935,21 @@ export interface SyncMainData {
    */
   trackers?: Record<string, string[]>;
   trackers_removed?: string[];
+  [key: string]: unknown;
+}
+
+export interface SyncServerState {
+  /**
+   * Request latency metric.
+   * Added in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24152}
+   */
+  request_latency?: number;
+  /**
+   * Queued tracker announce count.
+   * Added in qBittorrent WebUI API v2.16.0
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24084}
+   */
+  queued_tracker_announces?: number;
   [key: string]: unknown;
 }

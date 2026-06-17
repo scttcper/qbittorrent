@@ -241,6 +241,15 @@ it('should parse and save torrent metadata', async () => {
   const torrent = await client.saveTorrentMetadata(metadata!.hash);
   expect(torrent.byteLength).toBeGreaterThan(0);
 });
+it('should reject downloading incomplete torrent files through downloadFile endpoint', async () => {
+  if (await skipIfUnsupported('2.16.0', 'download torrent file')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  await expect(client.downloadTorrentFile(torrentId, 0)).rejects.toThrow();
+});
 it('should add torrent from parsed metadata with file priorities', async () => {
   if (await skipIfUnsupported('2.11.9', 'add torrent from parsed metadata')) {
     return;
@@ -455,6 +464,41 @@ it('should get process info', async () => {
   const processInfo = await client.getProcessInfo();
   expect(processInfo.launch_time).toBeGreaterThan(0);
 });
+it('should get free space at path', async () => {
+  if (await skipIfUnsupported('2.15.2', 'free space at path')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const freeSpace = await client.getFreeSpaceAtPath('/downloads');
+  expect(freeSpace).toBeGreaterThan(0);
+});
+it('should get and set transfer speed limits', async () => {
+  if (await skipIfUnsupported('2.16.0', 'transfer speed limits')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const original = await client.getTransferSpeedLimits();
+  try {
+    expect(
+      await client.setTransferSpeedLimits({
+        up_limit: 1024,
+        dl_limit: 2048,
+        alt_up_limit: 4096,
+        alt_dl_limit: 8192,
+      }),
+    ).toBe(true);
+    expect(await client.getTransferSpeedLimits()).toMatchObject({
+      up_limit: 1024,
+      dl_limit: 2048,
+      alt_up_limit: 4096,
+      alt_dl_limit: 8192,
+    });
+  } finally {
+    await client.setTransferSpeedLimits(original);
+  }
+});
 it('should get directory content metadata', async () => {
   if (await skipIfUnsupported('2.11.8', 'directory content metadata')) {
     return;
@@ -500,6 +544,58 @@ it('should store and load client data', async () => {
   await client.storeClientData({ test_value: 'stored' });
   const data = await client.loadClientData(['test_value']);
   expect(data.test_value).toBe('stored');
+});
+it('should clone rss auto-download rule', async () => {
+  if (await skipIfUnsupported('2.15.4', 'clone rss rule')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const sourceName = `source-${Date.now()}`;
+  const cloneName = `clone-${Date.now()}`;
+  try {
+    expect(
+      await client.setRssRule(sourceName, {
+        enabled: false,
+        mustContain: 'ubuntu',
+        savePath: '/downloads',
+      }),
+    ).toBe(true);
+    expect(await client.cloneRssRule(sourceName, cloneName)).toBe(true);
+
+    const rules = await client.getRssRules();
+    expect(rules[sourceName]?.mustContain).toBe('ubuntu');
+    expect(rules[cloneName]?.mustContain).toBe('ubuntu');
+  } finally {
+    await client.removeRssRule(sourceName);
+    await client.removeRssRule(cloneName);
+  }
+});
+it('should add, inspect, and delete torrent creator task', async () => {
+  if (await skipIfUnsupported('2.16.0', 'torrent creator task')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const missingSourcePath = `/downloads/missing-${Date.now()}`;
+  const { taskID } = await client.addTorrentCreatorTask(missingSourcePath, {
+    ignoreDotfiles: false,
+    private: true,
+    startSeeding: false,
+  });
+
+  try {
+    const [task] = await client.getTorrentCreatorStatus(taskID);
+    expect(task).toMatchObject({
+      taskID,
+      sourcePath: missingSourcePath,
+      ignoreDotfiles: false,
+      private: true,
+    });
+    expect(typeof task!.timeAdded).toBe('number');
+  } finally {
+    await client.deleteTorrentCreatorTask(taskID);
+  }
 });
 it('should get and set cookies', async () => {
   if (await skipIfUnsupported('2.11.3', 'cookies')) {
@@ -599,4 +695,18 @@ it('should list torrents', async () => {
   expect(typeof torrent.availability).toBe('number');
   expect(typeof torrent.force_start).toBe('boolean');
   expect(typeof torrent.seeding_time).toBe('number');
+});
+it('should include WebAPI 2.16 sync and preference fields when supported', async () => {
+  if (await skipIfUnsupported('2.16.0', 'WebAPI 2.16 fields')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const data = await client.getSyncMainData();
+  expect(typeof data.server_state?.request_latency).toBe('number');
+  expect(typeof data.server_state?.queued_tracker_announces).toBe('number');
+
+  const preferences = await client.getPreferences();
+  expect(typeof preferences.seeding_outgoing_connections).toBe('boolean');
+  expect(typeof preferences.mail_notification_encryption_type).toBe('string');
 });
