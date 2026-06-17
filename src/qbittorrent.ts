@@ -1310,5 +1310,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
 
 function serializeTorrentCreatorUrls(urls: string | string[]): string {
   const values = Array.isArray(urls) ? urls : urls.split('|');
+  // qBittorrent splits this field on `|`, then percent-decodes each entry with
+  // QUrl::fromPercentEncoding(). URLSearchParams handles the form body encoding.
   return values.map(url => encodeURIComponent(url)).join('|');
 }
