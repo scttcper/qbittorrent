@@ -33,9 +33,14 @@ import type {
   Preferences,
   ProcessInfo,
   RotateApiKeyResponse,
+  RssAutoDownloadRule,
+  RssAutoDownloadRules,
   SyncMainData,
   Torrent,
   TorrentCategories,
+  TorrentCreatorAddTaskOptions,
+  TorrentCreatorAddTaskResponse,
+  TorrentCreatorTaskStatus,
   TorrentFile,
   TorrentFilePriority,
   TorrentFilters,
@@ -46,6 +51,7 @@ import type {
   TorrentPieceState,
   TorrentProperties,
   TorrentTrackers,
+  TransferSpeedLimits,
   UploadSpeed,
   WebSeed,
 } from './types.js';
@@ -127,6 +133,23 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
       false,
     );
     return res;
+  }
+
+  /**
+   * Get free disk space at a path.
+   * Added in qBittorrent WebUI API v2.15.2.
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/23856}
+   */
+  async getFreeSpaceAtPath(path: string): Promise<number> {
+    const res = await this.request<string>(
+      '/app/getFreeSpaceAtPath',
+      'GET',
+      { path },
+      undefined,
+      undefined,
+      false,
+    );
+    return Number(res);
   }
 
   /**
@@ -293,6 +316,31 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     };
 
     await this.request('/torrents/setUploadLimit', 'POST', undefined, objToUrlSearchParams(data));
+    return true;
+  }
+
+  /**
+   * Retrieve global and alternative speed limits.
+   * Added in qBittorrent WebUI API v2.16.0.
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24134}
+   */
+  async getTransferSpeedLimits(): Promise<TransferSpeedLimits> {
+    const res = await this.request<TransferSpeedLimits>('/transfer/getSpeedLimits', 'GET');
+    return res;
+  }
+
+  /**
+   * Set global and alternative speed limits.
+   * Added in qBittorrent WebUI API v2.16.0.
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24134}
+   */
+  async setTransferSpeedLimits(limits: TransferSpeedLimits): Promise<boolean> {
+    await this.request(
+      '/transfer/setSpeedLimits',
+      'POST',
+      undefined,
+      objToUrlSearchParams({ ...limits }),
+    );
     return true;
   }
 
@@ -499,6 +547,126 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   }
 
   /**
+   * Get RSS auto-download rules.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/api/rsscontroller.cpp}
+   */
+  async getRssRules(): Promise<RssAutoDownloadRules> {
+    const res = await this.request<RssAutoDownloadRules>('/rss/rules', 'GET');
+    return res;
+  }
+
+  /**
+   * Create or update an RSS auto-download rule.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/api/rsscontroller.cpp}
+   */
+  async setRssRule(ruleName: string, ruleDef: RssAutoDownloadRule): Promise<boolean> {
+    await this.request(
+      '/rss/setRule',
+      'POST',
+      undefined,
+      objToUrlSearchParams({
+        ruleName,
+        ruleDef: JSON.stringify(ruleDef),
+      }),
+    );
+    return true;
+  }
+
+  /**
+   * Clone an RSS auto-download rule.
+   * Added in qBittorrent WebUI API v2.15.4.
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24056}
+   */
+  async cloneRssRule(sourceName: string, cloneName: string): Promise<boolean> {
+    await this.request(
+      '/rss/cloneRule',
+      'POST',
+      undefined,
+      objToUrlSearchParams({ sourceName, cloneName }),
+    );
+    return true;
+  }
+
+  /**
+   * Remove an RSS auto-download rule.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/api/rsscontroller.cpp}
+   */
+  async removeRssRule(ruleName: string): Promise<boolean> {
+    await this.request('/rss/removeRule', 'POST', undefined, objToUrlSearchParams({ ruleName }));
+    return true;
+  }
+
+  /**
+   * Add a torrent creation task.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/api/torrentcreatorcontroller.cpp}
+   */
+  async addTorrentCreatorTask(
+    sourcePath: string,
+    options: TorrentCreatorAddTaskOptions = {},
+  ): Promise<TorrentCreatorAddTaskResponse> {
+    const { trackers, urlSeeds, ...rest } = options;
+    const params: Record<string, string | number | boolean> = { sourcePath };
+    for (const [key, value] of Object.entries(rest)) {
+      if (value !== undefined) {
+        params[key] = value;
+      }
+    }
+
+    if (trackers !== undefined) {
+      params.trackers = serializeTorrentCreatorUrls(trackers);
+    }
+
+    if (urlSeeds !== undefined) {
+      params.urlSeeds = serializeTorrentCreatorUrls(urlSeeds);
+    }
+
+    const res = await this.request<TorrentCreatorAddTaskResponse>(
+      '/torrentcreator/addTask',
+      'POST',
+      undefined,
+      objToUrlSearchParams(params),
+    );
+    return res;
+  }
+
+  /**
+   * Get torrent creation task status.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/api/torrentcreatorcontroller.cpp}
+   */
+  async getTorrentCreatorStatus(taskID?: string): Promise<TorrentCreatorTaskStatus[]> {
+    const params = taskID ? { taskID } : undefined;
+    const res = await this.request<TorrentCreatorTaskStatus[]>(
+      '/torrentcreator/status',
+      'GET',
+      params,
+    );
+    return res;
+  }
+
+  /**
+   * Download a created .torrent file for a finished torrent creator task.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/api/torrentcreatorcontroller.cpp}
+   */
+  async getTorrentCreatorFile(taskID: string): Promise<Uint8Array<ArrayBuffer>> {
+    const res = await this.requestArrayBuffer('/torrentcreator/torrentFile', { taskID });
+    return new Uint8Array(res);
+  }
+
+  /**
+   * Delete a torrent creation task.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/src/webui/api/torrentcreatorcontroller.cpp}
+   */
+  async deleteTorrentCreatorTask(taskID: string): Promise<boolean> {
+    await this.request(
+      '/torrentcreator/deleteTask',
+      'POST',
+      undefined,
+      objToUrlSearchParams({ taskID }),
+    );
+    return true;
+  }
+
+  /**
    * Fetch torrent metadata for a magnet URI, torrent hash, or .torrent URL.
    * Metadata retrieval can be asynchronous; a partial hash response means retry later.
    * Added in qBittorrent WebUI API v2.11.9.
@@ -551,6 +719,19 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    */
   async saveTorrentMetadata(source: string): Promise<Uint8Array<ArrayBuffer>> {
     const res = await this.requestArrayBuffer('/torrents/saveMetadata', { source });
+    return new Uint8Array(res);
+  }
+
+  /**
+   * Download a completed file from torrent content.
+   * Added in qBittorrent WebUI API v2.16.0.
+   * {@link https://github.com/qbittorrent/qBittorrent/pull/24135}
+   */
+  async downloadTorrentFile(hash: string, file: number | string): Promise<Uint8Array<ArrayBuffer>> {
+    const res = await this.requestArrayBuffer('/torrents/downloadFile', {
+      hash,
+      file: file.toString(),
+    });
     return new Uint8Array(res);
   }
 
@@ -1125,4 +1306,9 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     const res = await this.request<TorrentPeersResponse>('/sync/torrentPeers', 'GET', params);
     return res;
   }
+}
+
+function serializeTorrentCreatorUrls(urls: string | string[]): string {
+  const values = Array.isArray(urls) ? urls : urls.split('|');
+  return values.map(url => encodeURIComponent(url)).join('|');
 }
