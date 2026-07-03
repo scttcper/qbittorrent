@@ -25,10 +25,40 @@ async function main() {
 }
 ```
 
+### Authentication
+
+The default authentication mode uses qBittorrent's username/password login flow
+and stores the returned WebUI session cookie.
+
+qBittorrent v5.2.0 and WebAPI v2.14.1 added API key authentication. Pass an API
+key to use stateless bearer authentication instead of cookie login:
+
+```ts
+const client = new QBittorrent({
+  baseUrl: 'http://localhost:8080/',
+  apiKey: 'qbt_0000000000000000000000000000',
+});
+```
+
+API keys can be created from the qBittorrent WebUI. They can also be rotated or
+deleted through the WebAPI:
+
+```ts
+const passwordClient = new QBittorrent({
+  baseUrl: 'http://localhost:8080/',
+  username: 'admin',
+  password: 'adminadmin',
+});
+
+const apiKey = await passwordClient.rotateApiKey();
+await passwordClient.deleteApiKey();
+```
+
 ### API
 
 Docs: https://qbittorrent.ep.workers.dev  
-qBittorrent Api Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
+qBittorrent API Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-5.0)  
+qBittorrent API Key Docs: https://github.com/qbittorrent/qBittorrent/wiki/API-Key-Authentication-%28%E2%89%A5v5.2.0%29
 
 ### Normalized API
 
