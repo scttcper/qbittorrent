@@ -1,10 +1,10 @@
 import type { TorrentClientConfig, TorrentClientState } from '@ctrl/shared-torrent';
-import { parse as cookieParse } from 'cookie';
+import { parseSetCookie } from 'cookie';
 import { ofetch } from 'ofetch';
 import type { Jsonify } from 'type-fest';
 import { joinURL } from 'ufo';
 
-import { getAuthCookieName, isGreater } from './requestUtils.js';
+import { isGreater } from './requestUtils.js';
 
 export interface QBittorrentState extends TorrentClientState {
   auth?: {
@@ -99,22 +99,20 @@ export class QBittorrentSession {
     }
 
     const cookieHeader = res.headers.get('set-cookie') ?? '';
-    const cookieName = getAuthCookieName(cookieHeader);
-    const cookie = cookieParse(cookieHeader);
-    const sid = cookieName ? cookie[cookieName] : undefined;
+    const cookie = parseSetCookie(cookieHeader);
+    const cookieName = cookie.name;
+    const sid = cookie.value;
     if (!sid) {
       throw new Error('Invalid cookie');
     }
 
-    const expires = cookie.Expires ?? cookie.expires;
-    const maxAge = cookie['Max-Age'] ?? cookie['max-age'];
     this.state.auth = {
       sid,
       cookieName,
-      expires: expires
-        ? new Date(expires)
-        : maxAge
-          ? new Date(Date.now() + Number(maxAge) * 1000)
+      expires: cookie.expires
+        ? cookie.expires
+        : cookie.maxAge !== undefined
+          ? new Date(Date.now() + cookie.maxAge * 1000)
           : new Date(Date.now() + 3_600_000),
     };
 

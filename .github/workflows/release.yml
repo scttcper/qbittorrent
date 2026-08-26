@@ -24,14 +24,16 @@ jobs:
       id-token: write # to enable use of OIDC for trusted publishing and npm provenance
     steps:
       # https://github.com/actions/checkout
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       # https://github.com/actions/setup-node
-      - uses: wyvox/action-setup-pnpm@v3
+      - uses: wyvox/action-setup-pnpm@d84148cd87d55adb709e92120c709b88d15bceac # v4.0.0
         with:
-          node-version: 24
+          node-version: 26
 
-      # Ensure npm 11.5.1 or later is installed
+      # Install the latest npm for trusted publishing support
       - name: Update npm
         run: npm install -g npm@latest
 

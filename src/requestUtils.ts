@@ -12,11 +12,6 @@ export function normalizeHashes(hashes: string | string[]): string {
   return hashes;
 }
 
-export function getAuthCookieName(setCookieHeader: string): string | undefined {
-  const [cookiePair] = setCookieHeader.split(';', 1);
-  return cookiePair?.split('=', 1)[0];
-}
-
 export function assertAddTorrentSucceeded(response: string): void {
   if (response === 'Fails.') {
     throw new Error('Failed to add torrent');
