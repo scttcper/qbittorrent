@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": ["pnpm-lock.yaml", "pnpm-workspace.yaml"],
   "printWidth": 100,
   "singleQuote": true,
   "arrowParens": "avoid",
