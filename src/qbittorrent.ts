@@ -320,6 +320,22 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   }
 
   /**
+   * Pause the BitTorrent session. Added in WebAPI v2.16.2.
+   */
+  async pauseSession(): Promise<boolean> {
+    await this.request('/transfer/pauseSession', 'POST');
+    return true;
+  }
+
+  /**
+   * Resume the BitTorrent session. Added in WebAPI v2.16.2.
+   */
+  async resumeSession(): Promise<boolean> {
+    await this.request('/transfer/resumeSession', 'POST');
+    return true;
+  }
+
+  /**
    * Retrieve global and alternative speed limits.
    * Added in qBittorrent WebUI API v2.16.0.
    * {@link https://github.com/qbittorrent/qBittorrent/pull/24134}
@@ -1088,10 +1104,16 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     torrent: string | Uint8Array<ArrayBuffer>,
     options: Partial<AddTorrentOptions> = {},
   ): Promise<boolean> {
+    await this.ensureAuthenticated('/torrents/add');
+    const supportsSeedMode =
+      options.seedMode !== undefined || options.skip_checking !== undefined
+        ? (await this.getApiVersion()).localeCompare('2.16.0', undefined, { numeric: true }) >= 0
+        : false;
     const form = buildAddTorrentForm({
       source: { type: 'torrent', torrent },
       options,
       isVersion5OrHigher: this.state.version?.isVersion5OrHigher ?? false,
+      supportsSeedMode,
     });
 
     const res = await this.request<string>(
@@ -1189,10 +1211,16 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * @param options
    */
   async addMagnet(urls: string, options: Partial<AddMagnetOptions> = {}): Promise<boolean> {
+    await this.ensureAuthenticated('/torrents/add');
+    const supportsSeedMode =
+      options.seedMode !== undefined || options.skip_checking !== undefined
+        ? (await this.getApiVersion()).localeCompare('2.16.0', undefined, { numeric: true }) >= 0
+        : false;
     const form = buildAddTorrentForm({
       source: { type: 'magnet', urls },
       options,
       isVersion5OrHigher: this.state.version?.isVersion5OrHigher ?? false,
+      supportsSeedMode,
     });
 
     const res = await this.request<string>(

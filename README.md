@@ -60,6 +60,29 @@ Docs: https://qbittorrent.ep.workers.dev
 qBittorrent API Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-5.0)  
 qBittorrent API Key Docs: https://github.com/qbittorrent/qBittorrent/wiki/API-Key-Authentication-%28%E2%89%A5v5.2.0%29
 
+### qBittorrent 5.3 support
+
+Use `seedMode` when adding a torrent whose files are already complete:
+
+```ts
+await client.addTorrent(torrentFile, { seedMode: true });
+```
+
+Both `addTorrent` and `addMagnet` select the appropriate field for the server's
+WebAPI version. The deprecated `skip_checking` option remains supported;
+`seedMode` takes precedence if both are supplied.
+
+WebAPI v2.16.2 adds session-wide pause and resume:
+
+```ts
+await client.pauseSession();
+await client.resumeSession();
+```
+
+`getSyncMainData()` exposes `server_state.session_state`, which is `true` when
+the session is paused. New 5.3 preference fields are optional for compatibility
+with older servers, including torrent-file backups and search persistence.
+
 ### Normalized API
 
 These functions are normalized through [@ctrl/shared-torrent](https://github.com/scttcper/shared-torrent) to make switching between multiple torrent clients easier. See [below](#see-also) for alternative supported torrent clients.

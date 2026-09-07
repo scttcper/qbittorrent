@@ -20,13 +20,19 @@ export function buildAddTorrentForm({
   source,
   options,
   isVersion5OrHigher,
+  supportsSeedMode = false,
 }: {
   source: AddTorrentFormSource;
   options: AddTorrentFormOptions;
   isVersion5OrHigher: boolean;
+  supportsSeedMode?: boolean;
 }): FormData {
   const form = new FormData();
-  const { filename, fields } = normalizeAddTorrentFormOptions(options, isVersion5OrHigher);
+  const { filename, fields } = normalizeAddTorrentFormOptions(
+    options,
+    isVersion5OrHigher,
+    supportsSeedMode,
+  );
 
   if (source.type === 'magnet') {
     form.append('urls', source.urls);
@@ -59,6 +65,7 @@ export function createTorrentFile(
 function normalizeAddTorrentFormOptions(
   options: AddTorrentFormOptions,
   isVersion5OrHigher: boolean,
+  supportsSeedMode: boolean,
 ): {
   filename?: string;
   fields: AddTorrentFormFields;
@@ -73,6 +80,18 @@ function normalizeAddTorrentFormOptions(
   if (isVersion5OrHigher && 'paused' in fields) {
     fields.stopped = fields.paused;
     delete fields.paused;
+  }
+
+  // Prefer the explicit seedMode option when both names are supplied.
+  const seedMode = fields.seedMode ?? fields.skip_checking;
+  delete fields.seedMode;
+  delete fields.skip_checking;
+  if (seedMode !== undefined) {
+    if (supportsSeedMode) {
+      fields.seedMode = seedMode;
+    } else {
+      fields.skip_checking = `${seedMode}` as 'true' | 'false';
+    }
   }
 
   // Automatic Torrent Management ignores savepath.
