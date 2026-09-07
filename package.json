@@ -40,20 +40,20 @@
     "cookie": "^2.0.1",
     "node-fetch-native": "^1.6.7",
     "ofetch": "^1.5.1",
-    "type-fest": "^5.8.0",
+    "type-fest": "^5.9.0",
     "ufo": "^1.6.4",
     "uint8array-extras": "^1.5.0"
   },
   "devDependencies": {
     "@ctrl/oxlint-config": "1.5.0",
     "@sindresorhus/tsconfig": "8.1.0",
-    "@types/node": "26.3.0",
-    "oxfmt": "0.65.0",
-    "oxlint": "1.80.0",
+    "@types/node": "26.4.1",
+    "oxfmt": "0.66.0",
+    "oxlint": "1.81.0",
     "p-wait-for": "6.0.0",
     "typedoc": "0.28.20",
     "typescript": "7.0.2",
-    "vitest": "4.1.11"
+    "vitest": "5.0.0"
   },
   "release": {
     "branches": [
@@ -63,5 +63,5 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "pnpm@11.24.0"
+  "packageManager": "pnpm@12.3.4"
 }
