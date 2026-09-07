@@ -998,9 +998,16 @@ export interface AddTorrentOptions {
    */
   tags: string;
   /**
-   * Skip hash checking. Possible values are true, false (default)
+   * Skip initial hash checking.
+   * @deprecated Use seedMode. Translated automatically for WebAPI v2.16.0+.
    */
   skip_checking: TrueFalseStr;
+  /**
+   * Assume all torrent files are complete and skip initial hash checking.
+   * Takes precedence over skip_checking. Uses the legacy field on older servers.
+   * Added in WebAPI v2.16.0.
+   */
+  seedMode?: boolean | TrueFalseStr;
   /**
    * Add torrents in the paused state. Possible values are true, false (default)
    */
@@ -1064,9 +1071,16 @@ export interface AddMagnetOptions {
    */
   tags: string;
   /**
-   * Skip hash checking. Possible values are true, false (default)
+   * Skip initial hash checking.
+   * @deprecated Use seedMode. Translated automatically for WebAPI v2.16.0+.
    */
   skip_checking: TrueFalseStr;
+  /**
+   * Assume all torrent files are complete and skip initial hash checking.
+   * Takes precedence over skip_checking. Uses the legacy field on older servers.
+   * Added in WebAPI v2.16.0.
+   */
+  seedMode?: boolean | TrueFalseStr;
   /**
    * Add torrents in the paused state. Possible values are true, false (default)
    */
@@ -1115,6 +1129,55 @@ export interface AddMagnetOptions {
 }
 
 export interface Preferences {
+  /**
+   * Save backup copies of .torrent files. Added in WebAPI v2.16.0.
+   */
+  torrent_files_backup_enabled?: boolean;
+  /**
+   * Directory for .torrent file backups. Added in WebAPI v2.16.0.
+   */
+  torrent_files_backup_dir?: string;
+  /**
+   * Move .torrent backups when downloads finish. Added in WebAPI v2.16.0.
+   */
+  torrent_files_finished_backup_dir_enabled?: boolean;
+  /**
+   * Directory for completed torrents’ .torrent backups. Added in WebAPI v2.16.0.
+   */
+  torrent_files_finished_backup_dir?: string;
+  /**
+   * Remove the .torrent backup when removing a torrent. Added in WebAPI v2.16.0.
+   */
+  remove_torrent_file_backup?: boolean;
+  /**
+   * Maximum number of WebUI sessions. Added in WebAPI v2.16.0.
+   */
+  web_ui_sessions_count_limit?: number;
+  /**
+   * Persist search jobs. Added in WebAPI v2.16.1.
+   */
+  store_search_jobs?: boolean;
+  /**
+   * Persist search job results. Added in WebAPI v2.16.1.
+   */
+  store_search_job_results?: boolean;
+  /**
+   * STUN server for WebTorrent. Added in WebAPI v2.16.1.
+   */
+  webtorrent_stun_server?: string;
+  /**
+   * Maximum number of outstanding block requests. Added in WebAPI v2.16.0.
+   */
+  max_outstanding_block_requests?: number;
+  /**
+   * Allow multiple connections from the same peer ID. Added in WebAPI v2.16.0.
+   */
+  enable_multi_connections_from_same_peer_id?: boolean;
+  /**
+   * Mode for combining share limits. Added in WebAPI v2.15.3.
+   */
+  share_limits_mode?: string;
+
   /**
    * Currently selected language (e.g. en_GB for English)
    */
@@ -1177,12 +1240,14 @@ export interface Preferences {
   scan_dirs: Record<string, 0 | 1 | string>;
   /**
    * Path to directory to copy .torrent files to. Slashes are used as path separators
+   * @deprecated Removed in WebAPI v2.16.0. Use torrent_files_backup_dir.
    */
-  export_dir: string;
+  export_dir?: string;
   /**
    * Path to directory to copy .torrent files of completed downloads to. Slashes are used as path separators
+   * @deprecated Removed in WebAPI v2.16.0. Use torrent_files_finished_backup_dir.
    */
-  export_dir_fin: string;
+  export_dir_fin?: string;
   /**
    * True if e-mail notification should be enabled
    */
@@ -1939,6 +2004,10 @@ export interface SyncMainData {
 }
 
 export interface SyncServerState {
+  /**
+   * True when the BitTorrent session is paused. Added in WebAPI v2.16.2.
+   */
+  session_state?: boolean;
   /**
    * Request latency metric.
    * Added in qBittorrent WebUI API v2.16.0
