@@ -218,6 +218,9 @@ importers:
       typescript:
         specifier: 7.0.2
         version: 7.0.2
+      typescript6:
+        specifier: npm:typescript@6.0.3
+        version: typescript@6.0.3
       vitest:
         specifier: 5.0.3
         version: 5.0.3(@types/node@26.6.4)(vite@8.2.2(@types/node@26.6.4)(yaml@2.9.0))
@@ -1030,6 +1033,11 @@ packages:
     peerDependencies:
       typescript: 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x || 5.5.x || 5.6.x || 5.7.x || 5.8.x || 5.9.x || 6.0.x
 
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   typescript@7.0.2:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
@@ -1682,6 +1690,8 @@ snapshots:
       minimatch: 10.2.6
       typescript: 7.0.2
       yaml: 2.9.0
+
+  typescript@6.0.3: {}
 
   typescript@7.0.2:
     optionalDependencies:

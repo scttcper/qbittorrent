@@ -29,7 +29,7 @@
     "lint:fix": "oxfmt && oxlint . --fix",
     "prepare": "npm run build",
     "build": "tsc",
-    "build:docs": "typedoc",
+    "build:docs": "node --import ./typedoc.mjs ./node_modules/typedoc/bin/typedoc",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -53,6 +53,7 @@
     "p-wait-for": "6.0.0",
     "typedoc": "0.28.20",
     "typescript": "7.0.2",
+    "typescript6": "npm:typescript@6.0.3",
     "vitest": "5.0.3"
   },
   "release": {
