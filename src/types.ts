@@ -1,3 +1,5 @@
+import type { LiteralUnion } from 'type-fest';
+
 export interface BuildInfo {
   /**
    * QT version
@@ -584,12 +586,15 @@ interface Category {
    * Category share limit action. Added in qBittorrent WebUI API v2.12.0
    * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
    */
-  share_limit_action?: 'Default' | 'Stop' | 'Remove' | 'RemoveWithContent' | 'EnableSuperSeeding';
+  share_limit_action?: LiteralUnion<
+    'Default' | 'Stop' | 'Remove' | 'RemoveWithContent' | 'EnableSuperSeeding',
+    string
+  >;
   /**
    * Category share limit mode. Added in qBittorrent WebUI API v2.12.0
    * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
    */
-  share_limits_mode?: 'Default' | 'MatchAny' | 'MatchAll';
+  share_limits_mode?: LiteralUnion<'Default' | 'MatchAny' | 'MatchAll', string>;
 }
 
 export enum TorrentState {
