@@ -157,6 +157,7 @@ All of the following npm modules provide the same normalized functions along wit
 - transmission - [@ctrl/transmission](https://github.com/scttcper/transmission)
 - utorrent - [@ctrl/utorrent](https://github.com/scttcper/utorrent)
 - rtorrent - [@ctrl/rtorrent](https://github.com/scttcper/rtorrent)
+- rqbit - [@ctrl/rqbit](https://github.com/scttcper/rqbit)
 
 Usenet clients with the same normalized approach:
 
