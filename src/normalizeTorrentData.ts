@@ -84,6 +84,12 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
   }
 
   const isCompleted = torrent.progress === 1;
+  // qBittorrent sends 8640000 (100 days) when it has no estimate
+  if (isCompleted) {
+    eta = 0;
+  } else if (eta >= 8_640_000) {
+    eta = -1;
+  }
 
   const result: NormalizedTorrent = {
     id: torrent.hash,
@@ -94,7 +100,7 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     dateAdded: new Date(torrent.added_on * 1000).toISOString(),
     isCompleted,
     progress: torrent.progress,
-    label: torrent.category,
+    label: torrent.category || undefined,
     tags: torrent.tags ? torrent.tags.split(', ') : [],
     // completion_on is -1 until the torrent finishes
     dateCompleted:
@@ -102,7 +108,8 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     savePath: torrent.save_path,
     uploadSpeed: torrent.upspeed,
     downloadSpeed: torrent.dlspeed,
-    queuePosition: torrent.priority,
+    // priority is the queue position, 0 or -1 when not queued
+    queuePosition: Math.max(torrent.priority, 0),
     connectedPeers: torrent.num_leechs,
     connectedSeeds: torrent.num_seeds,
     totalPeers: torrent.num_incomplete,
