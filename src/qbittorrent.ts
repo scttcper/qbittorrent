@@ -1,11 +1,12 @@
 import { magnetDecode } from '@ctrl/magnet-link';
-import type {
-  AddTorrentOptions as NormalizedAddTorrentOptions,
-  AllClientData,
-  Label,
-  NormalizedTorrent,
-  TorrentClient,
-  TorrentClientConfig,
+import {
+  type AddTorrentOptions as NormalizedAddTorrentOptions,
+  type AllClientData,
+  type Label,
+  type NormalizedTorrent,
+  type TorrentClient,
+  type TorrentClientConfig,
+  TorrentClientError,
 } from '@ctrl/shared-torrent';
 import { hash as torrentFileHash } from '@ctrl/torrent-file';
 import { FormData } from 'node-fetch-native';
@@ -252,7 +253,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     const torrentsResponse = await this.listTorrents({ hashes: hash });
     const [torrentData] = torrentsResponse;
     if (!torrentData) {
-      throw new Error('Torrent not found');
+      throw new TorrentClientError('Torrent not found', 'torrent_not_found');
     }
 
     return normalizeTorrentData(torrentData);
@@ -1093,17 +1094,8 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#delete-torrents}
    * @param deleteFiles (default: false) remove files from disk
-   * @throws when a torrent doesn't exist, qBittorrent silently ignores unknown hashes
    */
   async removeTorrent(hashes: string | string[] | 'all', deleteFiles = false): Promise<void> {
-    if (hashes !== 'all') {
-      const requested = new Set(Array.isArray(hashes) ? hashes : [hashes]);
-      const torrents = await this.listTorrents({ hashes });
-      if (torrents.length < requested.size) {
-        throw new Error('Torrent not found');
-      }
-    }
-
     const data = {
       hashes: normalizeHashes(hashes),
       deleteFiles,
@@ -1215,7 +1207,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
       });
     }
 
-    throw new Error('Torrent not found');
+    throw new TorrentClientError('Torrent not found', 'torrent_not_found');
   }
 
   /**

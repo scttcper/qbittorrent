@@ -1,3 +1,5 @@
+import { TorrentClientError } from '@ctrl/shared-torrent';
+
 import type { AddTorrentResponse } from './types.js';
 
 /**
@@ -14,12 +16,12 @@ export function normalizeHashes(hashes: string | string[]): string {
 
 export function assertAddTorrentSucceeded(response: string): void {
   if (response === 'Fails.') {
-    throw new Error('Failed to add torrent');
+    throw new TorrentClientError('Failed to add torrent', 'client_error');
   }
 
   const result = parseAddTorrentResponse(response);
   if (result && result.failure_count > 0) {
-    throw new Error('Failed to add torrent');
+    throw new TorrentClientError('Failed to add torrent', 'client_error');
   }
 }
 

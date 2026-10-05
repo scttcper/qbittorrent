@@ -65,6 +65,7 @@ qBittorrent API Key Docs: https://github.com/qbittorrent/qBittorrent/wiki/API-Ke
 Things that work differently from the other clients:
 
 - `label` is the qBittorrent category
+- qBittorrent ignores unknown hashes, pause, resume, queue and remove don't throw for them
 - `queueUp`/`queueDown` need torrent queueing enabled, qBittorrent responds with a 409 otherwise. `queuePosition` is `0` when queueing is disabled or the torrent is seeding
 - `pauseTorrent`/`resumeTorrent` use `/torrents/stop` and `/torrents/start` on qBittorrent 5 and `/torrents/pause` and `/torrents/resume` on 4.x
 
@@ -101,7 +102,7 @@ await client.resumeTorrent(['torrent-hash', 'other-torrent-hash']);
 
 ##### removeTorrent
 
-Remove one or more torrents, throws if a torrent doesn't exist. Does not remove data on disk by default.
+Remove one or more torrents. Does not remove data on disk by default.
 
 ```ts
 // does not remove data on disk
@@ -141,6 +142,22 @@ const result = await client.normalizedAddTorrent('magnet:?xt=urn:btih:...', {
   label: 'linux',
 });
 console.log(result);
+```
+
+##### Errors
+
+Failed requests throw a `TorrentClientError` from [@ctrl/shared-torrent](https://github.com/scttcper/shared-torrent) with a `code` of `torrent_not_found`, `unauthorized`, `request_failed` or `client_error`, the http `status` when there is one and the original error as the `cause`.
+
+```ts
+import { TorrentClientError } from '@ctrl/qbittorrent';
+
+try {
+  await client.getTorrent('torrent-hash');
+} catch (error) {
+  if (error instanceof TorrentClientError && error.code === 'torrent_not_found') {
+    // not in the client
+  }
+}
 ```
 
 ##### export and create from state
