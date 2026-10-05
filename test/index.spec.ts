@@ -424,7 +424,7 @@ it('should get / create / edit / remove category', async () => {
   await client.createCategory('movie', '/data');
   categories = await client.getCategories();
   expect(categories.movie).toMatchObject({ name: 'movie', savePath: '/data' });
-  await client.editCategory('movie', '/swag');
+  await client.editCategory('movie', '/swag', { downloadPath: undefined });
   categories = await client.getCategories();
   expect(categories.movie).toMatchObject({ name: 'movie', savePath: '/swag' });
   await client.removeCategory('movie');

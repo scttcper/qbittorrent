@@ -24,10 +24,15 @@ export function assertAddTorrentSucceeded(response: string): void {
 }
 
 export function objToUrlSearchParams(
-  obj: Record<string, string | number | boolean>,
+  obj: Record<string, string | number | boolean | undefined>,
 ): URLSearchParams {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(obj)) {
+    // optional options can be passed explicitly as undefined
+    if (value === undefined) {
+      continue;
+    }
+
     params.append(key, value.toString());
   }
 
