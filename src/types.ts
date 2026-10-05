@@ -455,19 +455,6 @@ export interface Torrent {
    */
   force_start: boolean;
   /**
-   * Torrent creation datetime in seconds
-   * Added in qBittorrent v5.2.0
-   * @deprecated use `creation_date`, qBittorrent never returned `created_on`
-   */
-  created_on?: number;
-  /**
-   * True if torrent is from a private tracker
-   * Added in qBittorrent v5.0.0
-   * Might be able to make not optional once qb v5 is more widely used
-   * @deprecated use `private`, qBittorrent never returned `isPrivate`
-   */
-  isPrivate?: boolean;
-  /**
    * Time until the next tracker reannounce
    * Added in qBittorrent WebUI API v2.9.3 (qb v5.0.0)
    */
