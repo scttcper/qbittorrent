@@ -145,8 +145,8 @@ it.skip('should set torrent priority', async () => {
   const torrentId = await setupTorrent(client);
   expect(await client.topPriority(torrentId)).toBe(true);
   expect(await client.bottomPriority(torrentId)).toBe(true);
-  expect(await client.queueDown(torrentId)).toBe(true);
-  expect(await client.queueUp(torrentId)).toBe(true);
+  await client.queueDown(torrentId);
+  await client.queueUp(torrentId);
 });
 it('should get torrent properties', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -284,8 +284,23 @@ it('should add/remove torrent tag', async () => {
 it('should pause/resume torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
-  expect(await client.pauseTorrent(torrentId)).toBeTruthy();
-  expect(await client.resumeTorrent(torrentId)).toBeTruthy();
+  await client.pauseTorrent(torrentId);
+  await client.resumeTorrent(torrentId);
+});
+it('should remove torrent', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  await client.removeTorrent(torrentId, false);
+  expect(await client.listTorrents()).toHaveLength(0);
+});
+it('should throw when removing a torrent that does not exist', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  await expect(client.removeTorrent('0'.repeat(40))).rejects.toThrow('Torrent not found');
+  await expect(client.removeTorrent([torrentId, '0'.repeat(40)])).rejects.toThrow(
+    'Torrent not found',
+  );
+  expect(await client.listTorrents()).toHaveLength(1);
 });
 it('should reannounceTorrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -337,9 +352,11 @@ it('should return normalized torrent data', async () => {
   expect(torrent.connectedPeers).toBe(0);
   expect(torrent.connectedSeeds).toBe(0);
   expect(torrent.downloadSpeed).toBe(0);
-  expect(torrent.eta).toBe(8_640_000);
+  expect(torrent.eta).toBe(-1);
   expect(torrent.isCompleted).toBe(false);
-  expect(torrent.label).toBe('');
+  expect(torrent.dateCompleted).toBeUndefined();
+  expect(torrent.tags).toEqual([]);
+  expect(torrent.label).toBeUndefined();
   expect(torrent.name).toBe(torrentName);
   expect(torrent.progress).toBe(0);
   expect(torrent.queuePosition).toBe(1);
@@ -363,9 +380,11 @@ it.skip('should add normalized torrent from magnet', async () => {
   expect(torrent.connectedPeers).toBe(0);
   expect(torrent.connectedSeeds).toBe(0);
   expect(torrent.downloadSpeed).toBe(0);
-  expect(torrent.eta).toBe(8_640_000);
+  expect(torrent.eta).toBe(-1);
   expect(torrent.isCompleted).toBe(false);
-  expect(torrent.label).toBe('');
+  expect(torrent.dateCompleted).toBeUndefined();
+  expect(torrent.tags).toEqual([]);
+  expect(torrent.label).toBeUndefined();
   expect(torrent.name).toBe('Ubuntu 11 10 Alternate Amd64 Iso');
   expect(torrent.progress).toBe(0);
   expect(torrent.queuePosition).toBe(1);
@@ -405,12 +424,41 @@ it('should get / create / edit / remove category', async () => {
   await client.createCategory('movie', '/data');
   categories = await client.getCategories();
   expect(categories.movie).toMatchObject({ name: 'movie', savePath: '/data' });
-  await client.editCategory('movie', '/swag');
+  await client.editCategory('movie', '/swag', { downloadPath: undefined });
   categories = await client.getCategories();
   expect(categories.movie).toMatchObject({ name: 'movie', savePath: '/swag' });
   await client.removeCategory('movie');
   categories = await client.getCategories();
   expect(categories.movie).toBe(undefined);
+});
+it('should create category with share limits', async () => {
+  if (await skipIfUnsupported('2.16.2', 'category share limits')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  try {
+    await client.createCategory('limited', '/data', {
+      downloadPathEnabled: true,
+      downloadPath: '/data/incomplete',
+      ratioLimit: 2,
+      seedingTimeLimit: 60,
+      inactiveSeedingTimeLimit: -1,
+      shareLimitsMode: 'MatchAll',
+      shareLimitAction: 'Stop',
+    });
+    const categories = await client.getCategories();
+    expect(categories.limited).toMatchObject({
+      download_path: '/data/incomplete',
+      ratio_limit: 2,
+      seeding_time_limit: 60,
+      inactive_seeding_time_limit: -1,
+      share_limits_mode: 'MatchAll',
+      share_limit_action: 'Stop',
+    });
+  } finally {
+    await client.removeCategory('limited');
+  }
 });
 it('should get / create / remove tags', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -545,6 +593,27 @@ it('should store and load client data', async () => {
   const data = await client.loadClientData(['test_value']);
   expect(data.test_value).toBe('stored');
 });
+it('should export and import rss auto-download rules', async () => {
+  if (await skipIfUnsupported('2.16.2', 'rss rule export/import')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const ruleName = `export-${Date.now()}`;
+  try {
+    await client.setRssRule(ruleName, { enabled: false, mustContain: 'ubuntu' });
+    const exported = await client.exportRssRules();
+    expect(exported[ruleName]?.mustContain).toBe('ubuntu');
+    await client.removeRssRule(ruleName);
+    expect((await client.getRssRules())[ruleName]).toBeUndefined();
+
+    expect(await client.importRssRules(exported)).toBe(true);
+    expect((await client.getRssRules())[ruleName]?.mustContain).toBe('ubuntu');
+  } finally {
+    await client.removeRssRule(ruleName);
+  }
+});
+
 it('should clone rss auto-download rule', async () => {
   if (await skipIfUnsupported('2.15.4', 'clone rss rule')) {
     return;
@@ -695,6 +764,10 @@ it('should list torrents', async () => {
   expect(typeof torrent.availability).toBe('number');
   expect(typeof torrent.force_start).toBe('boolean');
   expect(typeof torrent.seeding_time).toBe('number');
+  expect(torrent.infohash_v1).toBe(torrent.hash);
+  expect(torrent.pieces_num).toBe(3726);
+  expect(torrent.creation_date).toBe(1_532_624_126);
+  expect(torrent.comment).toBe('Ubuntu CD releases.ubuntu.com');
 });
 it('should include WebAPI 2.16 sync and preference fields when supported', async () => {
   if (await skipIfUnsupported('2.16.0', 'WebAPI 2.16 fields')) {

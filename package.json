@@ -20,6 +20,13 @@
   "sideEffects": false,
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -35,7 +42,7 @@
   },
   "dependencies": {
     "@ctrl/magnet-link": "^5.0.1",
-    "@ctrl/shared-torrent": "^6.5.2",
+    "@ctrl/shared-torrent": "^6.5.4",
     "@ctrl/torrent-file": "^4.5.2",
     "cookie": "^2.0.1",
     "node-fetch-native": "^1.6.7",
@@ -62,7 +69,7 @@
     ]
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "packageManager": "pnpm@12.9.1"
 }

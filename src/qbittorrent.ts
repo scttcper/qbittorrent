@@ -24,6 +24,7 @@ import type {
   AddMagnetOptions,
   AddTorrentOptions,
   BuildInfo,
+  CategoryOptions,
   ClientData,
   Cookies,
   DirectoryContent,
@@ -593,6 +594,31 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * Added in qBittorrent WebUI API v2.15.4.
    * {@link https://github.com/qbittorrent/qBittorrent/pull/24056}
    */
+  /**
+   * Export every RSS auto-download rule as json, same shape as {@link QBittorrent.getRssRules}.
+   * Added in qBittorrent WebUI API v2.16.2.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2162}
+   */
+  async exportRssRules(): Promise<RssAutoDownloadRules> {
+    return this.request<RssAutoDownloadRules>('/rss/exportRules', 'GET');
+  }
+
+  /**
+   * Import RSS auto-download rules, ex - from {@link QBittorrent.exportRssRules}. Existing rules with the same name are replaced.
+   * Added in qBittorrent WebUI API v2.16.2.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2162}
+   */
+  async importRssRules(rules: RssAutoDownloadRules): Promise<boolean> {
+    const form = new FormData();
+    form.set(
+      'rules',
+      new Blob([JSON.stringify(rules)], { type: 'application/json' }),
+      'rss-downloader-rules.json',
+    );
+    await this.request('/rss/importRules', 'POST', undefined, form, undefined, false);
+    return true;
+  }
+
   async cloneRssRule(sourceName: string, cloneName: string): Promise<boolean> {
     await this.request(
       '/rss/cloneRule',
@@ -919,8 +945,12 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#add-new-category}
    */
-  async createCategory(category: string, savePath = ''): Promise<boolean> {
-    const data = { category, savePath };
+  async createCategory(
+    category: string,
+    savePath = '',
+    options: CategoryOptions = {},
+  ): Promise<boolean> {
+    const data = { category, savePath, ...options };
     await this.request(
       '/torrents/createCategory',
       'POST',
@@ -935,8 +965,12 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#edit-category}
    */
-  async editCategory(category: string, savePath = ''): Promise<boolean> {
-    const data = { category, savePath };
+  async editCategory(
+    category: string,
+    savePath = '',
+    options: CategoryOptions = {},
+  ): Promise<boolean> {
+    const data = { category, savePath, ...options };
     await this.request(
       '/torrents/editCategory',
       'POST',
@@ -1033,8 +1067,8 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * @deprecated Alias for {@link stopTorrent}.
    */
-  async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    return this.stopTorrent(hashes);
+  async pauseTorrent(hashes: string | string[] | 'all'): Promise<void> {
+    await this.stopTorrent(hashes);
   }
 
   /**
@@ -1052,15 +1086,24 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * @deprecated Alias for {@link startTorrent}.
    */
-  async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    return this.startTorrent(hashes);
+  async resumeTorrent(hashes: string | string[] | 'all'): Promise<void> {
+    await this.startTorrent(hashes);
   }
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#delete-torrents}
    * @param deleteFiles (default: false) remove files from disk
+   * @throws when a torrent doesn't exist, qBittorrent silently ignores unknown hashes
    */
-  async removeTorrent(hashes: string | string[] | 'all', deleteFiles = false): Promise<boolean> {
+  async removeTorrent(hashes: string | string[] | 'all', deleteFiles = false): Promise<void> {
+    if (hashes !== 'all') {
+      const requested = new Set(Array.isArray(hashes) ? hashes : [hashes]);
+      const torrents = await this.listTorrents({ hashes });
+      if (torrents.length < requested.size) {
+        throw new Error('Torrent not found');
+      }
+    }
+
     const data = {
       hashes: normalizeHashes(hashes),
       deleteFiles,
@@ -1073,7 +1116,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
       undefined,
       false,
     );
-    return true;
   }
 
   /**
@@ -1161,7 +1203,19 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
       await this.addTorrent(torrent, torrentOptions);
     }
 
-    return this.getTorrent(torrentHash);
+    // qBittorrent responds before the torrent shows up in the torrent list
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const [torrentData] = await this.listTorrents({ hashes: torrentHash });
+      if (torrentData) {
+        return normalizeTorrentData(torrentData);
+      }
+
+      await new Promise(resolve => {
+        setTimeout(resolve, 250);
+      });
+    }
+
+    throw new Error('Torrent not found');
   }
 
   /**
@@ -1287,19 +1341,17 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#increase-torrent-priority}
    */
-  async queueUp(hashes: string | string[] | 'all'): Promise<boolean> {
+  async queueUp(hashes: string | string[] | 'all'): Promise<void> {
     const data = { hashes: normalizeHashes(hashes) };
     await this.request('/torrents/increasePrio', 'POST', undefined, objToUrlSearchParams(data));
-    return true;
   }
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#decrease-torrent-priority}
    */
-  async queueDown(hashes: string | string[] | 'all'): Promise<boolean> {
+  async queueDown(hashes: string | string[] | 'all'): Promise<void> {
     const data = { hashes: normalizeHashes(hashes) };
     await this.request('/torrents/decreasePrio', 'POST', undefined, objToUrlSearchParams(data));
-    return true;
   }
 
   /**
