@@ -249,21 +249,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     return true;
   }
 
-  /**
-   * qBittorrent silently ignores unknown hashes, the normalized methods throw instead
-   */
-  private async assertTorrentsExist(hashes: string | string[] | 'all'): Promise<void> {
-    if (hashes === 'all') {
-      return;
-    }
-
-    const requested = new Set(Array.isArray(hashes) ? hashes : [hashes]);
-    const torrents = await this.listTorrents({ hashes });
-    if (torrents.length < requested.size) {
-      throw new TorrentClientError('Torrent not found', 'torrent_not_found');
-    }
-  }
-
   async getTorrent(hash: string): Promise<NormalizedTorrent> {
     const torrentsResponse = await this.listTorrents({ hashes: hash });
     const [torrentData] = torrentsResponse;
@@ -1084,7 +1069,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * @deprecated Alias for {@link stopTorrent}.
    */
   async pauseTorrent(hashes: string | string[] | 'all'): Promise<void> {
-    await this.assertTorrentsExist(hashes);
     await this.stopTorrent(hashes);
   }
 
@@ -1104,7 +1088,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * @deprecated Alias for {@link startTorrent}.
    */
   async resumeTorrent(hashes: string | string[] | 'all'): Promise<void> {
-    await this.assertTorrentsExist(hashes);
     await this.startTorrent(hashes);
   }
 
@@ -1113,7 +1096,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * @param deleteFiles (default: false) remove files from disk
    */
   async removeTorrent(hashes: string | string[] | 'all', deleteFiles = false): Promise<void> {
-    await this.assertTorrentsExist(hashes);
     const data = {
       hashes: normalizeHashes(hashes),
       deleteFiles,
@@ -1352,7 +1334,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#increase-torrent-priority}
    */
   async queueUp(hashes: string | string[] | 'all'): Promise<void> {
-    await this.assertTorrentsExist(hashes);
     const data = { hashes: normalizeHashes(hashes) };
     await this.request('/torrents/increasePrio', 'POST', undefined, objToUrlSearchParams(data));
   }
@@ -1361,7 +1342,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#decrease-torrent-priority}
    */
   async queueDown(hashes: string | string[] | 'all'): Promise<void> {
-    await this.assertTorrentsExist(hashes);
     const data = { hashes: normalizeHashes(hashes) };
     await this.request('/torrents/decreasePrio', 'POST', undefined, objToUrlSearchParams(data));
   }

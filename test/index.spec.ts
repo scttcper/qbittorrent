@@ -295,17 +295,12 @@ it('should remove torrent', async () => {
 });
 it('should throw torrent_not_found for a torrent that does not exist', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
-  const torrentId = await setupTorrent(client);
-  const missing = '0'.repeat(40);
-  const notFound = { name: 'TorrentClientError', code: 'torrent_not_found' };
-  await expect(client.getTorrent(missing)).rejects.toMatchObject(notFound);
-  await expect(client.pauseTorrent(missing)).rejects.toMatchObject(notFound);
-  await expect(client.resumeTorrent(missing)).rejects.toMatchObject(notFound);
-  await expect(client.queueUp(missing)).rejects.toMatchObject(notFound);
-  await expect(client.queueDown(missing)).rejects.toMatchObject(notFound);
-  await expect(client.removeTorrent(missing)).rejects.toMatchObject(notFound);
-  await expect(client.removeTorrent([torrentId, missing])).rejects.toMatchObject(notFound);
-  expect(await client.listTorrents()).toHaveLength(1);
+  await expect(client.getTorrent('0'.repeat(40))).rejects.toMatchObject({
+    name: 'TorrentClientError',
+    code: 'torrent_not_found',
+  });
+  // qBittorrent ignores unknown hashes
+  await client.removeTorrent('0'.repeat(40));
 });
 it('should throw request_failed with the http status', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
