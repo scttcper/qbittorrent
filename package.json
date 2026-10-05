@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@ctrl/magnet-link": "^5.0.1",
-    "@ctrl/shared-torrent": "^6.5.3",
+    "@ctrl/shared-torrent": "^6.5.4",
     "@ctrl/torrent-file": "^4.5.2",
     "cookie": "^2.0.1",
     "node-fetch-native": "^1.6.7",

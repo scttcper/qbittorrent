@@ -170,8 +170,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1
       '@ctrl/shared-torrent':
-        specifier: ^6.5.3
-        version: 6.5.3(ofetch@1.5.1)
+        specifier: ^6.5.4
+        version: 6.5.4(ofetch@1.5.1)
       '@ctrl/torrent-file':
         specifier: ^4.5.2
         version: 4.5.2
@@ -235,8 +235,8 @@ packages:
     resolution: {integrity: sha512-V025iYzoB+VqZEKkQR+lIjXj+uCV9g3H1ySPH1SBsD6o/dGGv0wWUldp/OpnjK4s1m5ZNXsV3rct6KBl0K6Smg==}
     engines: {node: '>=20'}
 
-  '@ctrl/shared-torrent@6.5.3':
-    resolution: {integrity: sha512-j2m36RH7oyeGGOAwrfRFft/vQsdAHPL8eaxol6s0EVIzRJYkYjS6oq8s7mgFmsIdSut3d9jx5CzloKfcQ7Zo/Q==}
+  '@ctrl/shared-torrent@6.5.4':
+    resolution: {integrity: sha512-4b45No9i/T3cNxnDzAsTX9fxH2ZPhObmNb9uiInwc46XPp5ETF2l7a1MOec9kaGyrBzz8Xvty6sL/12PBGVJAw==}
     engines: {node: '>20'}
     peerDependencies:
       ofetch: ^1.5.0
@@ -1159,7 +1159,7 @@ snapshots:
 
   '@ctrl/oxlint-config@1.5.0': {}
 
-  '@ctrl/shared-torrent@6.5.3(ofetch@1.5.1)':
+  '@ctrl/shared-torrent@6.5.4(ofetch@1.5.1)':
     dependencies:
       ofetch: 1.5.1
 
