@@ -8,6 +8,8 @@
 npm install @ctrl/qbittorrent
 ```
 
+Requires Node.js 22 or newer.
+
 ### Use
 
 ```ts
@@ -59,6 +61,12 @@ await passwordClient.deleteApiKey();
 Docs: https://qbittorrent.ep.workers.dev  
 qBittorrent API Docs: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-5.0)  
 qBittorrent API Key Docs: https://github.com/qbittorrent/qBittorrent/wiki/API-Key-Authentication-%28%E2%89%A5v5.2.0%29
+
+Things that work differently from the other clients:
+
+- `label` is the qBittorrent category
+- `queueUp`/`queueDown` need torrent queueing enabled, qBittorrent responds with a 409 otherwise. `queuePosition` is `0` when queueing is disabled or the torrent is seeding
+- `pauseTorrent`/`resumeTorrent` use `/torrents/stop` and `/torrents/start` on qBittorrent 5 and `/torrents/pause` and `/torrents/resume` on 4.x
 
 ### Normalized API
 
