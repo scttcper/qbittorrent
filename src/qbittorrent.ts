@@ -1067,8 +1067,8 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * @deprecated Alias for {@link stopTorrent}.
    */
-  async pauseTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    return this.stopTorrent(hashes);
+  async pauseTorrent(hashes: string | string[] | 'all'): Promise<void> {
+    await this.stopTorrent(hashes);
   }
 
   /**
@@ -1086,15 +1086,24 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * @deprecated Alias for {@link startTorrent}.
    */
-  async resumeTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    return this.startTorrent(hashes);
+  async resumeTorrent(hashes: string | string[] | 'all'): Promise<void> {
+    await this.startTorrent(hashes);
   }
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#delete-torrents}
    * @param deleteFiles (default: false) remove files from disk
+   * @throws when a torrent doesn't exist, qBittorrent silently ignores unknown hashes
    */
-  async removeTorrent(hashes: string | string[] | 'all', deleteFiles = false): Promise<boolean> {
+  async removeTorrent(hashes: string | string[] | 'all', deleteFiles = false): Promise<void> {
+    if (hashes !== 'all') {
+      const requested = new Set(Array.isArray(hashes) ? hashes : [hashes]);
+      const torrents = await this.listTorrents({ hashes });
+      if (torrents.length < requested.size) {
+        throw new Error('Torrent not found');
+      }
+    }
+
     const data = {
       hashes: normalizeHashes(hashes),
       deleteFiles,
@@ -1107,7 +1116,6 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
       undefined,
       false,
     );
-    return true;
   }
 
   /**
@@ -1333,19 +1341,17 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#increase-torrent-priority}
    */
-  async queueUp(hashes: string | string[] | 'all'): Promise<boolean> {
+  async queueUp(hashes: string | string[] | 'all'): Promise<void> {
     const data = { hashes: normalizeHashes(hashes) };
     await this.request('/torrents/increasePrio', 'POST', undefined, objToUrlSearchParams(data));
-    return true;
   }
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#decrease-torrent-priority}
    */
-  async queueDown(hashes: string | string[] | 'all'): Promise<boolean> {
+  async queueDown(hashes: string | string[] | 'all'): Promise<void> {
     const data = { hashes: normalizeHashes(hashes) };
     await this.request('/torrents/decreasePrio', 'POST', undefined, objToUrlSearchParams(data));
-    return true;
   }
 
   /**

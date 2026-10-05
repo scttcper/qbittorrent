@@ -145,8 +145,8 @@ it.skip('should set torrent priority', async () => {
   const torrentId = await setupTorrent(client);
   expect(await client.topPriority(torrentId)).toBe(true);
   expect(await client.bottomPriority(torrentId)).toBe(true);
-  expect(await client.queueDown(torrentId)).toBe(true);
-  expect(await client.queueUp(torrentId)).toBe(true);
+  await client.queueDown(torrentId);
+  await client.queueUp(torrentId);
 });
 it('should get torrent properties', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -284,8 +284,23 @@ it('should add/remove torrent tag', async () => {
 it('should pause/resume torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
-  expect(await client.pauseTorrent(torrentId)).toBeTruthy();
-  expect(await client.resumeTorrent(torrentId)).toBeTruthy();
+  await client.pauseTorrent(torrentId);
+  await client.resumeTorrent(torrentId);
+});
+it('should remove torrent', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  await client.removeTorrent(torrentId, false);
+  expect(await client.listTorrents()).toHaveLength(0);
+});
+it('should throw when removing a torrent that does not exist', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  await expect(client.removeTorrent('0'.repeat(40))).rejects.toThrow('Torrent not found');
+  await expect(client.removeTorrent([torrentId, '0'.repeat(40)])).rejects.toThrow(
+    'Torrent not found',
+  );
+  expect(await client.listTorrents()).toHaveLength(1);
 });
 it('should reannounceTorrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
