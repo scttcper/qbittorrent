@@ -533,12 +533,12 @@ interface Category {
    * Category share limit action. Added in qBittorrent WebUI API v2.12.0
    * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
    */
-  share_limit_action?: string;
+  share_limit_action?: 'Default' | 'Stop' | 'Remove' | 'RemoveWithContent' | 'EnableSuperSeeding';
   /**
    * Category share limit mode. Added in qBittorrent WebUI API v2.12.0
    * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
    */
-  share_limits_mode?: string;
+  share_limits_mode?: 'Default' | 'MatchAny' | 'MatchAll';
 }
 
 export enum TorrentState {
@@ -1184,10 +1184,12 @@ export interface Preferences {
   locale: string;
   /**
    * True if a subfolder should be created when adding a torrent
+   * @deprecated replaced by `torrent_content_layout`
    */
   create_subfolder_enabled: boolean;
   /**
    * True if torrents should be added in a Paused state
+   * @deprecated renamed to `add_stopped_enabled` in qBittorrent 5.0
    */
   start_paused_enabled: boolean;
   /**
@@ -1240,12 +1242,12 @@ export interface Preferences {
   scan_dirs: Record<string, 0 | 1 | string>;
   /**
    * Path to directory to copy .torrent files to. Slashes are used as path separators
-   * @deprecated Removed in WebAPI v2.16.0. Use torrent_files_backup_dir.
+   * @deprecated removed in WebAPI 2.16, use `torrent_files_backup_dir`
    */
   export_dir?: string;
   /**
    * Path to directory to copy .torrent files of completed downloads to. Slashes are used as path separators
-   * @deprecated Removed in WebAPI v2.16.0. Use torrent_files_finished_backup_dir.
+   * @deprecated removed in WebAPI 2.16, use `torrent_files_finished_backup_dir`
    */
   export_dir_fin?: string;
   /**
@@ -1266,7 +1268,7 @@ export interface Preferences {
   mail_notification_smtp: string;
   /**
    * True if smtp server requires SSL connection
-   * @deprecated Removed in qBittorrent WebUI API v2.16.0. Use
+   * @deprecated removed in WebAPI 2.16, use `mail_notification_encryption_type`
    * `mail_notification_encryption_type` instead.
    * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2160}
    */
@@ -1506,6 +1508,7 @@ export interface Preferences {
   proxy_password: string;
   /**
    * True if proxy is only used for torrents
+   * @deprecated not returned by qBittorrent 5.x
    */
   proxy_torrents_only: boolean;
   /**
@@ -1542,6 +1545,7 @@ export interface Preferences {
   web_ui_username: string;
   /**
    * For API ≥ v2.3.0: Plaintext WebUI password, not readable, write-only. For API < v2.3.0: MD5 hash of WebUI password, hash is generated from the following string: username:Web UI Access:plain_text_web_ui_password
+   * Only accepted by setPreferences, never returned
    */
   web_ui_password?: string;
   /**
@@ -1598,10 +1602,12 @@ export interface Preferences {
   use_https: boolean;
   /**
    * SSL keyfile contents (this is a not a path)
+   * @deprecated not returned by qBittorrent 5.x
    */
   ssl_key: string;
   /**
    * SSL certificate contents (this is a not a path)
+   * @deprecated not returned by qBittorrent 5.x
    */
   ssl_cert: string;
   /**
@@ -1738,6 +1744,7 @@ export interface Preferences {
   enable_multi_connections_from_same_ip: boolean;
   /**
    * True enables os cache
+   * @deprecated not returned by qBittorrent 5.x
    */
   enable_os_cache: boolean;
   /**
@@ -1811,6 +1818,115 @@ export interface Preferences {
    * Added in qBittorrent v5.2.0
    */
   hostname_cache_ttl?: number;
+  add_stopped_enabled?: boolean;
+  add_to_top_of_queue?: boolean;
+  add_trackers_from_url_enabled?: boolean;
+  add_trackers_url?: string;
+  add_trackers_url_list?: string;
+  announce_port?: number;
+  app_instance_name?: string;
+  autorun_on_torrent_added_enabled?: boolean;
+  autorun_on_torrent_added_program?: string;
+  bdecode_depth_limit?: number;
+  bdecode_token_limit?: number;
+  block_peers_on_privileged_ports?: boolean;
+  confirm_torrent_deletion?: boolean;
+  confirm_torrent_recheck?: boolean;
+  connection_speed?: number;
+  current_interface_name?: string;
+  delete_torrent_content_files?: boolean;
+  dht_bootstrap_nodes?: string;
+  disk_io_read_mode?: number;
+  disk_io_type?: number;
+  disk_io_write_mode?: number;
+  disk_queue_size?: number;
+  embedded_tracker_port_forwarding?: boolean;
+  excluded_file_names?: string;
+  excluded_file_names_enabled?: boolean;
+  file_log_age?: number;
+  file_log_age_type?: number;
+  file_log_backup_enabled?: boolean;
+  file_log_delete_old?: boolean;
+  file_log_enabled?: boolean;
+  file_log_max_size?: number;
+  file_log_path?: string;
+  hashing_threads?: number;
+  i2p_address?: string;
+  i2p_enabled?: boolean;
+  i2p_inbound_length?: number;
+  /**
+   * WebAPI 2.16.2+
+   */
+  i2p_inbound_length_variance?: number;
+  i2p_inbound_quantity?: number;
+  i2p_mixed_mode?: boolean;
+  i2p_outbound_length?: number;
+  /**
+   * WebAPI 2.16.2+
+   */
+  i2p_outbound_length_variance?: number;
+  i2p_outbound_quantity?: number;
+  /**
+   * WebAPI 2.16.2+
+   */
+  i2p_pex_enabled?: boolean;
+  i2p_port?: number;
+  idn_support_enabled?: boolean;
+  ignore_ssl_errors?: boolean;
+  mark_of_the_web?: boolean;
+  max_active_checking_torrents?: number;
+  max_concurrent_http_announces?: number;
+  max_inactive_seeding_time?: number;
+  max_inactive_seeding_time_enabled?: boolean;
+  memory_working_set_limit?: number;
+  merge_trackers?: boolean;
+  peer_tos?: number;
+  peer_turnover?: number;
+  peer_turnover_cutoff?: number;
+  peer_turnover_interval?: number;
+  performance_warning?: boolean;
+  proxy_bittorrent?: boolean;
+  proxy_hostname_lookup?: boolean;
+  proxy_misc?: boolean;
+  proxy_rss?: boolean;
+  python_executable_path?: string;
+  reannounce_when_address_changed?: boolean;
+  refresh_interval?: number;
+  request_queue_size?: number;
+  resume_data_storage_type?: 'Legacy' | 'SQLite';
+  rss_fetch_delay?: number;
+  save_statistics_interval?: number;
+  /**
+   * WebAPI 2.16+
+   */
+  shutdown_timeout?: number;
+  socket_receive_buffer_size?: number;
+  socket_send_buffer_size?: number;
+  ssl_enabled?: boolean;
+  ssl_listen_port?: number;
+  ssrf_mitigation?: boolean;
+  /**
+   * WebAPI 2.16+
+   */
+  start_paused?: boolean;
+  status_bar_external_ip?: boolean;
+  torrent_content_layout?: 'Original' | 'Subfolder' | 'NoSubfolder';
+  torrent_content_remove_option?: 'Delete' | 'MoveToTrash';
+  torrent_file_size_limit?: number;
+  torrent_stop_condition?: 'None' | 'MetadataReceived' | 'FilesChecked';
+  use_category_paths_in_manual_mode?: boolean;
+  /**
+   * @deprecated not returned by qBittorrent 5.2+
+   */
+  use_subcategories?: boolean;
+  use_unwanted_folder?: boolean;
+  validate_https_tracker_certificate?: boolean;
+  /**
+   * qBittorrent 5.2+ (WebAPI 2.12+)
+   */
+  web_ui_api_key?: string;
+  web_ui_reverse_proxies_list?: string;
+  web_ui_reverse_proxy_enabled?: boolean;
 }
 
 export interface TorrentPeersResponse {
@@ -2021,4 +2137,36 @@ export interface SyncServerState {
    */
   queued_tracker_announces?: number;
   [key: string]: unknown;
+}
+
+/**
+ * Extra options for {@link QBittorrent.createCategory} and {@link QBittorrent.editCategory}
+ * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2162}
+ */
+export interface CategoryOptions {
+  /**
+   * Incomplete download path, used when `downloadPathEnabled` is true
+   */
+  downloadPath?: string;
+  downloadPathEnabled?: boolean;
+  /**
+   * `-2` uses the global limit, `-1` is unlimited. WebAPI 2.16.2+
+   */
+  ratioLimit?: number;
+  /**
+   * Minutes, `-2` uses the global limit, `-1` is unlimited. WebAPI 2.16.2+
+   */
+  seedingTimeLimit?: number;
+  /**
+   * Minutes, `-2` uses the global limit, `-1` is unlimited. WebAPI 2.16.2+
+   */
+  inactiveSeedingTimeLimit?: number;
+  /**
+   * How the limits combine. WebAPI 2.16.2+
+   */
+  shareLimitsMode?: 'Default' | 'MatchAny' | 'MatchAll';
+  /**
+   * What happens when a limit is reached. WebAPI 2.16.2+
+   */
+  shareLimitAction?: 'Default' | 'Stop' | 'Remove' | 'RemoveWithContent' | 'EnableSuperSeeding';
 }

@@ -24,6 +24,7 @@ import type {
   AddMagnetOptions,
   AddTorrentOptions,
   BuildInfo,
+  CategoryOptions,
   ClientData,
   Cookies,
   DirectoryContent,
@@ -593,6 +594,31 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * Added in qBittorrent WebUI API v2.15.4.
    * {@link https://github.com/qbittorrent/qBittorrent/pull/24056}
    */
+  /**
+   * Export every RSS auto-download rule as json, same shape as {@link QBittorrent.getRssRules}.
+   * Added in qBittorrent WebUI API v2.16.2.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2162}
+   */
+  async exportRssRules(): Promise<RssAutoDownloadRules> {
+    return this.request<RssAutoDownloadRules>('/rss/exportRules', 'GET');
+  }
+
+  /**
+   * Import RSS auto-download rules, ex - from {@link QBittorrent.exportRssRules}. Existing rules with the same name are replaced.
+   * Added in qBittorrent WebUI API v2.16.2.
+   * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2162}
+   */
+  async importRssRules(rules: RssAutoDownloadRules): Promise<boolean> {
+    const form = new FormData();
+    form.set(
+      'rules',
+      new Blob([JSON.stringify(rules)], { type: 'application/json' }),
+      'rss-downloader-rules.json',
+    );
+    await this.request('/rss/importRules', 'POST', undefined, form, undefined, false);
+    return true;
+  }
+
   async cloneRssRule(sourceName: string, cloneName: string): Promise<boolean> {
     await this.request(
       '/rss/cloneRule',
@@ -919,8 +945,12 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#add-new-category}
    */
-  async createCategory(category: string, savePath = ''): Promise<boolean> {
-    const data = { category, savePath };
+  async createCategory(
+    category: string,
+    savePath = '',
+    options: CategoryOptions = {},
+  ): Promise<boolean> {
+    const data = { category, savePath, ...options };
     await this.request(
       '/torrents/createCategory',
       'POST',
@@ -935,8 +965,12 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#edit-category}
    */
-  async editCategory(category: string, savePath = ''): Promise<boolean> {
-    const data = { category, savePath };
+  async editCategory(
+    category: string,
+    savePath = '',
+    options: CategoryOptions = {},
+  ): Promise<boolean> {
+    const data = { category, savePath, ...options };
     await this.request(
       '/torrents/editCategory',
       'POST',

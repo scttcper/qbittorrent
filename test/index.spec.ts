@@ -416,6 +416,35 @@ it('should get / create / edit / remove category', async () => {
   categories = await client.getCategories();
   expect(categories.movie).toBe(undefined);
 });
+it('should create category with share limits', async () => {
+  if (await skipIfUnsupported('2.16.2', 'category share limits')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  try {
+    await client.createCategory('limited', '/data', {
+      downloadPathEnabled: true,
+      downloadPath: '/data/incomplete',
+      ratioLimit: 2,
+      seedingTimeLimit: 60,
+      inactiveSeedingTimeLimit: -1,
+      shareLimitsMode: 'MatchAll',
+      shareLimitAction: 'Stop',
+    });
+    const categories = await client.getCategories();
+    expect(categories.limited).toMatchObject({
+      download_path: '/data/incomplete',
+      ratio_limit: 2,
+      seeding_time_limit: 60,
+      inactive_seeding_time_limit: -1,
+      share_limits_mode: 'MatchAll',
+      share_limit_action: 'Stop',
+    });
+  } finally {
+    await client.removeCategory('limited');
+  }
+});
 it('should get / create / remove tags', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   let tags = await client.getTags();
@@ -549,6 +578,27 @@ it('should store and load client data', async () => {
   const data = await client.loadClientData(['test_value']);
   expect(data.test_value).toBe('stored');
 });
+it('should export and import rss auto-download rules', async () => {
+  if (await skipIfUnsupported('2.16.2', 'rss rule export/import')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const ruleName = `export-${Date.now()}`;
+  try {
+    await client.setRssRule(ruleName, { enabled: false, mustContain: 'ubuntu' });
+    const exported = await client.exportRssRules();
+    expect(exported[ruleName]?.mustContain).toBe('ubuntu');
+    await client.removeRssRule(ruleName);
+    expect((await client.getRssRules())[ruleName]).toBeUndefined();
+
+    expect(await client.importRssRules(exported)).toBe(true);
+    expect((await client.getRssRules())[ruleName]?.mustContain).toBe('ubuntu');
+  } finally {
+    await client.removeRssRule(ruleName);
+  }
+});
+
 it('should clone rss auto-download rule', async () => {
   if (await skipIfUnsupported('2.15.4', 'clone rss rule')) {
     return;
