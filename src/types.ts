@@ -455,12 +455,14 @@ export interface Torrent {
   /**
    * Torrent creation datetime in seconds
    * Added in qBittorrent v5.2.0
+   * @deprecated use `creation_date`, qBittorrent never returned `created_on`
    */
   created_on?: number;
   /**
    * True if torrent is from a private tracker
    * Added in qBittorrent v5.0.0
    * Might be able to make not optional once qb v5 is more widely used
+   * @deprecated use `private`, qBittorrent never returned `isPrivate`
    */
   isPrivate?: boolean;
   /**
@@ -503,6 +505,55 @@ export interface Torrent {
    * {@link https://github.com/qbittorrent/qBittorrent/blob/master/WebAPI_Changelog.md#2120}
    */
   share_limit_action?: string;
+  /**
+   * Torrent comment from the .torrent file
+   */
+  comment?: string;
+  /**
+   * Torrent creator from the .torrent file
+   */
+  created_by?: string;
+  /**
+   * When the .torrent file was created, unix seconds
+   */
+  creation_date?: number;
+  /**
+   * Null until metadata is available
+   */
+  private?: boolean | null;
+  has_metadata?: boolean;
+  infohash_v1?: string;
+  /**
+   * Empty for v1 only torrents
+   */
+  infohash_v2?: string;
+  connections_count?: number;
+  connections_limit?: number;
+  download_path?: string;
+  /**
+   * Content root path, empty until metadata is available
+   */
+  root_path?: string;
+  piece_size?: number;
+  pieces_have?: number;
+  pieces_num?: number;
+  /**
+   * Ratio / time active in months
+   */
+  popularity?: number;
+  /**
+   * Bytes wasted on bad or redundant data
+   */
+  total_wasted?: number;
+  /**
+   * Minutes, `-2` global limit, `-1` unlimited
+   */
+  inactive_seeding_time_limit?: number;
+  max_inactive_seeding_time?: number;
+  /**
+   * WebAPI 2.15.3+
+   */
+  share_limits_mode?: 'Default' | 'MatchAny' | 'MatchAll';
 }
 
 export type TorrentCategories = Record<string, Category>;

@@ -749,6 +749,10 @@ it('should list torrents', async () => {
   expect(typeof torrent.availability).toBe('number');
   expect(typeof torrent.force_start).toBe('boolean');
   expect(typeof torrent.seeding_time).toBe('number');
+  expect(torrent.infohash_v1).toBe(torrent.hash);
+  expect(torrent.pieces_num).toBe(3726);
+  expect(torrent.creation_date).toBe(1_532_624_126);
+  expect(torrent.comment).toBe('Ubuntu CD releases.ubuntu.com');
 });
 it('should include WebAPI 2.16 sync and preference fields when supported', async () => {
   if (await skipIfUnsupported('2.16.0', 'WebAPI 2.16 fields')) {
