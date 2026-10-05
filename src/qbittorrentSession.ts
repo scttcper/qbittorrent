@@ -1,6 +1,10 @@
-import type { TorrentClientConfig, TorrentClientState } from '@ctrl/shared-torrent';
+import {
+  TorrentClientError,
+  type TorrentClientConfig,
+  type TorrentClientState,
+} from '@ctrl/shared-torrent';
 import { parseSetCookie } from 'cookie';
-import { ofetch } from 'ofetch';
+import { FetchError, ofetch } from 'ofetch';
 import type { Jsonify } from 'type-fest';
 import { joinURL } from 'ufo';
 
@@ -95,7 +99,7 @@ export class QBittorrentSession {
     });
 
     if (!res.headers.get('set-cookie')?.length) {
-      throw new Error('Cookie not found. Auth Failed.');
+      throw new TorrentClientError('Cookie not found. Auth Failed.', 'unauthorized');
     }
 
     const cookieHeader = res.headers.get('set-cookie') ?? '';
@@ -103,7 +107,7 @@ export class QBittorrentSession {
     const cookieName = cookie.name;
     const sid = cookie.value;
     if (!sid) {
-      throw new Error('Invalid cookie');
+      throw new TorrentClientError('Invalid cookie', 'unauthorized');
     }
 
     this.state.auth = {
@@ -170,7 +174,7 @@ export class QBittorrentSession {
     ) {
       const authed = await this.login();
       if (!authed) {
-        throw new Error('Auth Failed');
+        throw new TorrentClientError('Auth Failed', 'unauthorized');
       }
     }
   }
@@ -210,11 +214,13 @@ export class QBittorrentSession {
       // API key auth is stateless and cannot use /auth/login, so only cookie
       // auth gets a one-shot re-login when the server rejects the session.
       if (this.config.apiKey || !isAuthError(error)) {
-        throw error;
+        throw toClientError(error);
       }
 
       delete this.state.auth;
-      return this.requestOnce<T>(options);
+      return this.requestOnce<T>(options).catch((retryError: unknown) => {
+        throw toClientError(retryError);
+      });
     }
   }
 
@@ -262,6 +268,29 @@ export class QBittorrentSession {
       };
     }
   }
+}
+
+/**
+ * qBittorrent also responds 404 for missing categories, directories and search jobs,
+ * so only the explicit torrent lookups throw `torrent_not_found`
+ */
+function toClientError(error: unknown): TorrentClientError {
+  if (error instanceof TorrentClientError) {
+    return error;
+  }
+
+  if (error instanceof FetchError) {
+    return new TorrentClientError(
+      error.message,
+      isAuthError(error) ? 'unauthorized' : 'request_failed',
+      {
+        status: error.status,
+        cause: error,
+      },
+    );
+  }
+
+  return new TorrentClientError((error as Error).message, 'request_failed', { cause: error });
 }
 
 function isAuthError(error: unknown): boolean {

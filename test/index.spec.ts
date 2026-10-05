@@ -4,7 +4,7 @@ import path from 'node:path';
 import pWaitFor from 'p-wait-for';
 import { afterEach, expect, it } from 'vitest';
 
-import { QBittorrent, TorrentFilePriority } from '../src/index.js';
+import { QBittorrent, TorrentClientError, TorrentFilePriority } from '../src/index.js';
 
 const baseUrl = 'http://localhost:8080';
 const torrentName = 'ubuntu-18.04.1-desktop-amd64.iso';
@@ -293,14 +293,38 @@ it('should remove torrent', async () => {
   await client.removeTorrent(torrentId, false);
   expect(await client.listTorrents()).toHaveLength(0);
 });
-it('should throw when removing a torrent that does not exist', async () => {
+it('should throw torrent_not_found for a torrent that does not exist', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
-  await expect(client.removeTorrent('0'.repeat(40))).rejects.toThrow('Torrent not found');
-  await expect(client.removeTorrent([torrentId, '0'.repeat(40)])).rejects.toThrow(
-    'Torrent not found',
-  );
+  const missing = '0'.repeat(40);
+  const notFound = { name: 'TorrentClientError', code: 'torrent_not_found' };
+  await expect(client.getTorrent(missing)).rejects.toMatchObject(notFound);
+  await expect(client.pauseTorrent(missing)).rejects.toMatchObject(notFound);
+  await expect(client.resumeTorrent(missing)).rejects.toMatchObject(notFound);
+  await expect(client.queueUp(missing)).rejects.toMatchObject(notFound);
+  await expect(client.queueDown(missing)).rejects.toMatchObject(notFound);
+  await expect(client.removeTorrent(missing)).rejects.toMatchObject(notFound);
+  await expect(client.removeTorrent([torrentId, missing])).rejects.toMatchObject(notFound);
   expect(await client.listTorrents()).toHaveLength(1);
+});
+it('should throw request_failed with the http status', async () => {
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  // ci runs qBittorrent with torrent queueing disabled
+  await expect(client.queueUp(torrentId)).rejects.toMatchObject({
+    code: 'request_failed',
+    status: 409,
+  });
+});
+it('should throw unauthorized for a wrong password', async () => {
+  const client = new QBittorrent({ baseUrl, username, password: 'wrong' });
+  await expect(client.getAllData()).rejects.toMatchObject({ code: 'unauthorized' });
+});
+it('should throw request_failed without a status when the client is unreachable', async () => {
+  const client = new QBittorrent({ baseUrl: 'http://127.0.0.1:1', username, password });
+  const error = await client.getAllData().catch((error_: unknown) => error_);
+  expect(error).toBeInstanceOf(TorrentClientError);
+  expect(error).toMatchObject({ code: 'request_failed', status: undefined });
 });
 it('should reannounceTorrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
