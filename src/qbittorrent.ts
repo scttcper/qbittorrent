@@ -1161,7 +1161,19 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
       await this.addTorrent(torrent, torrentOptions);
     }
 
-    return this.getTorrent(torrentHash);
+    // qBittorrent responds before the torrent shows up in the torrent list
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const [torrentData] = await this.listTorrents({ hashes: torrentHash });
+      if (torrentData) {
+        return normalizeTorrentData(torrentData);
+      }
+
+      await new Promise(resolve => {
+        setTimeout(resolve, 250);
+      });
+    }
+
+    throw new Error('Torrent not found');
   }
 
   /**

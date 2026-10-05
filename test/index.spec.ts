@@ -339,6 +339,8 @@ it('should return normalized torrent data', async () => {
   expect(torrent.downloadSpeed).toBe(0);
   expect(torrent.eta).toBe(8_640_000);
   expect(torrent.isCompleted).toBe(false);
+  expect(torrent.dateCompleted).toBeUndefined();
+  expect(torrent.tags).toEqual([]);
   expect(torrent.label).toBe('');
   expect(torrent.name).toBe(torrentName);
   expect(torrent.progress).toBe(0);
@@ -365,6 +367,8 @@ it.skip('should add normalized torrent from magnet', async () => {
   expect(torrent.downloadSpeed).toBe(0);
   expect(torrent.eta).toBe(8_640_000);
   expect(torrent.isCompleted).toBe(false);
+  expect(torrent.dateCompleted).toBeUndefined();
+  expect(torrent.tags).toEqual([]);
   expect(torrent.label).toBe('');
   expect(torrent.name).toBe('Ubuntu 11 10 Alternate Amd64 Iso');
   expect(torrent.progress).toBe(0);

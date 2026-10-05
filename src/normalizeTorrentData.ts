@@ -95,8 +95,10 @@ export function normalizeTorrentData(torrent: Torrent): NormalizedTorrent {
     isCompleted,
     progress: torrent.progress,
     label: torrent.category,
-    tags: torrent.tags.split(', '),
-    dateCompleted: new Date(torrent.completion_on * 1000).toISOString(),
+    tags: torrent.tags ? torrent.tags.split(', ') : [],
+    // completion_on is -1 until the torrent finishes
+    dateCompleted:
+      torrent.completion_on > 0 ? new Date(torrent.completion_on * 1000).toISOString() : undefined,
     savePath: torrent.save_path,
     uploadSpeed: torrent.upspeed,
     downloadSpeed: torrent.dlspeed,
