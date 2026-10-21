@@ -98,27 +98,17 @@ export class QBittorrentSession {
       dispatcher: this.config.dispatcher,
     });
 
-    if (!res.headers.get('set-cookie')?.length) {
+    const cookieHeader = res.headers.get('set-cookie');
+    if (!cookieHeader?.length) {
       throw new TorrentClientError('Cookie not found. Auth Failed.', 'unauthorized');
     }
 
-    const cookieHeader = res.headers.get('set-cookie') ?? '';
-    const cookie = parseSetCookie(cookieHeader);
-    const cookieName = cookie.name;
-    const sid = cookie.value;
-    if (!sid) {
+    const auth = parseSessionCookie(cookieHeader);
+    if (!auth) {
       throw new TorrentClientError('Invalid cookie', 'unauthorized');
     }
 
-    this.state.auth = {
-      sid,
-      cookieName,
-      expires: cookie.expires
-        ? cookie.expires
-        : cookie.maxAge !== undefined
-          ? new Date(Date.now() + cookie.maxAge * 1000)
-          : new Date(Date.now() + 3_600_000),
-    };
+    this.state.auth = auth;
 
     // Check version after successful login
     await this.checkVersion();
@@ -247,7 +237,31 @@ export class QBittorrentSession {
       timeout: this.config.timeout,
       responseType: responseType as 'json',
       dispatcher: this.config.dispatcher,
+      onResponse: ({ response }) => {
+        this.updateSessionCookie(response.headers);
+      },
     });
+  }
+
+  /**
+   * qBittorrent sends a new SID when it starts a session from the Basic auth header, which
+   * happens once ours has expired or was evicted (5.3 keeps 15 sessions by default), and
+   * extends the expiry of long-lived sessions. Keep the latest one, otherwise every request
+   * after an eviction starts another session and pushes out the WebUI and other clients.
+   */
+  private updateSessionCookie(headers: Headers): void {
+    if (this.config.apiKey || !this.state.auth) {
+      return;
+    }
+
+    const cookieName = this.state.auth.cookieName ?? 'SID';
+    const cookieHeader = headers
+      .getSetCookie()
+      .find(setCookie => setCookie.startsWith(`${cookieName}=`));
+    const auth = cookieHeader ? parseSessionCookie(cookieHeader) : undefined;
+    if (auth) {
+      this.state.auth = auth;
+    }
   }
 
   private async checkVersion(): Promise<void> {
@@ -268,6 +282,23 @@ export class QBittorrentSession {
       };
     }
   }
+}
+
+function parseSessionCookie(cookieHeader: string): QBittorrentState['auth'] {
+  const cookie = parseSetCookie(cookieHeader);
+  if (!cookie.value) {
+    return undefined;
+  }
+
+  return {
+    sid: cookie.value,
+    cookieName: cookie.name,
+    expires: cookie.expires
+      ? cookie.expires
+      : cookie.maxAge !== undefined
+        ? new Date(Date.now() + cookie.maxAge * 1000)
+        : new Date(Date.now() + 3_600_000),
+  };
 }
 
 /**

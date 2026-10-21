@@ -479,6 +479,43 @@ it('should create category with share limits', async () => {
     await client.removeCategory('limited');
   }
 });
+it('should edit category options without resetting the save path', async () => {
+  if (await skipIfUnsupported('2.16.2', 'partial category edits')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  try {
+    await client.createCategory('partial', '/data');
+    await client.editCategory('partial', undefined, { ratioLimit: 2 });
+    const categories = await client.getCategories();
+    expect(categories.partial).toMatchObject({ savePath: '/data', ratio_limit: 2 });
+  } finally {
+    await client.removeCategory('partial');
+  }
+});
+it('should keep the session qBittorrent starts after evicting ours', async () => {
+  if (await skipIfUnsupported('2.16.0', 'WebUI sessions count limit')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  await client.getAppVersion();
+  const evictedSid = client.state.auth!.sid;
+  const { web_ui_sessions_count_limit: limit = 15 } = await client.getPreferences();
+  for (let i = 0; i < limit; i++) {
+    await fetch(`${baseUrl}/api/v2/auth/login`, {
+      method: 'POST',
+      body: new URLSearchParams({ username, password }),
+    });
+  }
+
+  await client.getAppVersion();
+  const renewedSid = client.state.auth!.sid;
+  expect(renewedSid).not.toBe(evictedSid);
+  await client.getAppVersion();
+  expect(client.state.auth!.sid).toBe(renewedSid);
+});
 it('should get / create / remove tags', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   let tags = await client.getTags();
@@ -770,7 +807,8 @@ it('should authenticate requests with basic auth when the session cookie is inva
   const version = await client.getAppVersion();
 
   expect(version).toBeTruthy();
-  expect(client.state.auth?.sid).toBe('invalid-session-id');
+  // qBittorrent starts a session from the Basic auth header, keep it instead of the invalid one
+  expect(client.state.auth?.sid).not.toBe('invalid-session-id');
 });
 
 it('should list torrents', async () => {
