@@ -122,6 +122,11 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     return res;
   }
 
+  private async supportsApiVersion(minVersion: string): Promise<boolean> {
+    const apiVersion = await this.getApiVersion();
+    return apiVersion.localeCompare(minVersion, undefined, { numeric: true }) >= 0;
+  }
+
   /**
    * Get default save path
    */
@@ -965,13 +970,17 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
 
   /**
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#edit-category}
+   * @param savePath omit to keep the current save path on WebAPI 2.16.2+, `''` resets it to the
+   * default save path. Older versions always reset it when omitted.
    */
   async editCategory(
     category: string,
-    savePath = '',
+    savePath?: string,
     options: CategoryOptions = {},
   ): Promise<boolean> {
-    const data = { category, savePath, ...options };
+    // WebAPI 2.16.2 only changes the options that are sent, older versions require savePath
+    const requiresSavePath = savePath === undefined && !(await this.supportsApiVersion('2.16.2'));
+    const data = { category, savePath: requiresSavePath ? '' : savePath, ...options };
     await this.request(
       '/torrents/editCategory',
       'POST',
@@ -1141,7 +1150,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     await this.ensureAuthenticated('/torrents/add');
     const supportsSeedMode =
       options.seedMode !== undefined || options.skip_checking !== undefined
-        ? (await this.getApiVersion()).localeCompare('2.16.0', undefined, { numeric: true }) >= 0
+        ? await this.supportsApiVersion('2.16.0')
         : false;
     const form = buildAddTorrentForm({
       source: { type: 'torrent', torrent },
@@ -1260,7 +1269,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     await this.ensureAuthenticated('/torrents/add');
     const supportsSeedMode =
       options.seedMode !== undefined || options.skip_checking !== undefined
-        ? (await this.getApiVersion()).localeCompare('2.16.0', undefined, { numeric: true }) >= 0
+        ? await this.supportsApiVersion('2.16.0')
         : false;
     const form = buildAddTorrentForm({
       source: { type: 'magnet', urls },

@@ -10,9 +10,17 @@ let baseUrl: string;
 let apiVersion = '2.16.2';
 let appVersion = 'v5.3.0beta1';
 let requests: string[] = [];
+let requestCookies: Array<string | undefined> = [];
+let responseCookies: string[] = [];
 let addForm: FormData;
+let editCategoryBody: URLSearchParams;
 const server = createServer(async (req, res) => {
   requests.push(`${req.method} ${req.url}`);
+  requestCookies.push(req.headers.cookie);
+  if (req.url !== '/api/v2/auth/login' && responseCookies.length > 0) {
+    res.setHeader('Set-Cookie', responseCookies);
+  }
+
   switch (req.url) {
     case '/api/v2/auth/login': {
       res.setHeader('Set-Cookie', 'QBT_SID=test; Max-Age=3600');
@@ -32,6 +40,11 @@ const server = createServer(async (req, res) => {
         headers: { 'Content-Type': req.headers['content-type']! },
       }).formData();
       res.end('Ok.');
+      break;
+    }
+    case '/api/v2/torrents/editCategory': {
+      editCategoryBody = new URLSearchParams(await text(req));
+      res.end();
       break;
     }
     case '/api/v2/transfer/pauseSession':
@@ -102,6 +115,58 @@ for (const method of ['addTorrent', 'addMagnet'] as const) {
     });
   }
 }
+
+for (const [version, savePath, expected] of [
+  ['2.15.1', undefined, ''],
+  ['2.15.1', '/data', '/data'],
+  ['2.16.2', undefined, null],
+  ['2.16.2', '', ''],
+  ['2.16.2', '/data', '/data'],
+] as const) {
+  it(`editCategory sends savePath ${JSON.stringify(expected)} on WebAPI ${version} when given ${JSON.stringify(savePath)}`, async () => {
+    apiVersion = version;
+    requests = [];
+    const client = new QBittorrent({ baseUrl, username: 'admin', password: 'test' });
+    expect(await client.editCategory('movies', savePath, { ratioLimit: 2 })).toBe(true);
+    expect(editCategoryBody.get('category')).toBe('movies');
+    expect(editCategoryBody.get('savePath')).toBe(expected);
+    expect(editCategoryBody.get('ratioLimit')).toBe('2');
+    expect(requests.includes('GET /api/v2/app/webapiVersion')).toBe(savePath === undefined);
+  });
+}
+
+it('keeps the session cookie qBittorrent sends after the login', async () => {
+  apiVersion = '2.16.2';
+  requestCookies = [];
+  const client = new QBittorrent({ baseUrl, username: 'admin', password: 'test' });
+  await client.getAppVersion();
+  expect(client.state.auth?.sid).toBe('test');
+
+  // qBittorrent starts a new session from Basic auth once ours is evicted
+  responseCookies = ['other=ignored', 'QBT_SID=renewed; Max-Age=60'];
+  try {
+    await client.getApiVersion();
+  } finally {
+    responseCookies = [];
+  }
+
+  await client.getApiVersion();
+  expect(client.state.auth?.sid).toBe('renewed');
+  expect(client.state.auth?.expires.getTime()).toBeLessThanOrEqual(Date.now() + 60_000);
+  expect(requestCookies.at(-1)).toBe('QBT_SID=renewed');
+});
+
+it('ignores session cookies when using an API key', async () => {
+  const client = new QBittorrent({ baseUrl, apiKey: 'test' });
+  responseCookies = ['QBT_SID=renewed; Max-Age=60'];
+  try {
+    await client.getApiVersion();
+  } finally {
+    responseCookies = [];
+  }
+
+  expect(client.state.auth).toBe(undefined);
+});
 
 it('pauses and resumes the session using POST and accepts empty responses', async () => {
   requests = [];
