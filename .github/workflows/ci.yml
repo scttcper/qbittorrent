@@ -12,9 +12,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Current release and the previous minor, version gated tests skip
-        # whatever the older image doesn't support.
-        qbittorrent: ['5.3.0-2', '5.2.4-1']
+        # Current release, the previous minor and the last v4, version gated
+        # tests skip whatever the older images don't support.
+        qbittorrent: ['5.3.0-2', '5.2.4-1', '4.6.7-1']
     name: build (qBittorrent ${{ matrix.qbittorrent }})
     steps:
       # https://github.com/actions/checkout
@@ -34,6 +34,8 @@ jobs:
       - name: start qbittorrent
         run: |
           # The official image stores config under /config/qBittorrent/config.
+          # v4 images read QBT_EULA instead of QBT_LEGAL_NOTICE, and don't
+          # accept Basic auth, so wait for the server with a form login.
           mkdir -p /tmp/qbittorrent/config/qBittorrent/config /tmp/qbittorrent/downloads
           cat > /tmp/qbittorrent/config/qBittorrent/config/qBittorrent.conf << 'EOF'
           [BitTorrent]
@@ -52,6 +54,7 @@ jobs:
           docker run -d \
             --name qbittorrent \
             -e QBT_LEGAL_NOTICE=confirm \
+            -e QBT_EULA=accept \
             -e QBT_WEBUI_PORT=8080 \
             -e QBT_TORRENTING_PORT=6881 \
             -e PUID="$(id -u)" \
@@ -63,7 +66,7 @@ jobs:
             -v /tmp/qbittorrent/downloads:/downloads \
             qbittorrentofficial/qbittorrent-nox:${{ matrix.qbittorrent }}
           for i in {1..30}; do
-            if curl -fsS -u admin:adminadmin http://localhost:8080/api/v2/app/version; then
+            if curl -fsS -i --data 'username=admin&password=adminadmin' http://localhost:8080/api/v2/auth/login | grep -qi '^set-cookie:'; then
               exit 0
             fi
             sleep 2
