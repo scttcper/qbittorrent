@@ -9,6 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Current release and the previous minor, version gated tests skip
+        # whatever the older image doesn't support.
+        qbittorrent: ['5.3.0-2', '5.2.4-1']
+    name: build (qBittorrent ${{ matrix.qbittorrent }})
     steps:
       # https://github.com/actions/checkout
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -27,8 +34,6 @@ jobs:
       - name: start qbittorrent
         run: |
           # The official image stores config under /config/qBittorrent/config.
-          # Use the alpha image so CI covers WebAPI 2.14.1+ auth behavior
-          # including Basic auth on API requests and API key endpoints.
           mkdir -p /tmp/qbittorrent/config/qBittorrent/config /tmp/qbittorrent/downloads
           cat > /tmp/qbittorrent/config/qBittorrent/config/qBittorrent.conf << 'EOF'
           [BitTorrent]
@@ -56,7 +61,7 @@ jobs:
             -p 6881:6881/udp \
             -v /tmp/qbittorrent/config:/config \
             -v /tmp/qbittorrent/downloads:/downloads \
-            qbittorrentofficial/qbittorrent-nox:alpha
+            qbittorrentofficial/qbittorrent-nox:${{ matrix.qbittorrent }}
           for i in {1..30}; do
             if curl -fsS -u admin:adminadmin http://localhost:8080/api/v2/app/version; then
               exit 0

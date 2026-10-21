@@ -331,6 +331,8 @@ it('should set torrent location', async () => {
   const torrentId = await setupTorrent(client);
   const res = await client.setTorrentLocation(torrentId, '/tmp');
   expect(res).toBe(true);
+  // qBittorrent 5.2 silently drops the next add of this torrent if it's removed mid-move
+  await pWaitFor(async () => (await client.getTorrent(torrentId)).savePath === '/tmp');
 });
 it('should rename file within torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
