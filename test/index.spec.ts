@@ -331,6 +331,8 @@ it('should set torrent location', async () => {
   const torrentId = await setupTorrent(client);
   const res = await client.setTorrentLocation(torrentId, '/tmp');
   expect(res).toBe(true);
+  // qBittorrent 5.2 silently drops the next add of this torrent if it's removed mid-move
+  await pWaitFor(async () => (await client.getTorrent(torrentId)).savePath === '/tmp');
 });
 it('should rename file within torrent', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
@@ -789,6 +791,10 @@ it('should be able to export and create from state', async () => {
 });
 
 it('should authenticate requests with basic auth when the session cookie is invalid', async () => {
+  if (await skipIfUnsupported('2.15.0', 'basic auth')) {
+    return;
+  }
+
   const client = QBittorrent.createFromState(
     { baseUrl, username, password },
     {
@@ -822,6 +828,11 @@ it('should list torrents', async () => {
   expect(typeof torrent.force_start).toBe('boolean');
   expect(typeof torrent.seeding_time).toBe('number');
   expect(torrent.infohash_v1).toBe(torrent.hash);
+  // comment arrived in 5.0, pieces_num and creation_date in 5.2
+  if (await skipIfUnsupported('2.15.1', 'torrent comment, piece count and creation date')) {
+    return;
+  }
+
   expect(torrent.pieces_num).toBe(3726);
   expect(torrent.creation_date).toBe(1_532_624_126);
   expect(torrent.comment).toBe('Ubuntu CD releases.ubuntu.com');

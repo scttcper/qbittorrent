@@ -1873,6 +1873,14 @@ export interface Preferences {
   bdecode_depth_limit?: number;
   bdecode_token_limit?: number;
   block_peers_on_privileged_ports?: boolean;
+  /**
+   * WebAPI 2.16.2+
+   */
+  confirm_remove_all_tags?: boolean;
+  /**
+   * WebAPI 2.16.2+
+   */
+  confirm_remove_tracker_from_all_torrents?: boolean;
   confirm_torrent_deletion?: boolean;
   confirm_torrent_recheck?: boolean;
   connection_speed?: number;
