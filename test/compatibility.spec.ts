@@ -21,7 +21,7 @@ const server = createServer(async (req, res) => {
     res.setHeader('Set-Cookie', responseCookies);
   }
 
-  switch (req.url) {
+  switch (new URL(req.url!, 'http://localhost').pathname) {
     case '/api/v2/auth/login': {
       res.setHeader('Set-Cookie', 'QBT_SID=test; Max-Age=3600');
       res.end('Ok.');
@@ -40,6 +40,18 @@ const server = createServer(async (req, res) => {
         headers: { 'Content-Type': req.headers['content-type']! },
       }).formData();
       res.end('Ok.');
+      break;
+    }
+    case '/api/v2/torrents/info': {
+      res.setHeader('Content-Type', 'application/json');
+      res.end('[]');
+      break;
+    }
+    case '/api/v2/torrents/stop':
+    case '/api/v2/torrents/start':
+    case '/api/v2/torrents/pause':
+    case '/api/v2/torrents/resume': {
+      res.end();
       break;
     }
     case '/api/v2/torrents/editCategory': {
@@ -134,6 +146,38 @@ for (const [version, savePath, expected] of [
     expect(requests.includes('GET /api/v2/app/webapiVersion')).toBe(savePath === undefined);
   });
 }
+
+for (const [app, stop, start, filter] of [
+  ['v4.6.7', 'pause', 'resume', 'paused'],
+  ['v5.3.0', 'stop', 'start', 'stopped'],
+] as const) {
+  for (const auth of [{ apiKey: 'test' }, { username: 'admin', password: 'test' }]) {
+    it(`picks the ${app} endpoints on the first request with ${'apiKey' in auth ? 'an API key' : 'a password'}`, async () => {
+      appVersion = app;
+      requests = [];
+      // a new client each time so every call is the first request
+      await new QBittorrent({ baseUrl, ...auth }).stopTorrent('all');
+      await new QBittorrent({ baseUrl, ...auth }).startTorrent('all');
+      await new QBittorrent({ baseUrl, ...auth }).listTorrents({ filter: 'paused' });
+      expect(requests.filter(request => request.includes('/torrents/'))).toEqual([
+        `POST /api/v2/torrents/${stop}`,
+        `POST /api/v2/torrents/${start}`,
+        `GET /api/v2/torrents/info?filter=${filter}`,
+      ]);
+      expect(requests.filter(request => request.endsWith('/app/version'))).toHaveLength(3);
+    });
+  }
+}
+
+it('getAppVersion stores the version for API key clients', async () => {
+  appVersion = 'v5.3.0';
+  requests = [];
+  const client = new QBittorrent({ baseUrl, apiKey: 'test' });
+  expect(await client.getAppVersion()).toBe('v5.3.0');
+  expect(client.state.version).toEqual({ version: 'v5.3.0', isVersion5OrHigher: true });
+  await client.stopTorrent('all');
+  expect(requests).toEqual(['GET /api/v2/app/version', 'POST /api/v2/torrents/stop']);
+});
 
 it('keeps the session cookie qBittorrent sends after the login', async () => {
   apiVersion = '2.16.2';

@@ -764,6 +764,21 @@ it('should authenticate with api key', async () => {
 
   await client.deleteApiKey();
 });
+it('should stop and start torrents with an api key', async () => {
+  if (await skipIfUnsupported('2.14.1', 'api key auth')) {
+    return;
+  }
+
+  const client = new QBittorrent({ baseUrl, username, password });
+  const torrentId = await setupTorrent(client);
+  const apiKeyClient = new QBittorrent({ baseUrl, apiKey: await client.rotateApiKey() });
+  try {
+    expect(await apiKeyClient.stopTorrent(torrentId)).toBe(true);
+    expect(await apiKeyClient.startTorrent(torrentId)).toBe(true);
+  } finally {
+    await client.deleteApiKey();
+  }
+});
 it('should set torrent name', async () => {
   const client = new QBittorrent({ baseUrl, username, password });
   const torrentId = await setupTorrent(client);
