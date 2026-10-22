@@ -124,8 +124,53 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
   }
 
   private async supportsApiVersion(minVersion: string): Promise<boolean> {
-    const apiVersion = await this.getApiVersion();
-    return apiVersion.localeCompare(minVersion, undefined, { numeric: true }) >= 0;
+    const isSupported = (apiVersion?: string) =>
+      apiVersion !== undefined &&
+      apiVersion.localeCompare(minVersion, undefined, { numeric: true }) >= 0;
+    const version = await this.ensureVersion();
+    // Only a "yes" is cached, an upgrade can turn a "no" into a "yes" without us noticing
+    if (!isSupported(version.apiVersion)) {
+      version.apiVersion = await this.getApiVersion();
+    }
+
+    return isSupported(version.apiVersion);
+  }
+
+  /**
+   * qBittorrent v5 renamed pause/resume to stop/start. A 404 means the server changed versions
+   * since we cached it (upgraded under a long running client), so refresh it and retry once.
+   */
+  private async postRenamedInV5(
+    v5Path: string,
+    v4Path: string,
+    data: Record<string, string>,
+  ): Promise<void> {
+    const post = ({ isVersion5OrHigher }: { isVersion5OrHigher: boolean }) =>
+      this.request(
+        isVersion5OrHigher ? v5Path : v4Path,
+        'POST',
+        undefined,
+        objToUrlSearchParams(data),
+      );
+    const version = await this.ensureVersion();
+    try {
+      await post(version);
+    } catch (error) {
+      if (!(error instanceof TorrentClientError) || error.status !== 404) {
+        throw error;
+      }
+
+      // A re-login during the request already fetched the version again
+      const current =
+        this.state.version && this.state.version !== version
+          ? this.state.version
+          : await this.refreshVersion();
+      if (current.isVersion5OrHigher === version.isVersion5OrHigher) {
+        throw error;
+      }
+
+      await post(current);
+    }
   }
 
   /**
@@ -1070,10 +1115,9 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#pause-torrents}
    */
   async stopTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const { isVersion5OrHigher } = await this.ensureVersion();
-    const endpoint = isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
-    const data = { hashes: normalizeHashes(hashes) };
-    await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
+    await this.postRenamedInV5('/torrents/stop', '/torrents/pause', {
+      hashes: normalizeHashes(hashes),
+    });
     return true;
   }
 
@@ -1088,10 +1132,9 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
   async startTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const { isVersion5OrHigher } = await this.ensureVersion();
-    const endpoint = isVersion5OrHigher ? '/torrents/start' : '/torrents/resume';
-    const data = { hashes: normalizeHashes(hashes) };
-    await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
+    await this.postRenamedInV5('/torrents/start', '/torrents/resume', {
+      hashes: normalizeHashes(hashes),
+    });
     return true;
   }
 
