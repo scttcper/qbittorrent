@@ -107,6 +107,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
       undefined,
       false,
     );
+    this.storeVersion(res);
     return res;
   }
 
@@ -437,7 +438,8 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     }
 
     if (filter) {
-      if (this.state.version?.isVersion5OrHigher) {
+      const { isVersion5OrHigher } = await this.ensureVersion();
+      if (isVersion5OrHigher) {
         if (filter === 'paused') {
           filter = 'stopped';
         } else if (filter === 'resumed') {
@@ -1068,7 +1070,8 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#pause-torrents}
    */
   async stopTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = this.state.version?.isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
+    const { isVersion5OrHigher } = await this.ensureVersion();
+    const endpoint = isVersion5OrHigher ? '/torrents/stop' : '/torrents/pause';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
@@ -1085,9 +1088,8 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * {@link https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#resume-torrents}
    */
   async startTorrent(hashes: string | string[] | 'all'): Promise<boolean> {
-    const endpoint = this.state.version?.isVersion5OrHigher
-      ? '/torrents/start'
-      : '/torrents/resume';
+    const { isVersion5OrHigher } = await this.ensureVersion();
+    const endpoint = isVersion5OrHigher ? '/torrents/start' : '/torrents/resume';
     const data = { hashes: normalizeHashes(hashes) };
     await this.request(endpoint, 'POST', undefined, objToUrlSearchParams(data));
     return true;
@@ -1147,7 +1149,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     torrent: string | Uint8Array<ArrayBuffer>,
     options: Partial<AddTorrentOptions> = {},
   ): Promise<boolean> {
-    await this.ensureAuthenticated('/torrents/add');
+    const { isVersion5OrHigher } = await this.ensureVersion();
     const supportsSeedMode =
       options.seedMode !== undefined || options.skip_checking !== undefined
         ? await this.supportsApiVersion('2.16.0')
@@ -1155,7 +1157,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     const form = buildAddTorrentForm({
       source: { type: 'torrent', torrent },
       options,
-      isVersion5OrHigher: this.state.version?.isVersion5OrHigher ?? false,
+      isVersion5OrHigher,
       supportsSeedMode,
     });
 
@@ -1266,7 +1268,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
    * @param options
    */
   async addMagnet(urls: string, options: Partial<AddMagnetOptions> = {}): Promise<boolean> {
-    await this.ensureAuthenticated('/torrents/add');
+    const { isVersion5OrHigher } = await this.ensureVersion();
     const supportsSeedMode =
       options.seedMode !== undefined || options.skip_checking !== undefined
         ? await this.supportsApiVersion('2.16.0')
@@ -1274,7 +1276,7 @@ export class QBittorrent extends QBittorrentSession implements TorrentClient {
     const form = buildAddTorrentForm({
       source: { type: 'magnet', urls },
       options,
-      isVersion5OrHigher: this.state.version?.isVersion5OrHigher ?? false,
+      isVersion5OrHigher,
       supportsSeedMode,
     });
 

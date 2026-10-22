@@ -264,6 +264,25 @@ export class QBittorrentSession {
     }
   }
 
+  /**
+   * qBittorrent v5 renamed pause/resume to stop/start, so requests that depend on the version
+   * need it before picking an endpoint. Logging in already fetches it for cookie auth.
+   */
+  protected async ensureVersion(): Promise<NonNullable<QBittorrentState['version']>> {
+    await this.ensureAuthenticated('/app/version');
+    await this.checkVersion();
+    return this.state.version!;
+  }
+
+  protected storeVersion(version: string): void {
+    // Remove potential 'v' prefix and any extra info after version number
+    const cleanVersion = version.replace(/^v/, '').split('-')[0]!;
+    this.state.version = {
+      version,
+      isVersion5OrHigher: cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0'),
+    };
+  }
+
   private async checkVersion(): Promise<void> {
     if (!this.state.version?.version) {
       const newVersion = await this.request<string>(
@@ -274,12 +293,7 @@ export class QBittorrentSession {
         undefined,
         false,
       );
-      // Remove potential 'v' prefix and any extra info after version number
-      const cleanVersion = newVersion.replace(/^v/, '').split('-')[0]!;
-      this.state.version = {
-        version: newVersion,
-        isVersion5OrHigher: cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0'),
-      };
+      this.storeVersion(newVersion);
     }
   }
 }
