@@ -3,7 +3,7 @@ import { text } from 'node:stream/consumers';
 
 import { afterAll, beforeAll, expect, it } from 'vitest';
 
-import { QBittorrent } from '../src/index.js';
+import { QBittorrent, TorrentClientError } from '../src/index.js';
 import type { AddTorrentOptions } from '../src/types.js';
 
 let baseUrl: string;
@@ -21,7 +21,14 @@ const server = createServer(async (req, res) => {
     res.setHeader('Set-Cookie', responseCookies);
   }
 
-  switch (new URL(req.url!, 'http://localhost').pathname) {
+  // a session from before the server restarted
+  if (req.headers.cookie === 'QBT_SID=stale') {
+    res.writeHead(403).end();
+    return;
+  }
+
+  const { pathname } = new URL(req.url!, 'http://localhost');
+  switch (pathname) {
     case '/api/v2/auth/login': {
       res.setHeader('Set-Cookie', 'QBT_SID=test; Max-Age=3600');
       res.end('Ok.');
@@ -51,7 +58,11 @@ const server = createServer(async (req, res) => {
     case '/api/v2/torrents/start':
     case '/api/v2/torrents/pause':
     case '/api/v2/torrents/resume': {
-      res.end();
+      // v5 renamed pause/resume to stop/start, `missing` stands in for any other 404
+      const isV5Path = pathname.endsWith('/stop') || pathname.endsWith('/start');
+      const { hashes } = Object.fromEntries(new URLSearchParams(await text(req)));
+      const exists = isV5Path === appVersion.startsWith('v5') && hashes !== 'missing';
+      res.writeHead(exists ? 200 : 404).end();
       break;
     }
     case '/api/v2/torrents/editCategory': {
@@ -178,6 +189,111 @@ it('getAppVersion stores the version for API key clients', async () => {
   await client.stopTorrent('all');
   expect(requests).toEqual(['GET /api/v2/app/version', 'POST /api/v2/torrents/stop']);
 });
+
+// state an app saved with exportState() before qBittorrent was upgraded to 5.3
+const v4State = { version: { version: 'v4.6.7', isVersion5OrHigher: false } };
+
+it('fetches the version again when logging in', async () => {
+  appVersion = 'v5.3.0';
+  requests = [];
+  const client = QBittorrent.createFromState(
+    { baseUrl, username: 'admin', password: 'test' },
+    { ...v4State, auth: { sid: 'old', expires: new Date(Date.now() - 1000).toISOString() } },
+  );
+  await client.stopTorrent('all');
+  expect(client.state.version?.version).toBe('v5.3.0');
+  expect(requests).toEqual([
+    'POST /api/v2/auth/login',
+    'GET /api/v2/app/version',
+    'POST /api/v2/torrents/stop',
+  ]);
+});
+
+it('picks the endpoint again when a restarted server rejects the session', async () => {
+  appVersion = 'v5.3.0';
+  requests = [];
+  const client = QBittorrent.createFromState(
+    { baseUrl, username: 'admin', password: 'test' },
+    {
+      ...v4State,
+      auth: {
+        sid: 'stale',
+        cookieName: 'QBT_SID',
+        expires: new Date(Date.now() + 60_000).toISOString(),
+      },
+    },
+  );
+  await client.stopTorrent('all');
+  // the re-login already fetched the new version, so there's no second version request
+  expect(requests).toEqual([
+    'POST /api/v2/torrents/pause',
+    'POST /api/v2/auth/login',
+    'GET /api/v2/app/version',
+    'POST /api/v2/torrents/pause',
+    'POST /api/v2/torrents/stop',
+  ]);
+});
+
+it('refreshes a stale version when an API key client gets a 404', async () => {
+  appVersion = 'v5.3.0';
+  requests = [];
+  const client = QBittorrent.createFromState({ baseUrl, apiKey: 'test' }, v4State);
+  await client.stopTorrent('all');
+  await client.startTorrent('all');
+  expect(client.state.version?.version).toBe('v5.3.0');
+  expect(requests).toEqual([
+    'POST /api/v2/torrents/pause',
+    'GET /api/v2/app/version',
+    'POST /api/v2/torrents/stop',
+    'POST /api/v2/torrents/start',
+  ]);
+});
+
+it('picks the v4 endpoint again after a downgrade', async () => {
+  appVersion = 'v4.6.7';
+  requests = [];
+  const client = QBittorrent.createFromState(
+    { baseUrl, apiKey: 'test' },
+    { version: { version: 'v5.3.0', isVersion5OrHigher: true } },
+  );
+  await client.startTorrent('all');
+  expect(requests).toEqual([
+    'POST /api/v2/torrents/start',
+    'GET /api/v2/app/version',
+    'POST /api/v2/torrents/resume',
+  ]);
+});
+
+it('throws a 404 that the version does not explain', async () => {
+  appVersion = 'v5.3.0';
+  requests = [];
+  const client = new QBittorrent({ baseUrl, apiKey: 'test' });
+  const error = await client.stopTorrent('missing').catch((error_: unknown) => error_);
+  expect(error).toBeInstanceOf(TorrentClientError);
+  expect(error).toMatchObject({ status: 404 });
+  expect(requests).toEqual([
+    'GET /api/v2/app/version',
+    'POST /api/v2/torrents/stop',
+    'GET /api/v2/app/version',
+  ]);
+});
+
+for (const [version, webapiVersionRequests] of [
+  ['2.15.1', 2],
+  ['2.16.2', 1],
+] as const) {
+  it(`caches the WebAPI version ${version} only when it supports the option`, async () => {
+    appVersion = 'v5.3.0';
+    apiVersion = version;
+    requests = [];
+    const client = new QBittorrent({ baseUrl, apiKey: 'test' });
+    await client.editCategory('movies', undefined, { ratioLimit: 2 });
+    await client.editCategory('movies', undefined, { ratioLimit: 3 });
+    expect(requests.filter(request => request.endsWith('/app/webapiVersion'))).toHaveLength(
+      webapiVersionRequests,
+    );
+  });
+}
 
 it('keeps the session cookie qBittorrent sends after the login', async () => {
   apiVersion = '2.16.2';

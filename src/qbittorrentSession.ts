@@ -28,6 +28,10 @@ export interface QBittorrentState extends TorrentClientState {
   version?: {
     version: string;
     isVersion5OrHigher: boolean;
+    /**
+     * WebAPI version, fetched the first time an option depends on it
+     */
+    apiVersion?: string;
   };
 }
 
@@ -77,7 +81,7 @@ export class QBittorrentSession {
    */
   async login(): Promise<boolean> {
     if (this.config.apiKey) {
-      await this.checkVersion();
+      await this.refreshVersion();
       return true;
     }
 
@@ -110,8 +114,8 @@ export class QBittorrentSession {
 
     this.state.auth = auth;
 
-    // Check version after successful login
-    await this.checkVersion();
+    // Always fetch the version again, a new login is usually a restarted (maybe upgraded) server
+    await this.refreshVersion();
 
     return true;
   }
@@ -274,26 +278,31 @@ export class QBittorrentSession {
     return this.state.version!;
   }
 
-  protected storeVersion(version: string): void {
+  protected async refreshVersion(): Promise<NonNullable<QBittorrentState['version']>> {
+    const version = await this.request<string>(
+      '/app/version',
+      'GET',
+      undefined,
+      undefined,
+      undefined,
+      false,
+    );
+    return this.storeVersion(version);
+  }
+
+  protected storeVersion(version: string): NonNullable<QBittorrentState['version']> {
     // Remove potential 'v' prefix and any extra info after version number
     const cleanVersion = version.replace(/^v/, '').split('-')[0]!;
     this.state.version = {
       version,
       isVersion5OrHigher: cleanVersion === '5.0.0' || isGreater(cleanVersion, '5.0.0'),
     };
+    return this.state.version;
   }
 
   private async checkVersion(): Promise<void> {
     if (!this.state.version?.version) {
-      const newVersion = await this.request<string>(
-        '/app/version',
-        'GET',
-        undefined,
-        undefined,
-        undefined,
-        false,
-      );
-      this.storeVersion(newVersion);
+      await this.refreshVersion();
     }
   }
 }
